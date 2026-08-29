@@ -1,0 +1,21 @@
+document_id,scheme_id,document_name,requirement_type,condition,applicant_type,source_document,source_page,source_section,active
+DOC-0001,SIH26092-052,Valid Scheduled Caste certificate,REQUIRED,NSFDC credit-scheme application,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0002,SIH26092-052,Income proof,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0003,SIH26092-052,KYC documents,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0004,SIH26092-052,Agency-specific checklist documents,PARTNER_VERIFICATION,As required by the authorised SCA/CA,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0005,SIH26092-053,Valid Scheduled Caste certificate,REQUIRED,NSFDC credit-scheme application,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0006,SIH26092-053,Income proof,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0007,SIH26092-053,KYC documents,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0008,SIH26092-053,Agency-specific checklist documents,PARTNER_VERIFICATION,As required by the authorised SCA/CA,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0009,SIH26092-054,Valid Scheduled Caste certificate,REQUIRED,NSFDC credit-scheme application,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0010,SIH26092-054,Income proof,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0011,SIH26092-054,KYC documents,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0012,SIH26092-054,Agency-specific checklist documents,PARTNER_VERIFICATION,As required by the authorised SCA/CA,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0013,SIH26092-055,Valid Scheduled Caste certificate,REQUIRED,NSFDC credit-scheme application,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0014,SIH26092-055,Income proof,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0015,SIH26092-055,KYC documents,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0016,SIH26092-055,Agency-specific checklist documents,PARTNER_VERIFICATION,As required by the authorised SCA/CA,INDIVIDUAL,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0017,SIH26092-056,Valid Scheduled Caste certificate,REQUIRED,NSFDC credit-scheme application,STUDENT,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0018,SIH26092-056,Income proof,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,STUDENT,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0019,SIH26092-056,KYC documents,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,STUDENT,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-0020,SIH26092-056,Agency-specific checklist documents,PARTNER_VERIFICATION,As required by the authorised SCA/CA,STUDENT,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE

@@ -1,0 +1,20 @@
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+
+# Python cache & build outputs
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.venv/
+venv/
+
+# Database files
+*.db
+*.sqlite3
+yojnasetu.db

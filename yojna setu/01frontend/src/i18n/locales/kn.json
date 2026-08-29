@@ -1,0 +1,127 @@
+{
+  "nav": {
+    "title": "ಯೋಜನಾಸೇತು",
+    "subtitle": "ಸರ್ಕಾರಿ ನಾಗರಿಕ ವೇದಿಕೆ",
+    "home": "Home",
+    "schemes": "Explore Schemes",
+    "recommendations": "Smart Matching",
+    "calculator": "Financial Calculator",
+    "savedSchemes": "Saved Schemes",
+    "applications": "Applications & Guidance",
+    "admin": "Partner Portal",
+    "login": "Citizen Login",
+    "register": "Register",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "home": {
+    "heroTitle": "ನಿಮಗಾಗಿ ಸೂಕ್ತವಾದ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು ಮತ್ತು ಆರ್ಥಿಕ ಸೌಲಭ್ಯಗಳನ್ನು ಕಂಡುಕೊಳ್ಳಿ",
+    "heroSubtitle": "AI-assisted multilingual guidance platform connecting Indian citizens with 50+ official central and state welfare schemes.",
+    "searchPlaceholder": "Search schemes by name, business, sector, or keyword...",
+    "searchButton": "Search Schemes",
+    "voiceButton": "Voice Assist",
+    "quickStats": {
+      "schemesCount": "56+ Schemes Verified",
+      "citizensServed": "Direct Portal Redirection",
+      "financialTools": "100% Deterministic Guidance"
+    },
+    "popularTitle": "Popular Welfare & Business Schemes",
+    "viewAllSchemes": "View All Schemes →"
+  },
+  "schemes": {
+    "title": "Government Schemes Discovery",
+    "subtitle": "Browse official central and state government schemes across sectors.",
+    "searchPlaceholder": "Search schemes...",
+    "filterAll": "All Sectors",
+    "filterType": "Scheme Type",
+    "filterMinistry": "Ministry / Department",
+    "filterSector": "Sector",
+    "applyFilters": "Apply Filters",
+    "resetFilters": "Reset",
+    "viewDetails": "View Scheme Details",
+    "saveScheme": "Save Scheme",
+    "saved": "Saved",
+    "officialPortal": "Apply on Official Portal",
+    "eligibilityTitle": "Eligibility Requirements",
+    "benefitTitle": "Financial Benefits & Subsidy",
+    "docsTitle": "Required Documents",
+    "verifiedBadge": "Verified Government Scheme"
+  },
+  "recommendations": {
+    "title": "Find Schemes Matched to Your Profile",
+    "subtitle": "Choose how you want to share your details to receive personalized scheme recommendations.",
+    "threeWaysTitle": "3 Easy Ways to Share Your Profile",
+    "tabForm": "Quick Profile Form",
+    "tabType": "Describe in Words",
+    "tabVoice": "Speak in Your Language",
+    "formState": "Select Your State",
+    "formCategory": "Social Category",
+    "formGender": "Gender",
+    "formAge": "Your Age (Years)",
+    "formIncome": "Annual Family Income (₹)",
+    "formOccupation": "Occupation / Business Sector",
+    "submitForm": "Get Matched Schemes",
+    "scoreLabel": "Compatibility Match",
+    "breakdownLabel": "Why this matches you:"
+  },
+  "calculator": {
+    "title": "Financial Scheme Calculator",
+    "subtitle": "Calculate exact loan EMIs, interest rates, and government subsidy estimates using scheme rules.",
+    "selectScheme": "Select a Financial Scheme",
+    "projectCost": "Total Project Cost (₹)",
+    "loanAmount": "Requested Loan Amount (₹)",
+    "tenureMonths": "Repayment Period (Months)",
+    "calculateButton": "Calculate EMI & Subsidy",
+    "monthlyEMI": "Monthly Installment (EMI)",
+    "totalInterest": "Total Estimated Interest",
+    "totalRepayment": "Total Payable Amount",
+    "subsidyEstimate": "Estimated Govt Subsidy",
+    "limitWarning": "Amount exceeds maximum scheme limit"
+  },
+  "savedSchemes": {
+    "title": "Your Saved Schemes",
+    "subtitle": "Bookmarked schemes saved to your YojnaSetu account for quick reference.",
+    "emptyState": "You have not saved any schemes yet. Browse schemes and click 'Save Scheme' to add them here.",
+    "remove": "Remove",
+    "emailMe": "Email Me Details",
+    "emailSuccess": "Scheme details emailed to your registered address!"
+  },
+  "auth": {
+    "loginTitle": "Citizen Portal Sign In",
+    "loginSubtitle": "Access your saved schemes, profile recommendations, and guidance.",
+    "registerTitle": "Create YojnaSetu Account",
+    "registerSubtitle": "Register to bookmark schemes and receive personalized government assistance.",
+    "emailLabel": "Email Address",
+    "phoneLabel": "Phone Number",
+    "passwordLabel": "Password",
+    "loginButton": "Sign In",
+    "registerButton": "Register Account",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already registered?"
+  },
+  "copilot": {
+    "name": "ಯೋಜನಾಸೇತು AI Assistant",
+    "badge": "Multilingual Citizen Assistant",
+    "welcome": "ನಮಸ್ಕಾರ! ಸರ್ಕಾರಿ ಯೋಜನೆಗಳನ್ನು ಹುಡುಕಲು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
+    "placeholder": "ಕನ್ನಡ ಅಥವಾ ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಕೇಳಿ...",
+    "send": "Send",
+    "clear": "Clear Chat",
+    "suggestedTitle": "Suggested Questions:"
+  },
+  "voice": {
+    "title": "Voice Assistant",
+    "listening": "Listening... Speak now in your selected language.",
+    "speakNow": "Press microphone and speak your query.",
+    "notSupported": "Voice input is not supported for this language in your browser."
+  },
+  "errors": {
+    "networkError": "Network connection error. Please try again.",
+    "loading": "Loading information...",
+    "tryAgain": "Try Again"
+  },
+  "footer": {
+    "tagline": "Connecting Indian Citizens with Official Welfare Schemes.",
+    "disclaimer": "YojnaSetu is a guidance and recommendation platform. Applications are submitted directly on official government portals.",
+    "copyright": "© 2026 YojnaSetu. All rights reserved."
+  }
+}

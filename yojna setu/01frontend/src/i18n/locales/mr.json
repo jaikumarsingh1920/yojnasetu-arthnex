@@ -1,0 +1,127 @@
+{
+  "nav": {
+    "title": "योजनासेतू",
+    "subtitle": "शासकीय नागरिक मंच",
+    "home": "मुख्यपृष्ठ",
+    "schemes": "योजना पहा",
+    "recommendations": "स्मार्ट जुळणी",
+    "calculator": "आर्थिक कॅल्क्युलेटर",
+    "savedSchemes": "जतन केलेल्या योजना",
+    "applications": "अर्ज व मार्गदर्शन",
+    "admin": "भागीदार पोर्टल",
+    "login": "लॉगिन",
+    "register": "नोंदणी करा",
+    "logout": "लॉगआउट",
+    "language": "भाषा"
+  },
+  "home": {
+    "heroTitle": "तुमच्यासाठी योग्य सरकारी योजना आणि आर्थिक लाभ शोधा",
+    "heroSubtitle": "नागरिकांना ५०+ अधिकृत केंद्रीय आणि राज्य कल्याणकारी योजनांशी जोडणारे AI व्यासपीठ.",
+    "searchPlaceholder": "योजनेचे नाव किंवा कीवर्डद्वारे शोधा...",
+    "searchButton": "योजना शोधा",
+    "voiceButton": "आवाज मदत",
+    "quickStats": {
+      "schemesCount": "५६+ सत्यापित योजना",
+      "citizensServed": "थेट अधिकृत पोर्टलवर पुनर्निर्देशन",
+      "financialTools": "१००% अचूक गणना"
+    },
+    "popularTitle": "लोकप्रिय योजना",
+    "viewAllSchemes": "सर्व योजना पहा →"
+  },
+  "schemes": {
+    "title": "सरकारी योजना शोध",
+    "subtitle": "अधिकृत केंद्रीय व राज्य सरकारी योजनांची यादी पहा.",
+    "searchPlaceholder": "शोधा...",
+    "filterAll": "सर्व क्षेत्रे",
+    "filterType": "योजनेचा प्रकार",
+    "filterMinistry": "मंत्रालय",
+    "filterSector": "क्षेत्र",
+    "applyFilters": "फिल्टर लागू करा",
+    "resetFilters": "रीसेट",
+    "viewDetails": "तपशील पहा",
+    "saveScheme": "जतन करा",
+    "saved": "जतन केले",
+    "officialPortal": "अधिकृत पोर्टलवर अर्ज करा",
+    "eligibilityTitle": "पात्रता अटी",
+    "benefitTitle": "आर्थिक लाभ व अनुदान",
+    "docsTitle": "आवश्यक कागदपत्रे",
+    "verifiedBadge": "सत्यापित सरकारी योजना"
+  },
+  "recommendations": {
+    "title": "तुमच्या प्रोफाइलनुसार सुचवलेल्या योजना",
+    "subtitle": "माहिती शेअर करून वैयक्तिक योजना मिळवा.",
+    "threeWaysTitle": "माहिती शेअर करण्याचे ३ सोपे मार्ग",
+    "tabForm": "झटपट फॉर्म",
+    "tabType": "लिहा",
+    "tabVoice": "तुमच्या भाषेत बोला",
+    "formState": "राज्य निवडा",
+    "formCategory": "सामाजिक वर्ग",
+    "formGender": "लिंग",
+    "formAge": "वय (वर्षे)",
+    "formIncome": "वार्षिक उत्पन्न (₹)",
+    "formOccupation": "व्यवसाय / क्षेत्र",
+    "submitForm": "योजना शोधा",
+    "scoreLabel": "पात्रता गुण",
+    "breakdownLabel": "ही योजना तुमच्यासाठी का योग्य आहे:"
+  },
+  "calculator": {
+    "title": "आर्थिक कॅल्क्युलेटर",
+    "subtitle": "कर्जाचे हप्ते (EMI) आणि अनुदानाची अचूक गणना करा.",
+    "selectScheme": "योजना निवडा",
+    "projectCost": "एकूण प्रकल्प खर्च (₹)",
+    "loanAmount": "कर्ज रक्कम (₹)",
+    "tenureMonths": "कालावधी (महिने)",
+    "calculateButton": "गणना करा",
+    "monthlyEMI": "मासिक हप्ता (EMI)",
+    "totalInterest": "एकूण अंदाजे व्याज",
+    "totalRepayment": "एकूण देय रक्कम",
+    "subsidyEstimate": "अंदाजे सरकारी अनुदान",
+    "limitWarning": "रक्कम योजनेच्या मर्यादेपेक्षा जास्त आहे"
+  },
+  "savedSchemes": {
+    "title": "जतन केलेल्या योजना",
+    "subtitle": "तुमच्या योजनासेतू खात्यात बुकमार्क केलेल्या योजना.",
+    "emptyState": "तुम्ही अजून कोणतीही योजना जतन केलेली नाही.",
+    "remove": "काढून टाका",
+    "emailMe": "तपशील ईमेल करा",
+    "emailSuccess": "तपशील तुमच्या ईमेलवर पाठवला आहे!"
+  },
+  "auth": {
+    "loginTitle": "नागरिक साइन इन",
+    "loginSubtitle": "तुमच्या योजना पहा.",
+    "registerTitle": "खाते तयार करा",
+    "registerSubtitle": "वैयक्तिक मदतीसाठी नोंदणी करा.",
+    "emailLabel": "ईमेल",
+    "phoneLabel": "फोन नंबर",
+    "passwordLabel": "पासवर्ड",
+    "loginButton": "साइन इन",
+    "registerButton": "नोंदणी करा",
+    "noAccount": "खाते नाही?",
+    "hasAccount": "आधीच नोंदणीकृत?"
+  },
+  "copilot": {
+    "name": "योजनासेतू AI सहाय्यक",
+    "badge": "बहुभाषिक नागरिक सहाय्यक",
+    "welcome": "नमस्कार! मी तुम्हाला सरकारी योजना शोधण्यात कशी मदत करू शकतो?",
+    "placeholder": "मराठी किंवा तुमच्या भाषेत विचारा...",
+    "send": "पाठवा",
+    "clear": "क्लियर करा",
+    "suggestedTitle": "सुचवलेले प्रश्न:"
+  },
+  "voice": {
+    "title": "व्हॉइस सहाय्यक",
+    "listening": "ऐकत आहे... तुमच्या भाषेत बोला.",
+    "speakNow": "माईक दाबा आणि बोला.",
+    "notSupported": "तुमच्या ब्राउझरमध्ये या भाषेसाठी व्हॉइस सपोर्ट नाही."
+  },
+  "errors": {
+    "networkError": "नेटवर्क त्रुटी. पुन्हा प्रयत्न करा.",
+    "loading": "लोड होत आहे...",
+    "tryAgain": "पुन्हा प्रयत्न करा"
+  },
+  "footer": {
+    "tagline": "भारतीय नागरिकांना सरकारी योजनांशी जोडणे.",
+    "disclaimer": "योजनासेतू हे मार्गदर्शक व्यासपीठ आहे.",
+    "copyright": "© 2026 योजनासेतू. सर्व हक्क सुरक्षित."
+  }
+}
