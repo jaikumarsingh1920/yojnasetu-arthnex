@@ -48,9 +48,10 @@ class AIProvider(ABC):
 class GeminiProvider(AIProvider):
   """Google Gemini API provider using REST API with httpx."""
 
-  def __init__(self, api_key: str):
+  def __init__(self, api_key: str, model: Optional[str] = None):
     self.api_key = api_key
-    self.base_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+    self.model = model or getattr(settings, "GEMINI_MODEL", "gemini-1.5-flash")
+    self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
 
   @property
   def name(self) -> str:
@@ -64,25 +65,24 @@ class GeminiProvider(AIProvider):
       self, prompt: str, system_prompt: Optional[str] = None
   ) -> str:
     url = f"{self.base_url}?key={self.api_key}"
-    contents = []
+    payload: Dict[str, Any] = {
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}]
+    }
     if system_prompt:
-      contents.append({"role": "user", "parts": [{"text": system_prompt}]})
-      contents.append(
-          {"role": "model", "parts": [{"text": "Understood. I will comply."}]}
-      )
-
-    contents.append({"role": "user", "parts": [{"text": prompt}]})
+      payload["system_instruction"] = {
+          "parts": [{"text": system_prompt}]
+      }
 
     try:
       with httpx.Client(timeout=15.0) as client:
-        response = client.post(url, json={"contents": contents})
+        response = client.post(url, json=payload)
         response.raise_for_status()
         data = response.json()
         candidates = data.get("candidates", [])
         if candidates and "content" in candidates[0]:
           parts = candidates[0]["content"].get("parts", [])
           if parts:
-            return parts[0].get("text", "")
+            return parts[0].get("text", "").strip()
         return ""
     except Exception as err:
       logger.error("Gemini API generate error: %s", err)

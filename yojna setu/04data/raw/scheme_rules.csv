@@ -56,3 +56,72 @@ RULE-0054,SIH26092-056,NOT_APPLICABLE,interest_rate_max,=,6.5,PERCENT_PER_ANNUM,
 RULE-0055,SIH26092-056,NOT_APPLICABLE,repayment_period_min_months,>=,120,MONTHS,FINANCIAL,HIGH,ELS_REPAY_STARTED,Does not meet documented NSFDC financial condition,https://nsfdc.nic.in/index.php/scheme,WEB,Named scheme section,UNKNOWN,UNKNOWN,TRUE
 RULE-0056,SIH26092-056,NOT_APPLICABLE,repayment_period_max_months,<=,144,MONTHS,FINANCIAL,HIGH,ELS_REPAY_NOT_STARTED,Does not meet documented NSFDC financial condition,https://nsfdc.nic.in/index.php/scheme,WEB,Named scheme section,UNKNOWN,UNKNOWN,TRUE
 RULE-0057,SIH26092-056,NOT_APPLICABLE,moratorium,=,COURSE_DURATION_PLUS_1_YEAR_OR_UPTO_6_MONTHS_IF_REPAYMENT_STARTED,TEXT,FINANCIAL,HIGH,ELS_MORATORIUM,Moratorium depends on disbursement/repayment condition,https://nsfdc.nic.in/index.php/scheme,WEB,Educational Loan Scheme,UNKNOWN,UNKNOWN,TRUE
+RULE-057-01,SIH26092-057,,social_category,IN,SC,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must belong to Scheduled Caste (SC),NSFDC MSY Guidelines,,,,,True
+RULE-057-02,SIH26092-057,,gender,=,FEMALE,STRING,ELIGIBILITY,CRITICAL,BASE,Scheme is specifically for women beneficiaries,NSFDC MSY Guidelines,,,,,True
+RULE-057-03,SIH26092-057,,annual_income,<=,300000.0,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹3,00,000",NSFDC MSY Guidelines,,,,,True
+RULE-057-04,SIH26092-057,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NSFDC MSY Guidelines,,,,,True
+RULE-057-05,SIH26092-057,,age,<=,50,INTEGER,ELIGIBILITY,HIGH,BASE,Maximum age is 50 years,NSFDC MSY Guidelines,,,,,True
+RULE-058-01,SIH26092-058,,social_category,IN,SC,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must belong to Scheduled Caste (SC),NSFDC GBS Guidelines,,,,,True
+RULE-058-02,SIH26092-058,,annual_income,<=,300000.0,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹3,00,000",NSFDC GBS Guidelines,,,,,True
+RULE-058-03,SIH26092-058,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NSFDC GBS Guidelines,,,,,True
+RULE-058-04,SIH26092-058,,age,<=,55,INTEGER,ELIGIBILITY,HIGH,BASE,Maximum age is 55 years,NSFDC GBS Guidelines,,,,,True
+RULE-059-01,SIH26092-059,,social_category,IN,ST,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must belong to Scheduled Tribe (ST),NSTFDC ASRY Guidelines,,,,,True
+RULE-059-02,SIH26092-059,,annual_income,<=,300000.0,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹3,00,000",NSTFDC ASRY Guidelines,,,,,True
+RULE-059-03,SIH26092-059,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NSTFDC ASRY Guidelines,,,,,True
+RULE-060-01,SIH26092-060,,social_category,IN,SC,STRING,ELIGIBILITY,CRITICAL,BASE,Promoter/Applicant must belong to Scheduled Caste (>51% equity),CEGSSC Guidelines,,,,,True
+RULE-060-02,SIH26092-060,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,CEGSSC Guidelines,,,,,True
+RULE-061-01,SIH26092-061,,social_category,IN,ST,STRING,ELIGIBILITY,HIGH,BASE,Targeted primarily at Scheduled Tribe forest gatherers and SHGs,TRIFED PMVDY Manual,,,,,True
+RULE-062-01,SIH26092-062,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,KVIC GVY Guidelines,,,,,True
+RULE-062-02,SIH26092-062,,age,<=,55,INTEGER,ELIGIBILITY,HIGH,BASE,Maximum age is 55 years,KVIC GVY Guidelines,,,,,True
+RULE-063-01,SIH26092-063,,social_category,IN,SC,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must belong to Scheduled Caste (SC),NSFDC MKY Circular,,,,,True
+RULE-063-02,SIH26092-063,,gender,=,FEMALE,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must be a woman farmer / agricultural worker,NSFDC MKY Circular,,,,,True
+RULE-063-03,SIH26092-063,,annual_income,<=,300000.0,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹3,00,000",NSFDC MKY Circular,,,,,True
+RULE-063-04,SIH26092-063,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NSFDC MKY Circular,,,,,True
+RULE-064-01,SIH26092-064,,social_category,IN,OBC,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must belong to Backward Classes (OBC),NBCFDC Shilp Sampada Guidelines,,,,,True
+RULE-064-02,SIH26092-064,,annual_income,<=,300000.0,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹3,00,000",NBCFDC Shilp Sampada Guidelines,,,,,True
+RULE-064-03,SIH26092-064,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NBCFDC Shilp Sampada Guidelines,,,,,True
+RULE-064-04,SIH26092-064,,age,<=,55,INTEGER,ELIGIBILITY,HIGH,BASE,Maximum age is 55 years,NBCFDC Shilp Sampada Guidelines,,,,,True
+RULE-065-01,SIH26092-065,,social_category,IN,"OBC,EBC,DNT",STRING,ELIGIBILITY,CRITICAL,BASE,"Applicant must belong to OBC, EBC, or DNT categories",PM-YASASVI Guidelines,,,,,True
+RULE-065-02,SIH26092-065,,annual_income,<=,250000.0,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹2,50,000",PM-YASASVI Guidelines,,,,,True
+RULE-065-03,SIH26092-065,,age,>=,13,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 13 years,PM-YASASVI Guidelines,,,,,True
+RULE-066-01,SIH26092-066,,social_category,IN,SC,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must belong to Scheduled Caste (SC),SHRESHTA Guidelines,,,,,True
+RULE-066-02,SIH26092-066,,annual_income,<=,250000.0,FLOAT,ELIGIBILITY,HIGH,BASE,"Parental annual income must not exceed ₹2,50,000",SHRESHTA Guidelines,,,,,True
+RULE-066-03,SIH26092-066,,age,>=,13,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 13 years,SHRESHTA Guidelines,,,,,True
+RULE-067-01,SIH26092-067,,social_category,IN,MINORITY,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must belong to a notified Minority community,NMDFC Virasat Guidelines,,,,,True
+RULE-067-02,SIH26092-067,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NMDFC Virasat Guidelines,,,,,True
+RULE-068-01,SIH26092-068,,target_groups,CONTAINS,PWD,STRING,ELIGIBILITY,CRITICAL,BASE,Scheme is specifically for Persons with Disabilities (PwD >= 40%),NDFDC DSY Guidelines,,,,,True
+RULE-068-02,SIH26092-068,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NDFDC DSY Guidelines,,,,,True
+RULE-069-01,SIH26092-069,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,SAMARTH Guidelines,,,,,True
+RULE-069-02,SIH26092-069,,age,<=,45,INTEGER,ELIGIBILITY,HIGH,BASE,Maximum age is 45 years,SAMARTH Guidelines,,,,,True
+RULE-070-01,SIH26092-070,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age for primary promoter is 18 years,AHIDF Guidelines,,,,,True
+RULE-071-01,SIH26092-071,,social_category,IN,"SC,ST",STRING,ELIGIBILITY,CRITICAL,BASE,Enterprise must have at least 51% ownership by SC/ST entrepreneurs,SCLCSS Guidelines,,,,,True
+RULE-072-01,SIH26092-072,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NSKFDC Sanitary Mart Guidelines,,,,,True
+RULE-073-01,SIH26092-073,,social_category,IN,OBC,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant must belong to Other Backward Classes (OBC),NBCFDC Krishi Sampada Guidelines,,,,,True
+RULE-073-02,SIH26092-073,,annual_income,<=,300000.0,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹3,00,000",NBCFDC Krishi Sampada Guidelines,,,,,True
+RULE-073-03,SIH26092-073,,age,>=,18,INTEGER,ELIGIBILITY,HIGH,BASE,Minimum age is 18 years,NBCFDC Krishi Sampada Guidelines,,,,,True
+RULE-074-01,SIH26092-074,,social_category,IN,ST,STRING,ELIGIBILITY,CRITICAL,BASE,Applicant household must belong to Scheduled Tribe / PVTG community,PM-JANMAN Guidelines,,,,,True
+RULE-075-01,SIH26092-075,,age,>=,10,INT,ELIGIBILITY,HIGH,BASE,Minimum age of 10 years required for opening PMJDY account,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-075-02,SIH26092-075,,age,<=,65,INT,ELIGIBILITY,MEDIUM,BASE,Overdraft facility available for ages up to 65,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-076-01,SIH26092-076,,age,>=,18,INT,ELIGIBILITY,HIGH,BASE,Minimum age 18 years required for PMSBY,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-076-02,SIH26092-076,,age,<=,70,INT,ELIGIBILITY,HIGH,BASE,Maximum entry age for PMSBY is 70 years,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-077-01,SIH26092-077,,age,>=,18,INT,ELIGIBILITY,HIGH,BASE,Minimum age 18 years required for PMJJBY,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-077-02,SIH26092-077,,age,<=,50,INT,ELIGIBILITY,HIGH,BASE,Maximum entry age for PMJJBY is 50 years,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-078-01,SIH26092-078,,age,>=,18,INT,ELIGIBILITY,HIGH,BASE,Minimum age 18 years required for Atal Pension Yojana,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-078-02,SIH26092-078,,age,<=,40,INT,ELIGIBILITY,HIGH,BASE,Maximum entry age for APY is 40 years,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-079-01,SIH26092-079,,target_group,CONTAINS,PWD,STRING,ELIGIBILITY,HIGH,BASE,ADIP requires applicant to be a Person with Disability (PwD >= 40%),Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-079-02,SIH26092-079,,annual_income,<=,360000,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹3,60,000 for ADIP scheme",Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-080-01,SIH26092-080,,target_group,CONTAINS,PWD,STRING,ELIGIBILITY,HIGH,BASE,DDRS requires beneficiary to be enrolled in special education / rehabilitation for PwDs,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-081-01,SIH26092-081,,target_group,CONTAINS,PWD,STRING,ELIGIBILITY,MEDIUM,BASE,SIPDA supports accessibility projects benefiting Divyangjan,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-082-01,SIH26092-082,,age,>=,12,INT,ELIGIBILITY,MEDIUM,BASE,Student must be in Class 8 or secondary stage,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-082-02,SIH26092-082,,annual_income,<=,350000,FLOAT,ELIGIBILITY,HIGH,BASE,"Parental annual income must not exceed ₹3,50,000 for NMMSS",Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-083-01,SIH26092-083,,annual_income,<=,450000,FLOAT,ELIGIBILITY,HIGH,BASE,"Parental income must not exceed ₹4,50,000 for CSIS interest subsidy",Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-084-01,SIH26092-084,,age,>=,18,INT,ELIGIBILITY,HIGH,BASE,Minimum age 18 years required for Coir Vikas Yojana,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-085-01,SIH26092-085,,business_stage,=,EXISTING_ONLY,STRING,ELIGIBILITY,HIGH,BASE,MSME LEAN is available exclusively for operational manufacturing MSMEs,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-086-01,SIH26092-086,,enterprise_size_requirement,IN,"MICRO,SMALL",LIST,ELIGIBILITY,HIGH,BASE,MSME TEAM is available for Micro and Small Enterprises with Udyam registration,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-087-01,SIH26092-087,,gender,=,FEMALE,STRING,ELIGIBILITY,HIGH,BASE,PMMVY is exclusively for pregnant women and lactating mothers,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-087-02,SIH26092-087,,annual_income,<=,800000,FLOAT,ELIGIBILITY,HIGH,BASE,"Annual family income must not exceed ₹8,00,000 for PMMVY",Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-088-01,SIH26092-088,,gender,=,FEMALE,STRING,ELIGIBILITY,HIGH,BASE,Sukanya Samriddhi Yojana account is exclusively for the girl child,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-088-02,SIH26092-088,,age,<=,10,INT,ELIGIBILITY,HIGH,BASE,SSY account must be opened before the girl child turns 10 years of age,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-089-01,SIH26092-089,,gender,=,FEMALE,STRING,ELIGIBILITY,HIGH,BASE,Lakhpati Didi initiative is exclusively for women Self Help Group (SHG) members,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-089-02,SIH26092-089,,age,>=,18,INT,ELIGIBILITY,HIGH,BASE,Minimum age 18 years required for SHG micro-enterprise credit,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE
+RULE-090-01,SIH26092-090,,state_restriction,=,ALL_INDIA,STRING,ELIGIBILITY,HIGH,BASE,PM-JAY covers eligible citizens across all participating States & UTs,Official Scheme Guidelines,1,Eligibility Criteria,2024-01-01,,TRUE

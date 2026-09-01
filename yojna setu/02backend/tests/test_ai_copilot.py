@@ -60,7 +60,7 @@ def test_copilot_chat_service_general_query(db):
 
     assert res.answer is not None
     assert len(res.answer) > 10
-    assert res.intent in ["GENERAL_SCHEME_QUERY", "RECOMMENDATION_QUERY", "BUSINESS_PROFILE_INIT"]
+    assert res.intent in ["GENERAL_SCHEME_QUERY", "RECOMMENDATION_QUERY", "BUSINESS_PROFILE_INIT", "FINANCIAL_QUERY", "SCHEME_DISCOVERY"]
     assert res.session_id.startswith("copilot-sess-")
     assert isinstance(res.citations, list)
 

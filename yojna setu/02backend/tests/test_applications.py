@@ -262,7 +262,7 @@ def test_submission_prevented_when_mandatory_documents_missing(app_client, ben1_
     assert len(val_res.json()["missing_documents"]) > 0
 
     # Submit request should fail HTTP 400
-    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben1_headers)
+    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben1_headers, json={"partner_id": "PARTNER-001"})
     assert sub_res.status_code == 400
     assert "missing" in sub_res.json()["detail"]
 
@@ -293,7 +293,7 @@ def test_upload_mandatory_documents_and_submit(app_client, ben1_headers):
     assert len(val_res.json()["missing_documents"]) == 0
 
     # Submit application
-    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben1_headers)
+    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben1_headers, json={"partner_id": "PARTNER-001"})
     assert sub_res.status_code == 200
     sub_data = sub_res.json()
 
@@ -308,7 +308,7 @@ def test_duplicate_submission_rejected(app_client, ben1_headers):
     app_id = list_res.json()["items"][0]["application_id"]
 
     # Attempting second submit on SUBMITTED application
-    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben1_headers)
+    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben1_headers, json={"partner_id": "PARTNER-001"})
     assert sub_res.status_code == 400
     assert "already been submitted" in sub_res.json()["detail"]
 

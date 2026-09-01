@@ -5,6 +5,7 @@ export interface FinancialCalculateRequest {
   scheme_id: string;
   project_cost?: number | null;
   requested_loan_amount?: number | null;
+  interest_rate?: number | null;
   repayment_period_months?: number | null;
   repayment_frequency?: string | null;
 }

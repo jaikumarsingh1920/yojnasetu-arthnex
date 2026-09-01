@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: yojnasetu-backend
+    runtime: python
+    rootDir: yojna setu/02backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: PROJECT_NAME
+        value: "YojnaSetu API"
+      - key: API_V1_STR
+        value: "/api/v1"
+      - key: LOG_LEVEL
+        value: "INFO"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: AI_PROVIDER
+        value: "auto"
+      - key: GEMINI_MODEL
+        value: "gemini-flash-latest"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+    healthCheckPath: /health

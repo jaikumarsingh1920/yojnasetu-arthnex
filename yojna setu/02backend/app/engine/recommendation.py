@@ -14,6 +14,7 @@ Zero LLM/AI, zero random numbers, zero hardcoded scoring shortcuts.
 """
 
 from typing import List, Dict, Any, Tuple, Optional
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.scheme import Scheme
@@ -390,15 +391,19 @@ class DeterministicRecommendationEngine:
             if getattr(profile, field_name) is None:
                 missing_fields.append(field_name)
 
-        # Retrieve schemes with pre-loaded relations
+        # Retrieve schemes with pre-loaded relations (Only ACTIVE schemes)
         schemes = db.query(Scheme).options(
             selectinload(Scheme.verifications),
             selectinload(Scheme.rules),
             selectinload(Scheme.documents),
+        ).filter(
+            or_(Scheme.scheme_status == "ACTIVE", Scheme.scheme_status == None, Scheme.scheme_status == "")
         ).all()
 
         evaluated_count = len(schemes)
         eligible_candidates: List[Tuple[Scheme, SchemeEligibilityResult]] = []
+        ineligible_candidates: List[Tuple[Scheme, SchemeEligibilityResult]] = []
+        insufficient_candidates: List[Tuple[Scheme, SchemeEligibilityResult]] = []
         ineligible_cnt = 0
         insufficient_cnt = 0
 
@@ -408,8 +413,10 @@ class DeterministicRecommendationEngine:
             if elig_res.status == SchemeEligibilityStatus.ELIGIBLE:
                 eligible_candidates.append((scheme, elig_res))
             elif elig_res.status == SchemeEligibilityStatus.INELIGIBLE:
+                ineligible_candidates.append((scheme, elig_res))
                 ineligible_cnt += 1
             elif elig_res.status == SchemeEligibilityStatus.INSUFFICIENT_INFORMATION:
+                insufficient_candidates.append((scheme, elig_res))
                 insufficient_cnt += 1
 
         eligible_count = len(eligible_candidates)
@@ -427,7 +434,7 @@ class DeterministicRecommendationEngine:
                 breakdown,
             ) = cls.evaluate_soft_fit(scheme, profile, elig_res)
 
-            elig_reasons = [rule.reason for rule in elig_res.hard_rules_passed] or ["Passed hard eligibility gate requirements."]
+            passed_reasons = [rule.reason for rule in elig_res.hard_rules_passed] or ["Passed hard eligibility gate requirements."]
 
             rec_item = RecommendationItem(
                 rank=0,  # Populated after ranking
@@ -435,12 +442,32 @@ class DeterministicRecommendationEngine:
                 scheme_name=scheme.scheme_name,
                 eligibility_status=elig_res.status.value,
                 score=score,
+                eligible=True,
+                matched_rules=passed_reasons,
+                failed_rules=[],
+                missing_information=[],
                 matched_factors=matched,
                 unmatched_factors=unmatched,
                 not_evaluated_factors=not_eval,
-                eligibility_reasons=elig_reasons,
+                eligibility_reasons=passed_reasons,
                 recommendation_reasons=rec_reasons,
                 score_breakdown=breakdown,
+                ministry=scheme.ministry,
+                source_organization=scheme.source_organization,
+                official_portal=scheme.official_portal,
+                application_url=scheme.application_url,
+                official_source_url=scheme.official_source_url,
+                source_document=scheme.source_document,
+                is_direct_portal_scheme=(scheme.application_route == "DIRECT_PORTAL"),
+                financial_category=scheme.financial_category,
+                is_credit_scheme=scheme.is_credit_scheme,
+                calculator_applicable=scheme.calculator_applicable,
+                financial_assistance_summary=scheme.financial_assistance_summary,
+                max_loan_amount=float(scheme.max_loan_amount) if scheme.max_loan_amount is not None else None,
+                interest_rate=scheme.interest_rate,
+                repayment_period_max_months=scheme.repayment_period_max_months,
+                subsidy_percentage=float(scheme.subsidy_percentage) if scheme.subsidy_percentage is not None else None,
+                grant_amount=float(scheme.grant_amount) if scheme.grant_amount is not None else None,
             )
             # Tuple for sorting: (-score, scheme_id) for score DESC, scheme_id ASC
             scored_items.append((-score, scheme.scheme_id, rec_item))
@@ -454,6 +481,105 @@ class DeterministicRecommendationEngine:
             item.rank = idx
             top_recommendations.append(item)
 
+        # Build Ineligible Schemes List with exact failed reasons
+        ineligible_items: List[RecommendationItem] = []
+        for idx, (scheme, elig_res) in enumerate(ineligible_candidates, start=1):
+            (
+                score,
+                matched,
+                unmatched,
+                not_eval,
+                rec_reasons,
+                breakdown,
+            ) = cls.evaluate_soft_fit(scheme, profile, elig_res)
+
+            passed_reasons = [rule.reason for rule in elig_res.hard_rules_passed]
+            failed_reasons = [rule.reason for rule in elig_res.hard_rules_failed]
+            unknown_reasons = [rule.reason for rule in elig_res.unknown_eligibility_rules]
+
+            ineligible_items.append(RecommendationItem(
+                rank=idx,
+                scheme_id=scheme.scheme_id,
+                scheme_name=scheme.scheme_name,
+                eligibility_status=elig_res.status.value,
+                score=score,
+                eligible=False,
+                matched_rules=passed_reasons,
+                failed_rules=failed_reasons,
+                missing_information=unknown_reasons,
+                matched_factors=matched,
+                unmatched_factors=unmatched,
+                not_evaluated_factors=not_eval,
+                eligibility_reasons=failed_reasons,
+                recommendation_reasons=rec_reasons,
+                score_breakdown=breakdown,
+                ministry=scheme.ministry,
+                source_organization=scheme.source_organization,
+                official_portal=scheme.official_portal,
+                application_url=scheme.application_url,
+                official_source_url=scheme.official_source_url,
+                source_document=scheme.source_document,
+                is_direct_portal_scheme=(scheme.application_route == "DIRECT_PORTAL"),
+                financial_category=scheme.financial_category,
+                is_credit_scheme=scheme.is_credit_scheme,
+                calculator_applicable=scheme.calculator_applicable,
+                financial_assistance_summary=scheme.financial_assistance_summary,
+                max_loan_amount=float(scheme.max_loan_amount) if scheme.max_loan_amount is not None else None,
+                interest_rate=scheme.interest_rate,
+                repayment_period_max_months=scheme.repayment_period_max_months,
+                subsidy_percentage=float(scheme.subsidy_percentage) if scheme.subsidy_percentage is not None else None,
+                grant_amount=float(scheme.grant_amount) if scheme.grant_amount is not None else None,
+            ))
+
+        # Build Insufficient Information Schemes List
+        insufficient_items: List[RecommendationItem] = []
+        for idx, (scheme, elig_res) in enumerate(insufficient_candidates, start=1):
+            (
+                score,
+                matched,
+                unmatched,
+                not_eval,
+                rec_reasons,
+                breakdown,
+            ) = cls.evaluate_soft_fit(scheme, profile, elig_res)
+
+            passed_reasons = [rule.reason for rule in elig_res.hard_rules_passed]
+            unknown_reasons = [rule.reason for rule in elig_res.unknown_eligibility_rules]
+
+            insufficient_items.append(RecommendationItem(
+                rank=idx,
+                scheme_id=scheme.scheme_id,
+                scheme_name=scheme.scheme_name,
+                eligibility_status=elig_res.status.value,
+                score=score,
+                eligible=False,
+                matched_rules=passed_reasons,
+                failed_rules=[],
+                missing_information=unknown_reasons,
+                matched_factors=matched,
+                unmatched_factors=unmatched,
+                not_evaluated_factors=not_eval,
+                eligibility_reasons=unknown_reasons,
+                recommendation_reasons=rec_reasons,
+                score_breakdown=breakdown,
+                ministry=scheme.ministry,
+                source_organization=scheme.source_organization,
+                official_portal=scheme.official_portal,
+                application_url=scheme.application_url,
+                official_source_url=scheme.official_source_url,
+                source_document=scheme.source_document,
+                is_direct_portal_scheme=(scheme.application_route == "DIRECT_PORTAL"),
+                financial_category=scheme.financial_category,
+                is_credit_scheme=scheme.is_credit_scheme,
+                calculator_applicable=scheme.calculator_applicable,
+                financial_assistance_summary=scheme.financial_assistance_summary,
+                max_loan_amount=float(scheme.max_loan_amount) if scheme.max_loan_amount is not None else None,
+                interest_rate=scheme.interest_rate,
+                repayment_period_max_months=scheme.repayment_period_max_months,
+                subsidy_percentage=float(scheme.subsidy_percentage) if scheme.subsidy_percentage is not None else None,
+                grant_amount=float(scheme.grant_amount) if scheme.grant_amount is not None else None,
+            ))
+
         # Profile Summary
         profile_summary = {
             k: v for k, v in profile.model_dump().items() if v is not None
@@ -466,5 +592,7 @@ class DeterministicRecommendationEngine:
             excluded_scheme_count=ineligible_cnt,
             insufficient_info_scheme_count=insufficient_cnt,
             recommendations=top_recommendations,
+            ineligible_schemes=ineligible_items,
+            insufficient_info_schemes=insufficient_items,
             missing_profile_fields=missing_fields,
         )

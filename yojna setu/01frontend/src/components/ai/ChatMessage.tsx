@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Bot, User, ArrowRight, ShieldCheck, Copy, Check } from 'lucide-react';
 import { SourceCitation, AICopilotAction, RichCard } from '../../types';
 import { SourceCitationCard } from './SourceCitationCard';
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [copied, setCopied] = useState<boolean>(false);
   const isAssistant = message.sender === 'assistant';
@@ -68,7 +70,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion }) =>
             <button
               onClick={handleCopyText}
               className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-700 bg-slate-100/80 hover:bg-slate-200 rounded transition opacity-0 group-hover:opacity-100"
-              title="Copy Answer"
+              title={t('copilot.copyAnswer', 'Copy Answer')}
             >
               {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
             </button>
@@ -77,7 +79,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion }) =>
           {/* Humanized Verified Badge */}
           {isAssistant && message.deterministicUsed && (
             <div className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">
-              <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified Government Information
+              <ShieldCheck className="w-3 h-3 text-emerald-600" /> {t('copilot.verifiedBadge', 'Verified Government Information')}
             </div>
           )}
 
@@ -114,7 +116,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion }) =>
         {/* Source Citations */}
         {isAssistant && message.citations && message.citations.length > 0 && (
           <div className="space-y-1.5 pt-1">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Verified Sources</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('copilot.verifiedSources', 'Verified Sources')}</p>
             <div className="grid grid-cols-1 gap-1.5">
               {message.citations.map((cite, idx) => (
                 <SourceCitationCard key={idx} citation={cite} />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partnerApi';
 import { ApplicationResponse } from '../types';
 import { ApplicationStatusBadge } from '../components/Badge';
@@ -8,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { Building2, Search, Filter, ShieldCheck, ArrowRight, UserCheck, Play } from 'lucide-react';
 
 export const PartnerQueue: React.FC = () => {
+  const { t } = useTranslation();
   const { user, role } = useAuth();
   const [applications, setApplications] = useState<ApplicationResponse[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('SUBMITTED');
@@ -47,11 +49,11 @@ export const PartnerQueue: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 bg-amber-950 text-amber-300 text-xs font-bold px-3 py-1 rounded-full mb-2 border border-amber-700">
             <Building2 className="w-4 h-4 text-amber-400" />
-            Partner Channelizing Agency Review Portal
+            {t('partner.portalBadge', 'Partner Channelizing Agency Review Portal')}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold">Application Review Queue</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold">{t('partner.queueTitle', 'Application Review Queue')}</h1>
           <p className="text-xs sm:text-sm text-amber-100 mt-1">
-            Server-side data isolation active for partner ID: <strong className="font-mono text-white">{user?.partner_id || 'GLOBAL ADMIN'}</strong>
+            {t('partner.isolationNotice', 'Server-side data isolation active for partner ID:')} <strong className="font-mono text-white">{user?.partner_id || 'GLOBAL ADMIN'}</strong>
           </p>
         </div>
 
@@ -61,12 +63,12 @@ export const PartnerQueue: React.FC = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 rounded-lg border border-slate-700 text-xs font-bold bg-slate-800 text-white outline-none"
           >
-            <option value="">All Statuses</option>
-            <option value="SUBMITTED">SUBMITTED (Pending Review)</option>
-            <option value="UNDER_REVIEW">UNDER REVIEW</option>
-            <option value="CORRECTION_REQUIRED">CORRECTION REQUIRED</option>
-            <option value="APPROVED">APPROVED</option>
-            <option value="REJECTED">REJECTED</option>
+            <option value="">{t('partner.allStatuses', 'All Statuses')}</option>
+            <option value="SUBMITTED">{t('partner.submittedPending', 'SUBMITTED (Pending Review)')}</option>
+            <option value="UNDER_REVIEW">{t('partner.underReviewStatus', 'UNDER REVIEW')}</option>
+            <option value="CORRECTION_REQUIRED">{t('partner.correctionReqStatus', 'CORRECTION REQUIRED')}</option>
+            <option value="APPROVED">{t('partner.approvedStatus', 'APPROVED')}</option>
+            <option value="REJECTED">{t('partner.rejectedStatus', 'REJECTED')}</option>
           </select>
         </div>
       </div>
@@ -77,14 +79,14 @@ export const PartnerQueue: React.FC = () => {
       {isLoading ? (
         <div className="py-16 text-center">
           <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-xs text-slate-500 mt-2 font-medium">Loading partner review applications...</p>
+          <p className="text-xs text-slate-500 mt-2 font-medium">{t('partner.loadingQueue', 'Loading partner review applications...')}</p>
         </div>
       ) : applications.length === 0 ? (
         <div className="py-16 text-center bg-white rounded-xl border border-slate-200">
           <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-800">No Applications in Queue</h3>
+          <h3 className="text-base font-bold text-slate-800">{t('partner.noApplications', 'No Applications in Queue')}</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-            There are currently no submitted applications matching status filter '{statusFilter || 'ALL'}'.
+            {t('partner.noApplicationsMatching', "There are currently no submitted applications matching status filter '{{filter}}'.", { filter: statusFilter || 'ALL' })}
           </p>
         </div>
       ) : (
@@ -98,12 +100,12 @@ export const PartnerQueue: React.FC = () => {
                 </div>
 
                 <p className="text-xs text-slate-500 font-mono">
-                  App ID: {app.application_id} | Beneficiary ID: {app.user_id}
+                  {t('partner.appId', 'App ID: {{id}}', { id: app.application_id })} | {t('partner.beneficiaryId', 'Beneficiary ID: {{id}}', { id: app.user_id })}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 pt-1">
-                  <span>Submitted: {app.submitted_at ? new Date(app.submitted_at).toLocaleString() : 'N/A'}</span>
-                  <span>Assigned Reviewer: {app.assigned_reviewer_id || 'Unassigned'}</span>
+                  <span>{t('partner.submittedDate', 'Submitted: {{date}}', { date: app.submitted_at ? new Date(app.submitted_at).toLocaleString() : 'N/A' })}</span>
+                  <span>{t('partner.assignedReviewer', 'Assigned Reviewer: {{reviewer}}', { reviewer: app.assigned_reviewer_id || t('partner.unassigned', 'Unassigned') })}</span>
                 </div>
               </div>
 
@@ -113,7 +115,7 @@ export const PartnerQueue: React.FC = () => {
                     onClick={() => handleStartReview(app.application_id)}
                     className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1"
                   >
-                    <Play className="w-3.5 h-3.5" /> Start Review
+                    <Play className="w-3.5 h-3.5" /> {t('partner.startReviewBtn', 'Start Review')}
                   </button>
                 )}
 
@@ -121,7 +123,7 @@ export const PartnerQueue: React.FC = () => {
                   to={`/partner/applications/${app.application_id}`}
                   className="bg-gov-navy hover:bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg transition flex items-center gap-1"
                 >
-                  Review Details & Documents <ArrowRight className="w-3.5 h-3.5" />
+                  {t('partner.reviewDetailsBtn', 'Review Details & Documents')} <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>

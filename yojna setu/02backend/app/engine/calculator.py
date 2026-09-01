@@ -965,6 +965,21 @@ class DeterministicFinancialEngine:
         resolved = cls.resolve_financial_rules(scheme, db_rules, calc_input)
         param_map = {p.field: p for p in resolved}
 
+        # Check if scheme is a non-credit scheme
+        if not scheme.is_credit_scheme or not scheme.calculator_applicable:
+            return FinancialCalculationResult(
+                status=FinancialCalculationStatus.NOT_APPLICABLE,
+                scheme_id=scheme.scheme_id,
+                scheme_name=scheme.scheme_name,
+                is_credit_scheme=False,
+                calculator_applicable=False,
+                financial_category=scheme.financial_category,
+                financial_assistance_summary=scheme.financial_assistance_summary,
+                resolved_parameters=resolved,
+                message="Loan / EMI calculation is not applicable for this scheme. Assistance is provided as a subsidy/grant/benefit rather than a repayable loan.",
+                warnings=["Loan / EMI calculation is not applicable for this scheme."],
+            )
+
         # 2. Check for missing critical inputs
         missing: List[str] = []
         all_warnings: List[str] = []
@@ -979,17 +994,26 @@ class DeterministicFinancialEngine:
         repay_param = param_map.get("repayment_period_max_months")
         freq_param = param_map.get("repayment_frequency")
 
-        if interest_param and interest_param.status == ParameterResolutionStatus.UNKNOWN:
-            missing.append("interest_rate")
-        if repay_param and repay_param.status == ParameterResolutionStatus.UNKNOWN:
+        effective_interest_rate = calc_input.interest_rate
+        if effective_interest_rate is None and interest_param and interest_param.value is not None:
+            effective_interest_rate = _decimal_or_none(interest_param.value)
+
+        if effective_interest_rate is None:
+            if interest_param and interest_param.status == ParameterResolutionStatus.UNKNOWN:
+                missing.append("interest_rate")
+            elif interest_param and interest_param.status == ParameterResolutionStatus.CONDITIONAL:
+                all_warnings.append(f"Interest rate is CONDITIONAL: {interest_param.reason}")
+                missing.append("interest_rate (CONDITIONAL)")
+            else:
+                missing.append("interest_rate")
+
+        if calc_input.repayment_period_months is None and repay_param and repay_param.status == ParameterResolutionStatus.UNKNOWN:
             missing.append("repayment_period_max_months")
         # Note: repayment_frequency UNKNOWN is NOT a hard blocker.
         # The engine defaults to MONTHLY with a warning when frequency is UNKNOWN,
         # since the core calculation (interest rate, tenure, principal) can still proceed.
 
         # Conditional parameters as warnings, not blockers
-        if interest_param and interest_param.status == ParameterResolutionStatus.CONDITIONAL:
-            all_warnings.append(f"Interest rate is CONDITIONAL: {interest_param.reason}")
         if repay_param and repay_param.status == ParameterResolutionStatus.CONDITIONAL:
             all_warnings.append(f"Repayment period is CONDITIONAL: {repay_param.reason}")
 
@@ -1027,20 +1051,7 @@ class DeterministicFinancialEngine:
         beneficiary_contribution = financing["beneficiary_contribution_amount"]
 
         # 5. Determine calculation parameters
-        interest_rate = _decimal_or_none(interest_param.value) if interest_param else None
-        if interest_rate is None and interest_param and interest_param.status == ParameterResolutionStatus.CONDITIONAL:
-            return FinancialCalculationResult(
-                status=FinancialCalculationStatus.INSUFFICIENT_INFORMATION,
-                scheme_id=scheme.scheme_id,
-                scheme_name=scheme.scheme_name,
-                resolved_parameters=resolved,
-                project_cost=calc_input.project_cost,
-                requested_loan_amount=calc_input.requested_loan_amount,
-                eligible_loan_amount=eligible_loan,
-                beneficiary_contribution_amount=beneficiary_contribution,
-                missing_parameters=["interest_rate (CONDITIONAL)"],
-                warnings=all_warnings,
-            )
+        interest_rate = effective_interest_rate
 
         # Determine tenure
         tenure = calc_input.repayment_period_months
@@ -1064,10 +1075,10 @@ class DeterministicFinancialEngine:
 
         # Determine frequency
         freq_str = None
-        if freq_param and freq_param.value:
+        if calc_input.repayment_frequency:
+            freq_str = calc_input.repayment_frequency.value if hasattr(calc_input.repayment_frequency, 'value') else str(calc_input.repayment_frequency)
+        elif freq_param and freq_param.value:
             freq_str = str(freq_param.value)
-        elif calc_input.repayment_frequency:
-            freq_str = calc_input.repayment_frequency.value
 
         if not freq_str:
             freq_str = "MONTHLY"

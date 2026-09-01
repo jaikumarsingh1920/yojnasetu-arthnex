@@ -12,7 +12,7 @@ if BACKEND_DIR not in sys.path:
 from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.models import (
-    Base, User, UserRole, Scheme, SchemeVerification, Application, ApplicationDocument, Notification, NotificationPreference
+    Base, User, UserRole, Scheme, SchemeVerification, Application, ApplicationDocument, Notification, NotificationPreference, Partner
 )
 from app.db.session import get_db
 from app.core.security import hash_password, create_access_token
@@ -44,7 +44,8 @@ def notif_client():
     u_ben = User(user_id="USER-BEN-NOTIF-01", email="ben_notif@test.com", hashed_password=hash_password("Pass123!"), role="BENEFICIARY")
     u_partner = User(user_id="USER-PARTNER-NOTIF-01", email="partner_notif@test.com", hashed_password=hash_password("Pass123!"), role="PARTNER_USER", partner_id="PARTNER-01")
     u_padmin = User(user_id="USER-PADMIN-NOTIF-01", email="padmin_notif@test.com", hashed_password=hash_password("Pass123!"), role="PARTNER_ADMIN", partner_id="PARTNER-01")
-    db.add_all([u_ben, u_partner, u_padmin])
+    partner = Partner(partner_id="PARTNER-01", name="Test Partner", code="TST_PRT", partner_type="CHANNELIZING_AGENCY", is_active=True, is_accepting_applications=True)
+    db.add_all([u_ben, u_partner, u_padmin, partner])
 
     # Seed scheme
     scheme = Scheme(
@@ -198,7 +199,7 @@ def test_full_application_lifecycle_notification_triggers(notif_client):
     assert create_res.status_code == 201
     app_id = create_res.json()["application_id"]
 
-    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers)
+    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers, json={"partner_id": "PARTNER-01"})
     assert sub_res.status_code == 200
 
     # Beneficiary receives APPLICATION_SUBMITTED notification
@@ -224,7 +225,7 @@ def test_full_application_lifecycle_notification_triggers(notif_client):
     assert any(n["notification_type"] == "CORRECTION_REQUIRED" and n["application_id"] == app_id for n in ben_notifs_after_corr)
 
     # 5. Beneficiary resubmits
-    client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers)
+    client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers, json={"partner_id": "PARTNER-01"})
     partner_notifs_after_resub = client.get("/api/v1/notifications", headers=partner_headers).json()["items"]
     assert any(n["notification_type"] == "APPLICATION_RESUBMITTED" and n["application_id"] == app_id for n in partner_notifs_after_resub)
 

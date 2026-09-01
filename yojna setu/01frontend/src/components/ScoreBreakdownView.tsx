@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, AlertCircle, HelpCircle, XCircle } from 'lucide-react';
 import { ScoreDimensionBreakdown } from '../types';
 
@@ -15,44 +16,46 @@ export const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({
   unmatchedFactors,
   notEvaluatedFactors,
 }) => {
+  const { t } = useTranslation();
+
   const getResultBadge = (res: string) => {
     switch (res) {
       case 'MATCH':
         return (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-            ✓ Strong Match
+            {t('scoreBreakdown.strongMatch', '✓ Strong Match')}
           </span>
         );
       case 'PARTIAL_MATCH':
         return (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
             <AlertCircle className="w-3 h-3 text-amber-600" />
-            ◐ Related Match
+            {t('scoreBreakdown.relatedMatch', '◐ Related Match')}
           </span>
         );
       case 'NO_MATCH':
         return (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
             <XCircle className="w-3 h-3 text-rose-600" />
-            ✕ Not a match
+            {t('scoreBreakdown.noMatch', '✕ Not a match')}
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
             <HelpCircle className="w-3 h-3 text-slate-400" />
-            — Not enough information
+            {t('scoreBreakdown.insufficientInfo', '— Not enough information')}
           </span>
         );
     }
   };
 
   const sanitizeReason = (reason: string) => {
-    if (!reason) return 'Not enough information to compare';
+    if (!reason) return t('scoreBreakdown.notEnoughInfo', 'Not enough information to compare');
     return reason
-      .replace(/UNKNOWN/g, 'not specified / requires verification')
-      .replace(/NOT_APPLICABLE/g, 'varies by candidate');
+      .replace(/UNKNOWN/g, t('scoreBreakdown.notSpecified', 'not specified / requires verification'))
+      .replace(/NOT_APPLICABLE/g, t('scoreBreakdown.variesByCandidate', 'varies by candidate'));
   };
 
   return (
@@ -60,7 +63,7 @@ export const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({
       {/* Dimension Scores */}
       <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
         <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4">
-          Scheme Criteria Match Breakdown
+          {t('scoreBreakdown.title', 'Scheme Criteria Match Breakdown')}
         </h4>
 
         <div className="space-y-3">
@@ -73,7 +76,7 @@ export const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({
                 <div className="flex items-center gap-2">
                   {getResultBadge(item.result)}
                   <span className="text-xs font-mono font-extrabold text-slate-900">
-                    {item.score} / {item.max_weight} pts
+                    {item.score} / {item.max_weight} {t('scoreBreakdown.pts', 'pts')}
                   </span>
                 </div>
               </div>
@@ -106,10 +109,10 @@ export const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({
         <div className="bg-emerald-50/60 p-3.5 rounded-lg border border-emerald-200">
           <h5 className="font-bold text-emerald-900 flex items-center gap-1.5 mb-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            Matched Dimensions ({matchedFactors.length})
+            {t('scoreBreakdown.matchedDimensionsCount', 'Matched Dimensions ({{count}})', { count: matchedFactors.length })}
           </h5>
           {matchedFactors.length === 0 ? (
-            <p className="text-[11px] text-emerald-700/70 italic">None</p>
+            <p className="text-[11px] text-emerald-700/70 italic">{t('common.none', 'None')}</p>
           ) : (
             <ul className="space-y-1 text-[11px] text-emerald-800 list-disc list-inside">
               {matchedFactors.map((f, i) => (
@@ -123,10 +126,10 @@ export const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({
         <div className="bg-rose-50/60 p-3.5 rounded-lg border border-rose-200">
           <h5 className="font-bold text-rose-900 flex items-center gap-1.5 mb-2">
             <XCircle className="w-4 h-4 text-rose-600" />
-            Unmatched Dimensions ({unmatchedFactors.length})
+            {t('scoreBreakdown.unmatchedDimensionsCount', 'Unmatched Dimensions ({{count}})', { count: unmatchedFactors.length })}
           </h5>
           {unmatchedFactors.length === 0 ? (
-            <p className="text-[11px] text-rose-700/70 italic">None</p>
+            <p className="text-[11px] text-rose-700/70 italic">{t('common.none', 'None')}</p>
           ) : (
             <ul className="space-y-1 text-[11px] text-rose-800 list-disc list-inside">
               {unmatchedFactors.map((f, i) => (
@@ -140,10 +143,10 @@ export const ScoreBreakdownView: React.FC<ScoreBreakdownViewProps> = ({
         <div className="bg-slate-100/70 p-3.5 rounded-lg border border-slate-200">
           <h5 className="font-bold text-slate-800 flex items-center gap-1.5 mb-2">
             <HelpCircle className="w-4 h-4 text-slate-500" />
-            Unspecified Dimensions ({notEvaluatedFactors.length})
+            {t('scoreBreakdown.unspecifiedDimensionsCount', 'Unspecified Dimensions ({{count}})', { count: notEvaluatedFactors.length })}
           </h5>
           {notEvaluatedFactors.length === 0 ? (
-            <p className="text-[11px] text-slate-600 italic">None</p>
+            <p className="text-[11px] text-slate-600 italic">{t('common.none', 'None')}</p>
           ) : (
             <ul className="space-y-1 text-[11px] text-slate-700 list-disc list-inside">
               {notEvaluatedFactors.map((f, i) => (

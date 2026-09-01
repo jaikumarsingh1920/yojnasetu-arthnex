@@ -10,11 +10,115 @@ class PartnerResponse(BaseModel):
     name: str
     code: str
     partner_type: str
+    partner_sub_type: Optional[str] = None
+    institution_type: Optional[str] = None
+    partner_category: Optional[str] = None
+    address: Optional[str] = None
+    district: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    website: Optional[str] = None
+    service_type: Optional[str] = None
+    last_verified_date: Optional[str] = None
+    scheme_authorization_level: Optional[str] = None
+    coordinates_status: Optional[str] = None
+    source_url: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    npa_percentage: Optional[float] = None
+    overdue_percentage: Optional[float] = None
+    is_accepting_applications: bool
     is_active: bool
+    verification_status: Optional[str] = None
+    coordinates_source: Optional[str] = None
+    coordinates_verified: Optional[bool] = None
+    geocoding_provider: Optional[str] = None
+    geocoding_status: Optional[str] = None
+    geocoding_confidence: Optional[str] = None
+    geocoding_display_name: Optional[str] = None
+    scheme_specific_mapping_available: Optional[bool] = None
+    supported_schemes: Optional[List[str]] = Field(default_factory=list)
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class NearestPartnerResponse(BaseModel):
+    partner: PartnerResponse
+    distance_km: float
+    is_scheme_matched: bool = False
+    partner_category: Optional[str] = None
+    supported_schemes: Optional[List[str]] = Field(default_factory=list)
+    service_type: Optional[str] = None
+    authorization_level: Optional[str] = None
+    scheme_authorized_category: Optional[str] = None
+    scheme_mapping_notes: Optional[str] = None
+    suitability_reason: Optional[str] = None
+    lending_capacity_status: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class PartnerCreateInput(BaseModel):
+    name: str = Field(..., min_length=2, max_length=255)
+    code: str = Field(..., min_length=2, max_length=50)
+    partner_type: str = Field(default="PUBLIC_SECTOR_BANK")
+    partner_sub_type: Optional[str] = None
+    institution_type: Optional[str] = None
+    partner_category: str = Field(default="AUTHORIZED_SCHEME_PARTNER")
+    address: Optional[str] = None
+    district: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    website: Optional[str] = None
+    service_type: Optional[str] = None
+    scheme_authorization_level: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    source_url: Optional[str] = None
+    verification_status: str = Field(default="VERIFIED_OFFICIAL")
+
+
+class PartnerUpdateInput(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    partner_type: Optional[str] = None
+    partner_sub_type: Optional[str] = None
+    institution_type: Optional[str] = None
+    partner_category: Optional[str] = None
+    address: Optional[str] = None
+    district: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    website: Optional[str] = None
+    service_type: Optional[str] = None
+    scheme_authorization_level: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    source_url: Optional[str] = None
+    verification_status: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class PartnerStatusUpdateInput(BaseModel):
+    is_active: bool
+    reason: Optional[str] = None
+
+
+class PartnerSchemeMappingInput(BaseModel):
+    scheme_id: str
+    service_type: Optional[str] = "FINANCING"
+    authorization_level: Optional[str] = "SCHEME_ROUTE_VERIFIED"
+    verification_notes: Optional[str] = None
+    source_url: Optional[str] = None
 
 
 class PartnerApplicationListItem(BaseModel):

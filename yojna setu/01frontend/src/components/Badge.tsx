@@ -1,24 +1,47 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShieldCheck, Clock, CheckCircle2, XCircle, AlertCircle, FileCheck } from 'lucide-react';
 import { ApplicationStatus } from '../types';
 
 interface VerificationBadgeProps {
-  status: string;
+  status?: string | null;
 }
 
 export const VerificationBadge: React.FC<VerificationBadgeProps> = ({ status }) => {
-  if (status === 'VERIFIED') {
+  const { t } = useTranslation();
+  const normStatus = (status || '').toUpperCase().trim();
+
+  if (normStatus === 'VERIFIED' || normStatus === 'VERIFIED_OFFICIAL') {
     return (
       <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-300">
         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-        Government Verified
+        {t('schemeCard.govtVerified')}
       </span>
     );
   }
+
+  if (normStatus === 'SOURCE_VERIFIED') {
+    return (
+      <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-[11px] font-bold px-2 py-0.5 rounded border border-blue-300">
+        <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+        {t('schemeCard.sourceVerified')}
+      </span>
+    );
+  }
+
+  if (normStatus === 'UNDER_REVIEW' || normStatus === 'UNVERIFIED' || normStatus === 'NEEDS_SOURCE_VERIFICATION') {
+    return (
+      <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-[11px] font-medium px-2 py-0.5 rounded border border-amber-300">
+        <Clock className="w-3.5 h-3.5 text-amber-600" />
+        {t('schemeCard.underVerification')}
+      </span>
+    );
+  }
+
   return (
-    <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-[11px] font-medium px-2 py-0.5 rounded border border-amber-300">
-      <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-      {status === 'UNVERIFIED' ? 'Under Verification' : status}
+    <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-[11px] font-medium px-2 py-0.5 rounded border border-slate-300">
+      <AlertCircle className="w-3.5 h-3.5 text-slate-500" />
+      {t('schemeCard.sourceUnavailable')}
     </span>
   );
 };
@@ -65,34 +88,56 @@ export const ApplicationStatusBadge: React.FC<ApplicationStatusBadgeProps> = ({ 
       icon: <Clock className="w-3.5 h-3.5 text-purple-600" />
     },
     CORRECTION_REQUIRED: {
-      label: 'Checklist Review Needed',
-      bg: 'bg-orange-50',
-      text: 'text-orange-900',
-      border: 'border-orange-300',
-      icon: <AlertCircle className="w-3.5 h-3.5 text-orange-600" />
+      label: 'Action Required',
+      bg: 'bg-amber-100',
+      text: 'text-amber-900',
+      border: 'border-amber-400',
+      icon: <AlertCircle className="w-3.5 h-3.5 text-amber-700 font-extrabold animate-pulse" />
     },
     NEEDS_CORRECTION: {
-      label: 'Checklist Review Needed',
-      bg: 'bg-orange-50',
-      text: 'text-orange-900',
-      border: 'border-orange-300',
-      icon: <AlertCircle className="w-3.5 h-3.5 text-orange-600" />
+      label: 'Action Required',
+      bg: 'bg-amber-100',
+      text: 'text-amber-900',
+      border: 'border-amber-400',
+      icon: <AlertCircle className="w-3.5 h-3.5 text-amber-700 font-extrabold animate-pulse" />
+    },
+    MORE_INFORMATION_REQUIRED: {
+      label: 'Information Required',
+      bg: 'bg-amber-100',
+      text: 'text-amber-900',
+      border: 'border-amber-400',
+      icon: <AlertCircle className="w-3.5 h-3.5 text-amber-700 font-extrabold animate-pulse" />
     },
     APPROVED: {
-      label: 'Guidance Completed',
+      label: 'Approved',
       bg: 'bg-emerald-50',
       text: 'text-emerald-800',
       border: 'border-emerald-300',
       icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
     },
+    COMPLETED: {
+      label: 'Completed / Benefit Disbursed',
+      bg: 'bg-emerald-100',
+      text: 'text-emerald-900',
+      border: 'border-emerald-400',
+      icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 font-extrabold" />
+    },
     REJECTED: {
-      label: 'Criteria Unmet',
+      label: 'Rejected',
       bg: 'bg-rose-50',
       text: 'text-rose-800',
       border: 'border-rose-300',
       icon: <XCircle className="w-3.5 h-3.5 text-rose-600" />
     },
+    WITHDRAWN: {
+      label: 'Withdrawn',
+      bg: 'bg-slate-200',
+      text: 'text-slate-700',
+      border: 'border-slate-400',
+      icon: <XCircle className="w-3.5 h-3.5 text-slate-500" />
+    },
   };
+
 
   const cfg = configs[status] || {
     label: String(status).replace(/_/g, ' '),

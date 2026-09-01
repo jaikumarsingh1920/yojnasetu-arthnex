@@ -1,0 +1,30 @@
+{
+  "errors.networkError": {
+    "en": "Network connection error. Please try again.",
+    "hi": "नेटवर्क कनेक्शन त्रुटि। कृपया पुनः प्रयास करें।"
+  },
+  "errors.pageNotFoundDesc": {
+    "en": "The page you are looking for does not exist or has been moved.",
+    "hi": "जिस पृष्ठ को आप खोज रहे हैं वह मौजूद नहीं है या हटा दिया गया है।"
+  },
+  "errors.somethingWrong": {
+    "en": "Something went wrong. Please reload the page.",
+    "hi": "कुछ गड़बड़ हुई। कृपया पृष्ठ पुनः लोड करें।"
+  },
+  "errors.tryAgain": {
+    "en": "Try Again",
+    "hi": "पुनः प्रयास करें"
+  },
+  "errors.unauthorizedDesc": {
+    "en": "You do not have permission to view this official resource. Please sign in with an authorized account.",
+    "hi": "आपके पास इस आधिकारिक संसाधन को देखने की अनुमति नहीं है। कृपया अधिकृत खाते से साइन इन करें।"
+  },
+  "errors.unexpectedError": {
+    "en": "An unexpected application error occurred while rendering this interface.",
+    "hi": "इस इंटरफ़ेस को रेंडर करते समय एक अप्रत्याशित त्रुटि उत्पन्न हुई।"
+  },
+  "errors.unexpectedRenderError": {
+    "en": "An unexpected application error occurred while rendering this interface.",
+    "hi": "इस इंटरफ़ेस को रेंडर करते समय एक अप्रत्याशित एप्लिकेशन त्रुटि हुई।"
+  }
+}

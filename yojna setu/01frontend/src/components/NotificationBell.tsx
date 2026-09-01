@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Bell, CheckCheck, ExternalLink, ShieldAlert, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { notificationApi } from '../api/notificationApi';
 import { NotificationItem } from '../types';
 
 export const NotificationBell: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [recentNotifications, setRecentNotifications] = useState<NotificationItem[]>([]);
@@ -113,9 +115,9 @@ export const NotificationBell: React.FC = () => {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'URGENT':
-        return <span className="bg-rose-100 text-rose-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-rose-300">URGENT</span>;
+        return <span className="bg-rose-100 text-rose-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-rose-300">{t('notifications.urgent', 'URGENT')}</span>;
       case 'HIGH':
-        return <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-amber-300">HIGH</span>;
+        return <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-amber-300">{t('notifications.high', 'HIGH')}</span>;
       default:
         return null;
     }
@@ -127,7 +129,7 @@ export const NotificationBell: React.FC = () => {
       <button
         onClick={handleToggleOpen}
         className="relative p-2 text-slate-300 hover:text-white hover:bg-gov-navy rounded-lg transition"
-        title="Notifications"
+        title={t('notifications.title', 'Notifications')}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -143,10 +145,10 @@ export const NotificationBell: React.FC = () => {
           <div className="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-sky-400" />
-              <h4 className="font-bold text-sm">Notifications</h4>
+              <h4 className="font-bold text-sm">{t('notifications.title', 'Notifications')}</h4>
               {unreadCount > 0 && (
                 <span className="bg-sky-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  {unreadCount} New
+                  {t('notifications.newAlertsCount', '{{count}} New', { count: unreadCount })}
                 </span>
               )}
             </div>
@@ -156,7 +158,7 @@ export const NotificationBell: React.FC = () => {
                 onClick={handleMarkAllRead}
                 className="text-[11px] text-sky-300 hover:text-white font-semibold flex items-center gap-1 transition"
               >
-                <CheckCheck className="w-3.5 h-3.5" /> Mark all read
+                <CheckCheck className="w-3.5 h-3.5" /> {t('notifications.markAllRead', 'Mark all read')}
               </button>
             )}
           </div>
@@ -165,13 +167,13 @@ export const NotificationBell: React.FC = () => {
             {isLoading ? (
               <div className="p-6 text-center text-xs text-slate-500">
                 <div className="w-5 h-5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                Loading alerts...
+                {t('notifications.loadingAlerts', 'Loading alerts...')}
               </div>
             ) : recentNotifications.length === 0 ? (
               <div className="p-8 text-center text-slate-500 space-y-1">
                 <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-xs font-bold text-slate-700">No Notifications</p>
-                <p className="text-[11px] text-slate-400">You're all caught up with your updates.</p>
+                <p className="text-xs font-bold text-slate-700">{t('notifications.noNotifications', 'No Notifications')}</p>
+                <p className="text-[11px] text-slate-400">{t('notifications.allCaughtUp', "You're all caught up with your updates.")}</p>
               </div>
             ) : (
               recentNotifications.map(item => (
@@ -207,7 +209,7 @@ export const NotificationBell: React.FC = () => {
               onClick={() => setIsOpen(false)}
               className="text-xs font-bold text-sky-700 hover:text-sky-900 flex items-center justify-center gap-1"
             >
-              View All Notifications <ExternalLink className="w-3 h-3" />
+              {t('notifications.viewAll', 'View All Notifications')} <ExternalLink className="w-3 h-3" />
             </Link>
           </div>
         </div>

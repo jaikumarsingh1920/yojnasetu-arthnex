@@ -1,0 +1,18 @@
+{
+  "notifications.allCaughtUp": {
+    "en": "You're all caught up with your updates.",
+    "hi": "आप अपने सभी अपडेट्स से पूरी तरह अवगत हैं।"
+  },
+  "notifications.emptyState": {
+    "en": "You have no unread notifications.",
+    "hi": "आपके पास कोई अपठित सूचना नहीं है।"
+  },
+  "notifications.prefModalDesc": {
+    "en": "Configure delivery channels for real-time application updates and verification alerts.",
+    "hi": "रीयल-टाइम आवेदन अपडेट और सत्यापन अलर्ट के लिए डिलीवरी चैनल कॉन्फ़िगर करें।"
+  },
+  "notifications.subtitle": {
+    "en": "Real-time status updates for applications, document verification results, and authority reviews.",
+    "hi": "आवेदनों, दस्तावेज़ सत्यापन परिणामों और प्राधिकरण समीक्षाओं के लिए वास्तविक समय स्थिति अपडेट।"
+  }
+}

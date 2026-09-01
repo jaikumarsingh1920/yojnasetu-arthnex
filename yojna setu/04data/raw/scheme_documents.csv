@@ -19,3 +19,81 @@ DOC-0017,SIH26092-056,Valid Scheduled Caste certificate,REQUIRED,NSFDC credit-sc
 DOC-0018,SIH26092-056,Income proof,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,STUDENT,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
 DOC-0019,SIH26092-056,KYC documents,CONDITIONAL,Offline application through SCA/CA; agency checklist applies,STUDENT,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
 DOC-0020,SIH26092-056,Agency-specific checklist documents,PARTNER_VERIFICATION,As required by the authorised SCA/CA,STUDENT,https://nsfdc.nic.in/index.php/faqs,WEB,Offline Mode (Channelizing Agencies),TRUE
+DOC-057-01,SIH26092-057,Scheduled Caste Certificate,REQUIRED,Issued by authorized revenue authority,,NSFDC MSY Guidelines,1,Eligibility,True
+DOC-057-02,SIH26092-057,Income Certificate,REQUIRED,"Annual family income <= ₹3,00,000",,NSFDC MSY Guidelines,1,Income Criteria,True
+DOC-057-03,SIH26092-057,Aadhaar Card / Identity Proof,REQUIRED,Valid government photo identity,,NSFDC MSY Guidelines,2,KYC,True
+DOC-057-04,SIH26092-057,Self-Help Group Resolution (if applying via SHG),CONDITIONAL,Required only for group micro-credit,,NSFDC MSY Guidelines,2,SHG Criteria,True
+DOC-058-01,SIH26092-058,Scheduled Caste Certificate,REQUIRED,Issued by competent revenue authority,,NSFDC GBS Policy Guidelines,1,Eligibility,True
+DOC-058-02,SIH26092-058,Income Certificate,REQUIRED,"Annual family income <= ₹3,00,000",,NSFDC GBS Policy Guidelines,1,Income Criteria,True
+DOC-058-03,SIH26092-058,Detailed Project Report (DPR) / Unit Quotation,REQUIRED,Quotation for green vehicle / solar unit / polyhouse,,NSFDC GBS Policy Guidelines,3,Technical DPR,True
+DOC-059-01,SIH26092-059,Scheduled Tribe Certificate,REQUIRED,Issued by competent revenue authority,,NSTFDC ASRY Guidelines,1,Eligibility,True
+DOC-059-02,SIH26092-059,Admission Letter / Proof of Enrollment,REQUIRED,Recognized professional / technical college admission proof,,NSTFDC ASRY Guidelines,2,Admission Proof,True
+DOC-059-03,SIH26092-059,Course Fee Structure Breakup,REQUIRED,Certified fee schedule from educational institution,,NSTFDC ASRY Guidelines,2,Financials,True
+DOC-060-01,SIH26092-060,Caste Certificate of SC Promoters (>51% shareholding),REQUIRED,Proof of SC ownership shareholding,,CEGSSC Guidelines,2,Shareholding,True
+DOC-060-02,SIH26092-060,Business Registration Certificate (Udyam / ROC),REQUIRED,Valid enterprise registration,,CEGSSC Guidelines,3,Entity Proof,True
+DOC-060-03,SIH26092-060,Bank Loan Sanction Letter from Member Lending Institution,REQUIRED,Sanction letter for loan > ₹15 Lakh,,CEGSSC Guidelines,4,MLI Sanction,True
+DOC-063-01,SIH26092-063,Scheduled Caste Certificate,REQUIRED,Issued by authorized revenue authority,,NSFDC MKY Circular,1,Eligibility,True
+DOC-063-02,SIH26092-063,Land Record / Agricultural Activity Proof,CONDITIONAL,7/12 extract or livestock ownership certificate,,NSFDC MKY Circular,1,Agri Proof,True
+DOC-064-01,SIH26092-064,OBC Certificate / Backward Class Proof,REQUIRED,Issued by authorized state revenue authority,,NBCFDC Shilp Sampada Guidelines,1,Eligibility,True
+DOC-064-02,SIH26092-064,Artisan / Weaver Identity Card (or Skill Proof),REQUIRED,Pehchan card / DIC certificate / Trade proof,,NBCFDC Shilp Sampada Guidelines,2,Artisan Proof,True
+DOC-064-03,SIH26092-064,Income Certificate,REQUIRED,"Annual family income <= ₹3,00,000",,NBCFDC Shilp Sampada Guidelines,1,Income Criteria,True
+DOC-065-01,SIH26092-065,Aadhaar Card,MANDATORY,Identity & DBT verification,,PM-YASASVI Guidelines,,,True
+DOC-065-02,SIH26092-065,OBC / EBC / DNT Caste Certificate,MANDATORY,Competent authority issued certificate,,PM-YASASVI Guidelines,,,True
+DOC-065-03,SIH26092-065,Income Certificate (<= ₹2.50 Lakh),MANDATORY,Issued by Tehsildar / SDO,,PM-YASASVI Guidelines,,,True
+DOC-065-04,SIH26092-065,School / College Bonafide Certificate & Fee Receipt,MANDATORY,Issued by head of institution,,PM-YASASVI Guidelines,,,True
+DOC-066-01,SIH26092-066,Aadhaar Card,MANDATORY,Student identity verification,,SHRESHTA Guidelines,,,True
+DOC-066-02,SIH26092-066,SC Caste Certificate,MANDATORY,In the name of the student or father,,SHRESHTA Guidelines,,,True
+DOC-066-03,SIH26092-066,Income Certificate (<= ₹2.50 Lakh),MANDATORY,Valid parental income certificate,,SHRESHTA Guidelines,,,True
+DOC-066-04,SIH26092-066,NETS Admit Card & Score Card,MANDATORY,Proof of entrance test qualification,,SHRESHTA Guidelines,,,True
+DOC-067-01,SIH26092-067,Aadhaar Card,MANDATORY,Identity and address proof,,NMDFC Virasat Guidelines,,,True
+DOC-067-02,SIH26092-067,Minority Community Certificate / Self-Declaration,MANDATORY,Proof of notified minority status,,NMDFC Virasat Guidelines,,,True
+DOC-067-03,SIH26092-067,Artisan / Pehchan Card or Proof of Trade,MANDATORY,Issued by DC Handloom / Handicrafts or SCA,,NMDFC Virasat Guidelines,,,True
+DOC-068-01,SIH26092-068,Unique Disability ID (UDID) / Disability Certificate,MANDATORY,Proof of 40% or more disability,,NDFDC DSY Guidelines,,,True
+DOC-068-02,SIH26092-068,Aadhaar Card,MANDATORY,Identity and address proof,,NDFDC DSY Guidelines,,,True
+DOC-068-03,SIH26092-068,Project Proposal / Business Plan,MANDATORY,Details of self-employment activity,,NDFDC DSY Guidelines,,,True
+DOC-069-01,SIH26092-069,Aadhaar Card,MANDATORY,Biometric attendance integration,,SAMARTH Guidelines,,,True
+DOC-069-02,SIH26092-069,Educational Qualification Certificate,OPTIONAL,As per NSQF course prerequisite,,SAMARTH Guidelines,,,True
+DOC-070-01,SIH26092-070,Detailed Project Report (DPR),MANDATORY,Comprehensive infrastructure and financial model,,AHIDF Guidelines,,,True
+DOC-070-02,SIH26092-070,Udyam Registration Certificate / Business Registration,MANDATORY,Proof of enterprise existence,,AHIDF Guidelines,,,True
+DOC-071-01,SIH26092-071,Udyam Registration Certificate,MANDATORY,Active MSE registration,,SCLCSS Guidelines,,,True
+DOC-071-02,SIH26092-071,SC / ST Caste Certificate of Proprietor/Promoters,MANDATORY,Minimum 51% shareholding proof,,SCLCSS Guidelines,,,True
+DOC-071-03,SIH26092-071,Bank Term Loan Sanction Letter,MANDATORY,From eligible lending bank,,SCLCSS Guidelines,,,True
+DOC-072-01,SIH26092-072,Aadhaar Card,MANDATORY,Identity verification,,NSKFDC Sanitary Mart Guidelines,,,True
+DOC-072-02,SIH26092-072,Safai Karamchari / Manual Scavenger Certificate or ID,MANDATORY,Issued by Municipal Corporation / Local Body / SCA,,NSKFDC Sanitary Mart Guidelines,,,True
+DOC-073-01,SIH26092-073,Aadhaar Card,MANDATORY,Identity proof,,NBCFDC Krishi Sampada Guidelines,,,True
+DOC-073-02,SIH26092-073,OBC Caste Certificate,MANDATORY,Competent authority issued,,NBCFDC Krishi Sampada Guidelines,,,True
+DOC-073-03,SIH26092-073,Land Records / Farmer ID / Vending Proof,MANDATORY,Proof of agricultural or vending activity,,NBCFDC Krishi Sampada Guidelines,,,True
+DOC-074-01,SIH26092-074,Aadhaar Card / Ration Card,MANDATORY,Household identity verification,,PM-JANMAN Guidelines,,,True
+DOC-074-02,SIH26092-074,ST / PVTG Certificate / Village Survey Listing,MANDATORY,Inclusion in official PVTG baseline survey,,PM-JANMAN Guidelines,,,True
+DOC-075-01,SIH26092-075,Aadhaar Card,MANDATORY,Primary identity and address proof for e-KYC,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-075-02,SIH26092-075,Passport Sized Photographs,MANDATORY,2 recent color photographs for account opening form,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-076-01,SIH26092-076,Savings Bank Account Passbook,MANDATORY,Active savings account for annual ₹20 auto-debit,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-076-02,SIH26092-076,Aadhaar Card,MANDATORY,Identity proof and DBT linkage,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-077-01,SIH26092-077,Savings Bank Account Passbook,MANDATORY,Active savings account for annual ₹436 premium auto-debit,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-077-02,SIH26092-077,Nominee KYC and Bank Details,MANDATORY,Designation of beneficiary nominee,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-078-01,SIH26092-078,Aadhaar Card,MANDATORY,Primary KYC and subscriber identity,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-078-02,SIH26092-078,Bank / Post Office Account Passbook,MANDATORY,Account for monthly/quarterly contribution auto-debit,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-079-01,SIH26092-079,Disability Certificate / UDID Card,MANDATORY,Certificate indicating >= 40% benchmark disability,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-079-02,SIH26092-079,Income Certificate,MANDATORY,"Proof of family monthly income <= ₹30,000",INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-080-01,SIH26092-080,Disability Certificate / UDID Card,MANDATORY,Proof of disability for special school admission,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-080-02,SIH26092-080,Aadhaar Card,MANDATORY,Student identity proof,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-081-01,SIH26092-081,Institutional DPR and Estimates,MANDATORY,Detailed Project Report vetted by CPWD/PWD for accessibility retrofit,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-082-01,SIH26092-082,Class 8 Marksheet & NMMSS Roll Card,MANDATORY,Proof of passing Class 8 and NMMSS selection merit,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-082-02,SIH26092-082,Income Certificate,MANDATORY,Parental income certificate <= ₹3.5 Lakh from competent revenue authority,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-083-01,SIH26092-083,EWS Income Certificate,MANDATORY,Income certificate issued by designated State Authority certifying parental income <= ₹4.5 Lakh,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-083-02,SIH26092-083,Admission Letter / Fee Structure,MANDATORY,Admission proof in recognized professional/technical higher education institution in India,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-084-01,SIH26092-084,Aadhaar Card,MANDATORY,Artisan identity and address proof,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-084-02,SIH26092-084,Coir Board Skill Training Certificate,CONDITIONAL,Required for Mahila Coir Yojana subsidized ratt procurement,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-085-01,SIH26092-085,Udyam Registration Certificate,MANDATORY,Valid Udyam Registration for manufacturing MSME,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-085-02,SIH26092-085,Enterprise Bank Details & PAN,MANDATORY,Proof of active business account for subsidy reimbursement,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-086-01,SIH26092-086,Udyam Registration Certificate,MANDATORY,Udyam certificate for Micro or Small enterprise,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-086-02,SIH26092-086,Product Specifications & Catalog Data,MANDATORY,Product details for ONDC digital onboarding,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-087-01,SIH26092-087,Mother and Child Protection (MCP) Card,MANDATORY,MCP Card with ANC registration and immunization dates,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-087-02,SIH26092-087,Aadhaar Card of Mother and Husband,MANDATORY,Identity verification and DBT seeding,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-087-03,SIH26092-087,Income / Disadvantaged Category Proof,MANDATORY,e-Shram / Ration Card / PMJAY Card / SC-ST Certificate / Income <= ₹8 Lakh,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-088-01,SIH26092-088,Birth Certificate of Girl Child,MANDATORY,Official municipal / hospital birth certificate certifying age <= 10 years,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-088-02,SIH26092-088,Aadhaar and PAN Card of Parent/Guardian,MANDATORY,KYC of parent/legal guardian operating the account,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-089-01,SIH26092-089,SHG Membership Passbook / Certificate,MANDATORY,Proof of active membership in a recognized rural SHG,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-089-02,SIH26092-089,Micro-Investment Plan (MIP),MANDATORY,Enterprise livelihood plan endorsed by SHG / Village Organization,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-090-01,SIH26092-090,Aadhaar Card,MANDATORY,Primary biometric e-KYC for Ayushman card generation,INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE
+DOC-090-02,SIH26092-090,Ration Card / NFSA Database Proof,CONDITIONAL,Family linkage proof in SECC / NFSA database (waived for 70+ age),INDIVIDUAL,Official Scheme Guidelines,1,Required Documents,TRUE

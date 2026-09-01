@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from typing import List, Optional, Any
+from pydantic import BaseModel, Field, field_validator
 
 
 # ─────────────────────────────────────────────────────────────
@@ -76,16 +76,49 @@ class SchemeListItemResponse(BaseModel):
     short_description: Optional[str] = None
     sector: Optional[str] = None
     marginalized_group: Optional[str] = None
+    target_groups: Optional[str] = None
+    target_beneficiary: Optional[str] = None
     business_stage: Optional[str] = None
     state_restriction: Optional[str] = None
     support_type: Optional[str] = None
     loan_available: Optional[str] = None
+    max_loan_amount: Optional[float] = None
+    min_loan_amount: Optional[float] = None
     max_loan_amount_raw: Optional[str] = None
+    interest_rate: Optional[float] = None
+    interest_rate_min: Optional[float] = None
+    interest_rate_max: Optional[float] = None
+    interest_rate_type: Optional[str] = None
+    interest_rate_min_raw: Optional[str] = None
     interest_rate_max_raw: Optional[str] = None
+    subsidy_available: Optional[str] = None
+    subsidy_percentage: Optional[float] = None
+    benefit_description: Optional[str] = None
+    financial_category: Optional[str] = "LOAN_CREDIT"
+    is_credit_scheme: Optional[bool] = True
+    calculator_applicable: Optional[bool] = True
+    financial_assistance_summary: Optional[str] = None
     application_url: Optional[str] = None
     official_portal: Optional[str] = None
+    application_route: Optional[str] = "OFFICIAL_ROUTE_UNVERIFIED"
+    partner_count: Optional[int] = 0
+    verification_status: Optional[str] = "VERIFIED"
     last_verified_date: Optional[str] = None
     created_at: datetime
+
+    @field_validator("scheme_type", mode="before")
+    @classmethod
+    def sanitize_scheme_type(cls, v: Any) -> Optional[str]:
+        if v == "UNKNOWN" or not v:
+            return None
+        return v
+
+    @field_validator("marginalized_group", mode="before")
+    @classmethod
+    def sanitize_marginalized_group(cls, v: Any) -> Optional[str]:
+        if v == "UNKNOWN" or not v:
+            return None
+        return v
 
     class Config:
         from_attributes = True
@@ -216,9 +249,15 @@ class SchemeDetailResponse(BaseModel):
     working_capital_support: Optional[str] = None
 
     # Application Route & Portal
+    financial_category: Optional[str] = "LOAN_CREDIT"
+    is_credit_scheme: Optional[bool] = True
+    calculator_applicable: Optional[bool] = True
+    financial_assistance_summary: Optional[str] = None
     application_mode: Optional[str] = None
     application_url: Optional[str] = None
     official_portal: Optional[str] = None
+    application_route: Optional[str] = "OFFICIAL_ROUTE_UNVERIFIED"
+    partner_count: Optional[int] = 0
     application_steps: Optional[str] = None
     required_documents: Optional[str] = None
     helpline: Optional[str] = None
@@ -237,6 +276,7 @@ class SchemeDetailResponse(BaseModel):
     change_summary: Optional[str] = None
     last_verified_date: Optional[str] = None
     searchable_tags: Optional[str] = None
+    verification_status: Optional[str] = "VERIFIED"
     created_at: datetime
 
     # Related Entities
@@ -244,5 +284,57 @@ class SchemeDetailResponse(BaseModel):
     rules: List[SchemeRuleResponse] = []
     documents: List[SchemeDocumentResponse] = []
 
+    @field_validator("scheme_type", mode="before")
+    @classmethod
+    def sanitize_detail_scheme_type(cls, v: Any) -> Optional[str]:
+        if v == "UNKNOWN" or not v:
+            return None
+        return v
+
+    @field_validator("marginalized_group", mode="before")
+    @classmethod
+    def sanitize_detail_marginalized_group(cls, v: Any) -> Optional[str]:
+        if v == "UNKNOWN" or not v:
+            return None
+        return v
+
     class Config:
         from_attributes = True
+
+
+class FilterOptionItem(BaseModel):
+    label: str
+    value: str
+    count: int
+
+
+class FilterOptionsResponse(BaseModel):
+    ministries: List[FilterOptionItem]
+    sectors: List[FilterOptionItem]
+    financial_types: List[FilterOptionItem]
+    beneficiary_categories: List[FilterOptionItem]
+    states: List[FilterOptionItem]
+    application_routes: List[FilterOptionItem]
+    total_schemes: int
+
+
+# ─────────────────────────────────────────────────────────────
+# Scheme Comparison Response Schemas
+# ─────────────────────────────────────────────────────────────
+
+class SchemePersonalizedEligibility(BaseModel):
+    status: str = Field(..., description="ELIGIBLE, INSUFFICIENT_INFORMATION, or INELIGIBLE")
+    reasons: List[str] = Field(default_factory=list, description="Factual eligibility or ineligibility explanation rules")
+    missing_fields: List[str] = Field(default_factory=list, description="Profile attributes missing for conclusive evaluation")
+
+
+class SchemeComparisonItem(BaseModel):
+    scheme: SchemeDetailResponse
+    personalized_eligibility: Optional[SchemePersonalizedEligibility] = None
+
+
+class SchemeComparisonResponse(BaseModel):
+    compared_schemes: List[SchemeComparisonItem]
+    invalid_ids: List[str] = Field(default_factory=list, description="IDs requested that were invalid or not found")
+
+

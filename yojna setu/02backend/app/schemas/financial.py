@@ -18,14 +18,15 @@ class RepaymentFrequency(str, Enum):
 class FinancialCalculationInput(BaseModel):
     """
     Input model for deterministic financial calculation.
-    Only beneficiary-scenario fields are accepted here.
+    Accepts beneficiary-scenario fields and optional interest rate override.
     Scheme-authoritative financial parameters (interest rate, financing %,
-    moratorium, etc.) are loaded exclusively from the database.
+    moratorium, etc.) are loaded from the database rules if not overridden.
     """
     scheme_id: str = Field(..., description="Scheme ID to calculate financing for")
     project_cost: Optional[Decimal] = Field(default=None, description="Total project cost in INR")
     requested_loan_amount: Optional[Decimal] = Field(default=None, description="Requested loan amount in INR")
-    repayment_period_months: Optional[int] = Field(default=None, description="Requested repayment tenure in months")
+    interest_rate: Optional[Decimal] = Field(default=None, ge=0, le=100, description="Annual interest rate percentage override (e.g. 7.5 or 0.0)")
+    repayment_period_months: Optional[int] = Field(default=None, ge=1, le=600, description="Requested repayment tenure in months")
     repayment_frequency: Optional[RepaymentFrequency] = Field(
         default=None,
         description="Repayment frequency override — only used when scheme allows multiple frequencies"
@@ -90,6 +91,7 @@ class FinancialCalculationStatus(str, Enum):
     CALCULATED = "CALCULATED"
     VALIDATION_FAILED = "VALIDATION_FAILED"
     INSUFFICIENT_INFORMATION = "INSUFFICIENT_INFORMATION"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
 
 
 class FinancialCalculationResult(BaseModel):
@@ -100,6 +102,13 @@ class FinancialCalculationResult(BaseModel):
     status: FinancialCalculationStatus
     scheme_id: str
     scheme_name: str
+
+    # Scheme classification & assistance mode
+    is_credit_scheme: bool = True
+    calculator_applicable: bool = True
+    financial_category: Optional[str] = None
+    financial_assistance_summary: Optional[str] = None
+    message: Optional[str] = None
 
     # Resolved authoritative parameters (with traceability)
     resolved_parameters: List[ResolvedFinancialParameter] = Field(default_factory=list)

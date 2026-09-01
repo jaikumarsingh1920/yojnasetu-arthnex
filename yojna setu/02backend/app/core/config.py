@@ -36,8 +36,12 @@ class Settings(BaseSettings):
 
     # AI Provider configuration
     GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-flash-latest"
     OPENAI_API_KEY: Optional[str] = None
     AI_PROVIDER: str = "auto"  # auto, gemini, openai, dev_fallback
+
+    # Google Authentication configuration
+    GOOGLE_CLIENT_ID: Optional[str] = None
 
     # Email configuration
     EMAIL_PROVIDER: str = "none"  # none, smtp, console

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Heart, LogIn, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { savedSchemesApi } from '../api/savedSchemesApi';
@@ -19,6 +20,7 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
   size = 'md',
   showLabel = true,
 }) => {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -93,7 +95,7 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
       <button
         onClick={handleToggle}
         disabled={loading}
-        title={isSaved ? 'Remove from Saved Schemes' : 'Save Scheme for Later'}
+        title={isSaved ? t('savedSchemes.removeSavedTooltip', 'Remove from Saved Schemes') : t('savedSchemes.saveSchemeTooltip', 'Save Scheme for Later')}
         className={`inline-flex items-center font-semibold rounded-lg border transition shadow-sm ${buttonSizeClasses} ${
           isSaved
             ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
@@ -106,7 +108,7 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
           }`}
         />
         {showLabel && (
-          <span>{isSaved ? '♥ Saved' : '♡ Save Scheme'}</span>
+          <span>{isSaved ? `♥ ${t('savedSchemes.saved', 'Saved')}` : `♡ ${t('savedSchemes.saveScheme', 'Save Scheme')}`}</span>
         )}
       </button>
 
@@ -127,9 +129,9 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
             </div>
 
             <div>
-              <h3 className="text-lg font-extrabold text-slate-900">Save Scheme to Account</h3>
+              <h3 className="text-lg font-extrabold text-slate-900">{t('savedSchemes.saveToAccount', 'Save Scheme to Account')}</h3>
               <p className="text-sm text-slate-600 mt-1">
-                Please login to save schemes to your account. You can review saved schemes anytime from your dashboard.
+                {t('savedSchemes.saveModalDesc', 'Please login to save schemes to your account. You can review saved schemes anytime from your dashboard.')}
               </p>
             </div>
 
@@ -139,13 +141,13 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
                 className="flex-1 px-4 py-2 bg-gov-blue text-white rounded-lg font-bold text-sm shadow hover:bg-sky-900 transition flex items-center justify-center gap-1.5"
               >
                 <LogIn className="w-4 h-4" />
-                Login Now
+                {t('auth.loginNow', 'Login Now')}
               </button>
               <button
                 onClick={() => setShowLoginModal(false)}
                 className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold text-sm hover:bg-slate-200 transition"
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </button>
             </div>
           </div>

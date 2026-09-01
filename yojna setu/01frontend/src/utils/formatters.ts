@@ -43,7 +43,7 @@ export const formatPercent = (
  */
 export const formatDate = (
   value: string | Date | null | undefined,
-  fallback: string = 'N/A'
+  fallback: string = 'Not specified'
 ): string => {
   if (!value) return fallback;
   try {

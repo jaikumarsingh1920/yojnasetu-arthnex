@@ -657,3 +657,74 @@ class PartnerService:
         db.commit()
 
         return cls.get_partner_application_detail(db, application_id, current_user)
+
+    @classmethod
+    def complete_application(
+        cls,
+        db: Session,
+        application_id: str,
+        current_user: User,
+        notes: Optional[str] = None
+    ) -> PartnerApplicationDetailResponse:
+        """
+        Transitions an APPROVED application to COMPLETED (benefit disbursed).
+        Requires PARTNER_ADMIN or SYSTEM_ADMIN.
+        """
+        app_obj = db.query(Application).filter(Application.application_id == application_id).first()
+        if not app_obj:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Application with ID '{application_id}' was not found."
+            )
+
+        cls.verify_partner_access(app_obj, current_user)
+
+        if app_obj.status != ApplicationStatus.APPROVED.value:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Only APPROVED applications can be marked COMPLETED. Current status: '{app_obj.status}'."
+            )
+
+        old_status = app_obj.status
+        new_status = ApplicationStatus.COMPLETED.value
+        now = utc_now()
+
+        app_obj.status = new_status
+        app_obj.updated_at = now
+
+        reason_text = notes.strip() if notes and notes.strip() else "Scheme benefit disbursed / Application processing completed."
+
+        history = ApplicationStatusHistory(
+            application_id=application_id,
+            old_status=old_status,
+            new_status=new_status,
+            changed_by=current_user.user_id,
+            reason=reason_text
+        )
+        db.add(history)
+
+        audit = AuditLog(
+            actor_user_id=current_user.user_id,
+            actor_role=current_user.role,
+            application_id=application_id,
+            action="MARK_COMPLETED",
+            old_value=old_status,
+            new_value=new_status,
+            reason=reason_text
+        )
+        db.add(audit)
+
+        db.commit()
+
+        NotificationPublisher.publish(
+            db=db,
+            event_type=NotificationEventType.APPLICATION_COMPLETED,
+            application_id=application_id,
+            recipient_user_id=app_obj.user_id,
+            scheme_name=app_obj.scheme.scheme_name if app_obj.scheme else "",
+            payload={"completed_at": now.isoformat(), "notes": reason_text}
+        )
+        db.commit()
+
+        return cls.get_partner_application_detail(db, application_id, current_user)
+

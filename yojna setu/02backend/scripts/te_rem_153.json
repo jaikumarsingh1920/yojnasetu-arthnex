@@ -1,0 +1,767 @@
+{
+  "calculator.mudraPmegp": {
+    "en": "7% MUDRA/PMEGP",
+    "hi": "7% मुद्रा/पीएमईजीपी",
+    "curr_te": "7% मुद्रा/पीएमईजीपी"
+  },
+  "calculator.nonCreditBadge": {
+    "en": "No Loan Required",
+    "hi": "कोई ऋण आवश्यक नहीं",
+    "curr_te": "कोई ऋण आवश्यक नहीं"
+  },
+  "calculator.nonCreditNotice": {
+    "en": "Notice: Loan / EMI calculation is not applicable for this scheme. Assistance is provided as a subsidy, grant, or direct welfare benefit. Calculations below simulate general reference borrowing scenarios. To review official guidelines,",
+    "hi": "सूचना: इस योजना के लिए ऋण / ईएमआई गणना लागू नहीं है। सहायता सब्सिडी, अनुदान या प्रत्यक्ष कल्याण लाभ के रूप में प्रदान की जाती है। नीचे दी गई गणनाएं सामान्य संदर्भ परिदृश्यों का अनुकरण करती हैं। आधिकारिक दिशानिर्देशों की समीक्षा के लिए,",
+    "curr_te": "सूचना: इस योजना के लिए ऋण / ईएमआई गणना लागू नहीं है। सहायता सब्सिडी, अनुदान या प्रत्यक्ष कल्याण लाभ के रूप में प्रदान की जाती है। नीचे दी गई गणनाएं सामान्य संदर्भ परिदृश्यों का अनुकरण करती हैं। आधिकारिक दिशानिर्देशों की समीक्षा के लिए,"
+  },
+  "calculator.nonCreditNoticeDesc": {
+    "en": "Loan / EMI calculation is not applicable for this scheme.",
+    "hi": "इस योजना के लिए ऋण / ईएमआई गणना लागू नहीं है।",
+    "curr_te": "इस योजना के लिए ऋण / ईएमआई गणना लागू नहीं है।"
+  },
+  "calculator.nonCreditSubtitle": {
+    "en": "This scheme provides direct financial grants, subsidies, or skill toolkits without repayable loan terms.",
+    "hi": "यह योजना बिना किसी पुनर्भुगतान ऋण शर्तों के प्रत्यक्ष वित्तीय अनुदान, सब्सिडी या कौशल टूलकिट प्रदान करती है।",
+    "curr_te": "यह योजना बिना किसी पुनर्भुगतान ऋण शर्तों के प्रत्यक्ष वित्तीय अनुदान, सब्सिडी या कौशल टूलकिट प्रदान करती है।"
+  },
+  "calculator.nonCreditTitle": {
+    "en": "Grant / Direct Welfare Benefit Scheme",
+    "hi": "अनुदान / प्रत्यक्ष कल्याणकारी लाभ योजना",
+    "curr_te": "अनुदान / प्रत्यक्ष कल्याणकारी लाभ योजना"
+  },
+  "calculator.nonRepayableAssistance": {
+    "en": "Non-repayable assistance",
+    "hi": "गैर-वापसी योग्य सहायता",
+    "curr_te": "गैर-वापसी योग्य सहायता"
+  },
+  "calculator.officialAssistanceSummary": {
+    "en": "Official Assistance Summary:",
+    "hi": "आधिकारिक सहायता सारांश:",
+    "curr_te": "आधिकारिक सहायता सारांश:"
+  },
+  "calculator.officialTermsPreloaded": {
+    "en": "Official Terms Pre-Loaded",
+    "hi": "आधिकारिक शर्तें पहले से लोड हैं",
+    "curr_te": "आधिकारिक शर्तें पहले से लोड हैं"
+  },
+  "calculator.pageSubtitle": {
+    "en": "Compute mathematically exact reducing-balance EMIs, total interest burden, and government subsidy benefits across all official loan and credit schemes.",
+    "hi": "सभी आधिकारिक ऋण और क्रेडिट योजनाओं में गणितीय रूप से सटीक घटते-शेष ईएमआई, कुल ब्याज भार और सरकारी सब्सिडी लाभों की गणना करें।",
+    "curr_te": "सभी आधिकारिक ऋण और क्रेडिट योजनाओं में गणितीय रूप से सटीक घटते-शेष ईएमआई, कुल ब्याज भार और सरकारी सब्सिडी लाभों की गणना करें।"
+  },
+  "calculator.pageTitle": {
+    "en": "Loan EMI, Interest & Subsidy Calculator",
+    "hi": "ऋण ईएमआई, ब्याज एवं सब्सिडी कैलकुलेटर",
+    "curr_te": "ऋण ईएमआई, ब्याज एवं सब्सिडी कैलकुलेटर"
+  },
+  "calculator.positiveLoanWarning": {
+    "en": "Please enter a positive loan amount.",
+    "hi": "कृपया एक सकारात्मक ऋण राशि दर्ज करें।",
+    "curr_te": "कृपया एक सकारात्मक ऋण राशि दर्ज करें।"
+  },
+  "calculator.principalPlusInterest": {
+    "en": "Principal + Total Interest",
+    "hi": "मूलधन + कुल ब्याज",
+    "curr_te": "मूलधन + कुल ब्याज"
+  },
+  "calculator.rateDisclosure": {
+    "en": "Interest Rate Disclosure",
+    "hi": "ब्याज दर प्रकटीकरण",
+    "curr_te": "ब्याज दर प्रकटीकरण"
+  },
+  "calculator.rateDisclosureDesc": {
+    "en": "Interest rate: As determined by the financing institution / not specified in available official scheme guidelines. Use the slider below to simulate benchmark interest rates.",
+    "hi": "ब्याज दर: वित्तीय संस्थान द्वारा निर्धारित / उपलब्ध आधिकारिक योजना दिशानिर्देशों में अनिर्दिष्ट। बेंचमार्क ब्याज दरों का अनुकरण करने के लिए नीचे दिए गए स्लाइडर का उपयोग करें।",
+    "curr_te": "ब्याज दर: वित्तीय संस्थान द्वारा निर्धारित / उपलब्ध आधिकारिक योजना दिशानिर्देशों में अनिर्दिष्ट। बेंचमार्क ब्याज दरों का अनुकरण करने के लिए नीचे दिए गए स्लाइडर का उपयोग करें।"
+  },
+  "calculator.repaymentObligation": {
+    "en": "Repayment Obligation",
+    "hi": "पुनर्भुगतान दायित्व",
+    "curr_te": "पुनर्भुगतान दायित्व"
+  },
+  "calculator.requestedLoan": {
+    "en": "Requested Loan Amount (₹)",
+    "hi": "अनुरोधित ऋण राशि (₹)",
+    "curr_te": "अनुरोधित ऋण राशि (₹)"
+  },
+  "calculator.reset": {
+    "en": "Reset",
+    "hi": "रीसेट करें",
+    "curr_te": "रीसेट करें"
+  },
+  "calculator.resetTitle": {
+    "en": "Reset to default parameters",
+    "hi": "डिफ़ॉल्ट पैरामीटर पर रीसेट करें",
+    "curr_te": "डिफ़ॉल्ट पैरामीटर पर रीसेट करें"
+  },
+  "calculator.schemeAware": {
+    "en": "Scheme-Aware",
+    "hi": "योजना-जागरूक",
+    "curr_te": "योजना-जागरूक"
+  },
+  "calculator.selectScheme": {
+    "en": "Select a Financial Scheme",
+    "hi": "एक वित्तीय योजना चुनें",
+    "curr_te": "एक वित्तीय योजना चुनें"
+  },
+  "calculator.showFirst12Only": {
+    "en": "Show First 12 Months Only",
+    "hi": "केवल पहले 12 महीने दिखाएं",
+    "curr_te": "केवल पहले 12 महीने दिखाएं"
+  },
+  "calculator.simulateRate": {
+    "en": "Simulate Interest Rate (% p.a.)",
+    "hi": "ब्याज दर अनुकरण करें (% प्रति वर्ष)",
+    "curr_te": "ब्याज दर अनुकरण करें (% प्रति वर्ष)"
+  },
+  "calculator.simulateTenure": {
+    "en": "Simulate Repayment Tenure",
+    "hi": "पुनर्भुगतान अवधि अनुकरण करें",
+    "curr_te": "पुनर्भुगतान अवधि अनुकरण करें"
+  },
+  "calculator.standardGeneralLoan": {
+    "en": "Standard General Loan (Custom Parameters)",
+    "hi": "मानक सामान्य ऋण (कस्टम पैरामीटर)",
+    "curr_te": "मानक सामान्य ऋण (कस्टम पैरामीटर)"
+  },
+  "calculator.subsidyInsights": {
+    "en": "Official Scheme Subsidy & Benefit Details",
+    "hi": "आधिकारिक योजना सब्सिडी एवं लाभ विवरण",
+    "curr_te": "आधिकारिक योजना सब्सिडी एवं लाभ विवरण"
+  },
+  "calculator.targetScheme": {
+    "en": "Target Government Scheme (Optional)",
+    "hi": "लक्षित सरकारी योजना (वैकल्पिक)",
+    "curr_te": "लक्षित सरकारी योजना (वैकल्पिक)"
+  },
+  "calculator.total": {
+    "en": "Total",
+    "hi": "कुल",
+    "curr_te": "कुल"
+  },
+  "calculator.totalInterestPayable": {
+    "en": "Total Interest Payable",
+    "hi": "कुल देय ब्याज",
+    "curr_te": "कुल देय ब्याज"
+  },
+  "calculator.totalRepaymentAmount": {
+    "en": "Total Repayment Amount",
+    "hi": "कुल पुनर्भुगतान राशि",
+    "curr_te": "कुल पुनर्भुगतान राशि"
+  },
+  "calculator.viewAmortization": {
+    "en": "View Amortization Schedule",
+    "hi": "पूर्ण परिशोधन अनुसूची देखें",
+    "curr_te": "पूर्ण परिशोधन अनुसूची देखें"
+  },
+  "calculator.viewOfficialGuidelines": {
+    "en": "View Official Scheme Guidelines",
+    "hi": "आधिकारिक योजना दिशानिर्देश देखें",
+    "curr_te": "आधिकारिक योजना दिशानिर्देश देखें"
+  },
+  "calculator.viewSchemeDetails": {
+    "en": "view scheme details",
+    "hi": "योजना विवरण देखें",
+    "curr_te": "योजना विवरण देखें"
+  },
+  "calculator.viewSchemeRules": {
+    "en": "View Scheme Rules",
+    "hi": "योजना के नियम देखें",
+    "curr_te": "योजना के नियम देखें"
+  },
+  "calculator.year": {
+    "en": "Year",
+    "hi": "वर्ष",
+    "curr_te": "वर्ष"
+  },
+  "calculator.yearlySummary": {
+    "en": "Yearly Summary",
+    "hi": "वार्षिक सारांश",
+    "curr_te": "वार्षिक सारांश"
+  },
+  "calculator.zeroRepayment": {
+    "en": "Zero repayment obligation",
+    "hi": "शून्य पुनर्भुगतान दायित्व",
+    "curr_te": "शून्य पुनर्भुगतान दायित्व"
+  },
+  "compare.allCategories": {
+    "en": "All Categories",
+    "hi": "सभी श्रेणियां",
+    "curr_te": "सभी श्रेणियां"
+  },
+  "compare.allSectors": {
+    "en": "All Sectors",
+    "hi": "सभी क्षेत्र",
+    "curr_te": "सभी क्षेत्र"
+  },
+  "compare.appRoute": {
+    "en": "Application Route",
+    "hi": "आवेदन का मार्ग",
+    "curr_te": "आवेदन का मार्ग"
+  },
+  "compare.directPortal": {
+    "en": "Direct Online Portal",
+    "hi": "प्रत्यक्ष ऑनलाइन पोर्टल",
+    "curr_te": "प्रत्यक्ष ऑनलाइन पोर्टल"
+  },
+  "compare.errorTitle": {
+    "en": "Unable to Compare Schemes",
+    "hi": "योजनाओं की तुलना करने में असमर्थ",
+    "curr_te": "योजनाओं की तुलना करने में असमर्थ"
+  },
+  "compare.finCategory": {
+    "en": "Financial Category",
+    "hi": "वित्तीय श्रेणी",
+    "curr_te": "वित्तीय श्रेणी"
+  },
+  "compare.generalCitizens": {
+    "en": "General Citizens",
+    "hi": "सामान्य नागरिक",
+    "curr_te": "सामान्य नागरिक"
+  },
+  "compare.geography": {
+    "en": "Geography / State",
+    "hi": "भूगोल / राज्य",
+    "curr_te": "भूगोल / राज्य"
+  },
+  "compare.highestStatedMax": {
+    "en": "Highest stated maximum",
+    "hi": "उच्चतम घोषित अधिकतम",
+    "curr_te": "उच्चतम घोषित अधिकतम"
+  },
+  "compare.ineligible": {
+    "en": "✕ Not Eligible",
+    "hi": "✕ अपात्र",
+    "curr_te": "✕ अपात्र"
+  },
+  "compare.invalidIdsNotice": {
+    "en": "Note: Some requested scheme IDs could not be found or are inactive:",
+    "hi": "नोट: कुछ अनुरोधित योजना आईडी नहीं मिलीं या निष्क्रिय हैं:",
+    "curr_te": "नोट: कुछ अनुरोधित योजना आईडी नहीं मिलीं या निष्क्रिय हैं:"
+  },
+  "compare.loading": {
+    "en": "Fetching official scheme comparison data...",
+    "hi": "आधिकारिक योजना तुलना डेटा प्राप्त किया जा रहा है...",
+    "curr_te": "आधिकारिक योजना तुलना डेटा प्राप्त किया जा रहा है..."
+  },
+  "compare.loanNotApplicable": {
+    "en": "Loan facility not applicable",
+    "hi": "ऋण सुविधा लागू नहीं है",
+    "curr_te": "ऋण सुविधा लागू नहीं है"
+  },
+  "compare.loginNotice": {
+    "en": "Log in for personalized profile evaluation →",
+    "hi": "व्यक्तिगत प्रोफ़ाइल मूल्यांकन के लिए लॉग इन करें →",
+    "curr_te": "व्यक्तिगत प्रोफ़ाइल मूल्यांकन के लिए लॉग इन करें →"
+  },
+  "compare.loginRequired": {
+    "en": "Log in to evaluate personalized eligibility.",
+    "hi": "व्यक्तिगत पात्रता का मूल्यांकन करने के लिए लॉग इन करें।",
+    "curr_te": "व्यक्तिगत पात्रता का मूल्यांकन करने के लिए लॉग इन करें।"
+  },
+  "compare.lowestStatedRate": {
+    "en": "Lowest stated interest rate",
+    "hi": "न्यूनतम घोषित ब्याज दर",
+    "curr_te": "न्यूनतम घोषित ब्याज दर"
+  },
+  "compare.max": {
+    "en": "Max",
+    "hi": "अधिकतम",
+    "curr_te": "अधिकतम"
+  },
+  "compare.maxLoanAmount": {
+    "en": "Max Stated Loan Amount",
+    "hi": "अधिकतम घोषित ऋण राशि",
+    "curr_te": "अधिकतम घोषित ऋण राशि"
+  },
+  "compare.min": {
+    "en": "Min",
+    "hi": "न्यूनतम",
+    "curr_te": "न्यूनतम"
+  },
+  "compare.missingAttrs": {
+    "en": "Missing attributes:",
+    "hi": "अनुपलब्ध विशेषताएं:",
+    "curr_te": "अनुपलब्ध विशेषताएं:"
+  },
+  "compare.moreInfoRequired": {
+    "en": "⚠ More Info Required",
+    "hi": "⚠ अधिक जानकारी आवश्यक",
+    "curr_te": "⚠ अधिक जानकारी आवश्यक"
+  },
+  "compare.officialRoute": {
+    "en": "Official Government Route",
+    "hi": "आधिकारिक सरकारी मार्ग",
+    "curr_te": "आधिकारिक सरकारी मार्ग"
+  },
+  "compare.pageTitle": {
+    "en": "Scheme Comparison",
+    "hi": "योजनाओं की तुलना",
+    "curr_te": "योजनाओं की तुलना"
+  },
+  "compare.partnerAssisted": {
+    "en": "Channel Partner / Bank Assisted",
+    "hi": "चैनल पार्टनर / बैंक सहायता प्राप्त",
+    "curr_te": "चैनल पार्टनर / बैंक सहायता प्राप्त"
+  },
+  "compare.profileIncompleteNotice": {
+    "en": "Complete your profile to view eligibility status.",
+    "hi": "पात्रता स्थिति देखने के लिए अपनी प्रोफ़ाइल पूरी करें।",
+    "curr_te": "पात्रता स्थिति देखने के लिए अपनी प्रोफ़ाइल पूरी करें।"
+  },
+  "compare.retry": {
+    "en": "Try Again",
+    "hi": "पुनः प्रयास करें",
+    "curr_te": "पुनः प्रयास करें"
+  },
+  "compare.secBasicInfo": {
+    "en": "2. Basic Information",
+    "hi": "2. बुनियादी जानकारी",
+    "curr_te": "2. बुनियादी जानकारी"
+  },
+  "compare.secProvenance": {
+    "en": "7. Verification & Provenance",
+    "hi": "7. सत्यापन एवं स्रोत",
+    "curr_te": "7. सत्यापन एवं स्रोत"
+  },
+  "compare.sector": {
+    "en": "Sector / Vocation",
+    "hi": "क्षेत्र / व्यवसाय",
+    "curr_te": "क्षेत्र / व्यवसाय"
+  },
+  "compare.sourceUrl": {
+    "en": "Official Source URL",
+    "hi": "आधिकारिक स्रोत यूआरएल",
+    "curr_te": "आधिकारिक स्रोत यूआरएल"
+  },
+  "compare.verificationStatus": {
+    "en": "Verification Status",
+    "hi": "सत्यापन स्थिति",
+    "curr_te": "सत्यापन स्थिति"
+  },
+  "compare.verifiedBadge": {
+    "en": "VERIFIED",
+    "hi": "सत्यापित",
+    "curr_te": "सत्यापित"
+  },
+  "compare.removeScheme": {
+    "en": "Remove",
+    "hi": "हटाएं",
+    "curr_te": "हटाएं"
+  },
+  "compare.standardOfficialNorms": {
+    "en": "Standard KYC and official ministry guidelines apply",
+    "hi": "मानक केवाईसी और आधिकारिक मंत्रालय दिशानिर्देश लागू",
+    "curr_te": "मानक केवाईसी और आधिकारिक मंत्रालय दिशानिर्देश लागू"
+  },
+  "compare.interestSubvention": {
+    "en": "Direct interest subvention / credit guarantee",
+    "hi": "प्रत्यक्ष ब्याज छूट / क्रेडिट गारंटी",
+    "curr_te": "प्रत्यक्ष ब्याज छूट / क्रेडिट गारंटी"
+  },
+  "compare.grantAssistance": {
+    "en": "Direct benefit transfer / non-loan subsidy",
+    "hi": "प्रत्यक्ष लाभ अंतरण / गैर-ऋण सब्सिडी",
+    "curr_te": "प्रत्यक्ष लाभ अंतरण / गैर-ऋण सब्सिडी"
+  },
+  "compare.collateralNorms": {
+    "en": "No collateral for loans up to statutory limits (RBI guidelines)",
+    "hi": "आरबीआई दिशानिर्देशों अनुसार सीमा तक कोई गारंटी नहीं",
+    "curr_te": "आरबीआई दिशानिर्देशों अनुसार सीमा तक कोई गारंटी नहीं"
+  },
+  "dashboard.viewSavedBtn": {
+    "en": "View Saved Schemes",
+    "hi": "सहेजी गई योजनाएं देखें",
+    "curr_te": "सहेजी गई योजनाएं देखें"
+  },
+  "dashboard.workspaceBadge": {
+    "en": "Authenticated Beneficiary Workspace",
+    "hi": "प्रमाणित लाभार्थी कार्यस्थान",
+    "curr_te": "प्रमाणित लाभार्थी कार्यस्थान"
+  },
+  "documents.officialRequirement": {
+    "en": "Official Requirement",
+    "hi": "आधिकारिक आवश्यकता",
+    "curr_te": "आधिकारिक आवश्यकता"
+  },
+  "documents.officialRequirements": {
+    "en": "Official Requirements",
+    "hi": "आधिकारिक आवश्यकताएं",
+    "curr_te": "आधिकारिक आवश्यकताएं"
+  },
+  "documents.sourceLabel": {
+    "en": "Source / Verification:",
+    "hi": "स्रोत / सत्यापन:",
+    "curr_te": "स्रोत / सत्यापन:"
+  },
+  "documents.subtitle": {
+    "en": "Please carry/submit the required documents to the concerned government authority or authorized channel partner.",
+    "hi": "कृपया संबंधित सरकारी प्राधिकरण या अधिकृत केंद्र पर आवश्यक दस्तावेज प्रस्तुत करें।",
+    "curr_te": "कृपया संबंधित सरकारी प्राधिकरण या अधिकृत केंद्र पर आवश्यक दस्तावेज प्रस्तुत करें।"
+  },
+  "documents.title": {
+    "en": "Documents You May Need",
+    "hi": "आवश्यक दस्तावेज",
+    "curr_te": "आवश्यक दस्तावेज"
+  },
+  "documents.uncertaintyDesc": {
+    "en": "Document requirements could not be verified from the available official source. Please confirm with the concerned authority before applying.",
+    "hi": "उपलब्ध आधिकारिक स्रोत से दस्तावेज़ आवश्यकता सत्यापित नहीं हो सकी। कृपया आवेदन से पहले संबंधित कार्यालय से पुष्टि करें।",
+    "curr_te": "उपलब्ध आधिकारिक स्रोत से दस्तावेज़ आवश्यकता सत्यापित नहीं हो सकी। कृपया आवेदन से पहले संबंधित कार्यालय से पुष्टि करें।"
+  },
+  "documents.uncertaintyTitle": {
+    "en": "Document Requirements Note",
+    "hi": "दस्तावेज़ आवश्यकता सूचना",
+    "curr_te": "दस्तावेज़ आवश्यकता सूचना"
+  },
+  "documents.zeroStorage": {
+    "en": "Zero Document Storage Policy: YojnaSetu does not store, upload, or collect your personal physical documents. All verification is handled directly at authorized centers.",
+    "hi": "शून्य दस्तावेज़ संग्रहण नीति: योजनासेतु आपके व्यक्तिगत दस्तावेज़ संग्रहीत या अपलोड नहीं करता है।",
+    "curr_te": "शून्य दस्तावेज़ संग्रहण नीति: योजनासेतु आपके व्यक्तिगत दस्तावेज़ संग्रहीत या अपलोड नहीं करता है।"
+  },
+  "partnerLocator.expandRadius": {
+    "en": "Expand Search Radius (50 km)",
+    "hi": "खोज दायरा बढ़ाएं (50 किमी)",
+    "curr_te": "खोज दायरा बढ़ाएं (50 किमी)"
+  },
+  "partnerLocator.filterType": {
+    "en": "All Partner Types",
+    "hi": "सभी भागीदार प्रकार",
+    "curr_te": "सभी भागीदार प्रकार"
+  },
+  "partnerLocator.navigateGoogle": {
+    "en": "Navigate on Google Maps",
+    "hi": "गूगल मैप्स पर नेविगेट करें",
+    "curr_te": "गूगल मैप्स पर नेविगेट करें"
+  },
+  "partnerLocator.noPartnerFound": {
+    "en": "No verified partner found in this radius",
+    "hi": "इस दायरे में कोई सत्यापित भागीदार नहीं मिला",
+    "curr_te": "इस दायरे में कोई सत्यापित भागीदार नहीं मिला"
+  },
+  "partnerLocator.noPartnersFound": {
+    "en": "No verified channel partners found within this radius.",
+    "hi": "इस दायरे में कोई सत्यापित चैनल पार्टनर नहीं मिला।",
+    "curr_te": "इस दायरे में कोई सत्यापित चैनल पार्टनर नहीं मिला।"
+  },
+  "partnerLocator.routeUnavailable": {
+    "en": "Route unavailable from current GPS origin",
+    "hi": "वर्तमान जीपीएस स्थान से मार्ग अनुपलब्ध है",
+    "curr_te": "वर्तमान जीपीएस स्थान से मार्ग अनुपलब्ध है"
+  },
+  "partnerLocator.supportsScheme": {
+    "en": "Supports Selected Scheme",
+    "hi": "चयनित योजना का समर्थन करता है",
+    "curr_te": "चयनित योजना का समर्थन करता है"
+  },
+  "partnerLocator.useGps": {
+    "en": "Use My Current Location",
+    "hi": "मेरे वर्तमान स्थान का उपयोग करें",
+    "curr_te": "मेरे वर्तमान स्थान का उपयोग करें"
+  },
+  "partnerLocator.website": {
+    "en": "Website",
+    "hi": "वेबसाइट",
+    "curr_te": "वेबसाइट"
+  },
+  "partnerLocator.officialSource": {
+    "en": "Official Source",
+    "hi": "आधिकारिक स्रोत",
+    "curr_te": "आधिकारिक स्रोत"
+  },
+  "partnerLocator.services": {
+    "en": "Services",
+    "hi": "सेवाएं",
+    "curr_te": "सेवाएं"
+  },
+  "portalModal.pendingUrl": {
+    "en": "The official digital application link for this scheme is currently pending official government verification. Please check back soon or consult your local nodal agency office.",
+    "hi": "इस योजना के लिए आधिकारिक पोर्टल लिंक वर्तमान में सत्यापन के अधीन है। कृपया सहायता के लिए संबंधित मंत्रालय से संपर्क करें।",
+    "curr_te": "इस योजना के लिए आधिकारिक पोर्टल लिंक वर्तमान में सत्यापन के अधीन है। कृपया सहायता के लिए संबंधित मंत्रालय से संपर्क करें।"
+  },
+  "portalModal.selectedScheme": {
+    "en": "Selected Scheme",
+    "hi": "चयनित आधिकारिक योजना",
+    "curr_te": "चयनित आधिकारिक योजना"
+  },
+  "portalModal.title": {
+    "en": "Official Portal Redirection",
+    "hi": "आधिकारिक सरकारी पोर्टल पर पुनर्निर्देशन",
+    "curr_te": "आधिकारिक सरकारी पोर्टल पर पुनर्निर्देशन"
+  },
+  "portalModal.verifiedUrl": {
+    "en": "Verified Official Portal URL",
+    "hi": "सत्यापित आधिकारिक पोर्टल यूआरएल",
+    "curr_te": "सत्यापित आधिकारिक पोर्टल यूआरएल"
+  },
+  "portalModal.warning": {
+    "en": "You are leaving YojnaSetu to apply on the official portal.",
+    "hi": "आप योजनासेतु छोड़कर आधिकारिक सरकारी पोर्टल पर जा रहे हैं",
+    "curr_te": "आप योजनासेतु छोड़कर आधिकारिक सरकारी पोर्टल पर जा रहे हैं"
+  },
+  "recommendations.cost": {
+    "en": "Total Project Cost (₹)",
+    "hi": "कुल परियोजना लागत (₹)",
+    "curr_te": "कुल परियोजना लागत (₹)"
+  },
+  "recommendations.evaluating": {
+    "en": "Evaluating Schemes...",
+    "hi": "योजनाओं का मूल्यांकन हो रहा है...",
+    "curr_te": "योजनाओं का मूल्यांकन हो रहा है..."
+  },
+  "recommendations.failedRules": {
+    "en": "Unmet Criteria",
+    "hi": "अपूर्ण मानदंड",
+    "curr_te": "अपूर्ण मानदंड"
+  },
+  "recommendations.ineligibleTab": {
+    "en": "Not Eligible",
+    "hi": "अपात्र योजनाएं",
+    "curr_te": "अपात्र योजनाएं"
+  },
+  "recommendations.insufficientTab": {
+    "en": "More Info Needed",
+    "hi": "अतिरिक्त जानकारी आवश्यक",
+    "curr_te": "अतिरिक्त जानकारी आवश्यक"
+  },
+  "recommendations.loanReq": {
+    "en": "Loan Required",
+    "hi": "ऋण की आवश्यकता",
+    "curr_te": "ऋण की आवश्यकता"
+  },
+  "recommendations.matchedRules": {
+    "en": "Matched Eligibility Rules",
+    "hi": "संतुष्ट पात्रता नियम",
+    "curr_te": "संतुष्ट पात्रता नियम"
+  },
+  "recommendations.missingRules": {
+    "en": "Missing Information to Confirm",
+    "hi": "पुष्टि हेतु आवश्यक जानकारी",
+    "curr_te": "पुष्टि हेतु आवश्यक जानकारी"
+  },
+  "recommendations.need": {
+    "en": "Primary Need / Purpose",
+    "hi": "मुख्य आवश्यकता / उद्देश्य",
+    "curr_te": "मुख्य आवश्यकता / उद्देश्य"
+  },
+  "recommendations.stage": {
+    "en": "Business Stage",
+    "hi": "व्यवसाय की स्थिति",
+    "curr_te": "व्यवसाय की स्थिति"
+  },
+  "recommendations.submit": {
+    "en": "Find Matched Schemes",
+    "hi": "पात्र योजनाएं खोजें",
+    "curr_te": "पात्र योजनाएं खोजें"
+  },
+  "recommendations.title": {
+    "en": "Smart Scheme Matching",
+    "hi": "स्मार्ट योजना मिलान",
+    "curr_te": "स्मार्ट योजना मिलान"
+  },
+  "recommendations.whyQualify": {
+    "en": "Why You Qualify",
+    "hi": "आप क्यों पात्र हैं",
+    "curr_te": "आप क्यों पात्र हैं"
+  },
+  "schemeDetail.askAiTitle": {
+    "en": "Ask AI Guidance About This Scheme",
+    "hi": "इस योजना के बारे में एआई से मार्गदर्शन लें",
+    "curr_te": "इस योजना के बारे में एआई से मार्गदर्शन लें"
+  },
+  "schemeDetail.asking": {
+    "en": "Thinking...",
+    "hi": "सोच रहा हूँ...",
+    "curr_te": "सोच रहा हूँ..."
+  },
+  "schemeDetail.backToAll": {
+    "en": "Back to All Schemes",
+    "hi": "सभी योजनाओं पर वापस जाएं",
+    "curr_te": "सभी योजनाओं पर वापस जाएं"
+  },
+  "schemeDetail.backToSearch": {
+    "en": "Back to Scheme Search",
+    "hi": "योजना खोज पर वापस जाएं",
+    "curr_te": "योजना खोज पर वापस जाएं"
+  },
+  "schemeDetail.eligibilityTitle": {
+    "en": "Eligibility Criteria & Guidelines",
+    "hi": "पात्रता मानदंड एवं दिशानिर्देश",
+    "curr_te": "पात्रता मानदंड एवं दिशानिर्देश"
+  },
+  "schemeDetail.emailMe": {
+    "en": "Email Me This Scheme",
+    "hi": "मुझे यह योजना ईमेल करें",
+    "curr_te": "मुझे यह योजना ईमेल करें"
+  },
+  "schemeDetail.emailSending": {
+    "en": "Sending...",
+    "hi": "भेज रहा है...",
+    "curr_te": "भेज रहा है..."
+  },
+  "schemeDetail.findPartner": {
+    "en": "Find a Nearby Channel Partner",
+    "hi": "नजदीकी चैनल पार्टनर खोजें",
+    "curr_te": "नजदीकी चैनल पार्टनर खोजें"
+  },
+  "schemeDetail.guidanceNoteDesc": {
+    "en": "Based on the information provided, you appear to meet the listed eligibility criteria. Final eligibility, document verification, and sanctioning are determined exclusively by the concerned official authority.",
+    "hi": "प्रदान की गई जानकारी के आधार पर, आप सूचीबद्ध पात्रता मानदंडों को पूरा करते प्रतीत होते हैं। अंतिम पात्रता, दस्तावेज़ सत्यापन और स्वीकृति विशेष रूप से संबंधित आधिकारिक प्राधिकरण द्वारा निर्धारित की जाती है।",
+    "curr_te": "प्रदान की गई जानकारी के आधार पर, आप सूचीबद्ध पात्रता मानदंडों को पूरा करते प्रतीत होते हैं। अंतिम पात्रता, दस्तावेज़ सत्यापन और स्वीकृति विशेष रूप से संबंधित आधिकारिक प्राधिकरण द्वारा निर्धारित की जाती है।"
+  },
+  "schemeDetail.guidanceNoteTitle": {
+    "en": "Eligibility Guidance Note",
+    "hi": "पात्रता मार्गदर्शन नोट",
+    "curr_te": "पात्रता मार्गदर्शन नोट"
+  },
+  "schemeDetail.loading": {
+    "en": "Loading government scheme details...",
+    "hi": "सरकारी योजना का विवरण लोड हो रहा है...",
+    "curr_te": "सरकारी योजना का विवरण लोड हो रहा है..."
+  },
+  "schemeDetail.purposeTitle": {
+    "en": "Scheme Purpose & Objective",
+    "hi": "योजना का उद्देश्य एवं लक्ष्य",
+    "curr_te": "योजना का उद्देश्य एवं लक्ष्य"
+  },
+  "schemeDetail.schemeNotFound": {
+    "en": "Scheme not found.",
+    "hi": "योजना नहीं मिली।",
+    "curr_te": "योजना नहीं मिली।"
+  },
+  "schemeDetail.sourcesLabel": {
+    "en": "Sources:",
+    "hi": "स्रोत:",
+    "curr_te": "स्रोत:"
+  },
+  "schemeDetail.standardConditions": {
+    "en": "Standard government scheme conditions apply.",
+    "hi": "मानक सरकारी योजना शर्तें लागू होती हैं।",
+    "curr_te": "मानक सरकारी योजना शर्तें लागू होती हैं।"
+  },
+  "schemeDetail.verifiedInfo": {
+    "en": "Verified Information",
+    "hi": "सत्यापित जानकारी",
+    "curr_te": "सत्यापित जानकारी"
+  },
+  "schemeDetail.verifiedInfoBadge": {
+    "en": "Government Verified Information",
+    "hi": "सरकार द्वारा सत्यापित जानकारी",
+    "curr_te": "सरकार द्वारा सत्यापित जानकारी"
+  },
+  "schemes.applyFilters": {
+    "en": "Apply Filters",
+    "hi": "फ़िल्टर लागू करें",
+    "curr_te": "फ़िल्टर लागू करें"
+  },
+  "schemes.browseAllSchemes": {
+    "en": "Browse All 90 Schemes",
+    "hi": "सभी 90 योजनाएं देखें",
+    "curr_te": "सभी 90 योजनाएं देखें"
+  },
+  "schemes.closeFilters": {
+    "en": "Apply & Close",
+    "hi": "लागू करें और बंद करें",
+    "curr_te": "लागू करें और बंद करें"
+  },
+  "schemes.filterAllStatus": {
+    "en": "All Verification Statuses",
+    "hi": "सभी सत्यापन स्थितियां",
+    "curr_te": "सभी सत्यापन स्थितियां"
+  },
+  "schemes.filterBy": {
+    "en": "Filter Schemes",
+    "hi": "योजनाएं फ़िल्टर करें",
+    "curr_te": "योजनाएं फ़िल्टर करें"
+  },
+  "schemes.filterFinancial": {
+    "en": "Assistance / Financial Type",
+    "hi": "सहायता / वित्तीय प्रकार",
+    "curr_te": "सहायता / वित्तीय प्रकार"
+  },
+  "schemes.findForMyProfile": {
+    "en": "Find Schemes for My Profile",
+    "hi": "मेरी प्रोफ़ाइल अनुसार योजनाएं खोजें",
+    "curr_te": "मेरी प्रोफ़ाइल अनुसार योजनाएं खोजें"
+  },
+  "schemes.loanAvailableOnly": {
+    "en": "Credit / Loan Available",
+    "hi": "ऋण / लोन सुविधा उपलब्ध",
+    "curr_te": "ऋण / लोन सुविधा उपलब्ध"
+  },
+  "schemes.mobileFilterBtn": {
+    "en": "Filters & Refinements",
+    "hi": "फ़िल्टर एवं खोज विकल्प",
+    "curr_te": "फ़िल्टर एवं खोज विकल्प"
+  },
+  "schemes.sortInterestRate": {
+    "en": "Lowest Interest Rate",
+    "hi": "न्यूनतम ब्याज दर",
+    "curr_te": "न्यूनतम ब्याज दर"
+  },
+  "schemes.sortMaxLoan": {
+    "en": "Highest Loan Limit",
+    "hi": "अधिकतम ऋण सीमा",
+    "curr_te": "अधिकतम ऋण सीमा"
+  },
+  "schemes.sortNameAsc": {
+    "en": "Name (A to Z)",
+    "hi": "नाम (अ से ज्ञ / A to Z)",
+    "curr_te": "नाम (अ से ज्ञ / A to Z)"
+  },
+  "schemes.sortNameDesc": {
+    "en": "Name (Z to A)",
+    "hi": "नाम (Z to A)",
+    "curr_te": "नाम (Z to A)"
+  },
+  "schemes.sortRelevance": {
+    "en": "Most Relevant",
+    "hi": "सबसे प्रासंगिक",
+    "curr_te": "सबसे प्रासंगिक"
+  },
+  "schemes.subsidyAvailableOnly": {
+    "en": "Subsidy / Grant Available",
+    "hi": "सब्सिडी / अनुदान उपलब्ध",
+    "curr_te": "सब्सिडी / अनुदान उपलब्ध"
+  },
+  "schemes.trySuggestions": {
+    "en": "Try popular searches:",
+    "hi": "लोकप्रिय खोज विकल्प आज़माएं:",
+    "curr_te": "लोकप्रिय खोज विकल्प आज़माएं:"
+  },
+  "schemes.typeLoan": {
+    "en": "Loan Schemes",
+    "hi": "ऋण योजनाएं",
+    "curr_te": "ऋण योजनाएं"
+  },
+  "schemes.typeMicroFinance": {
+    "en": "Micro-Finance Schemes",
+    "hi": "माइक्रो-फाइनेंस योजनाएं",
+    "curr_te": "माइक्रो-फाइनेंस योजनाएं"
+  },
+  "schemes.typeSubsidy": {
+    "en": "Subsidy Schemes",
+    "hi": "सब्सिडी योजनाएं",
+    "curr_te": "सब्सिडी योजनाएं"
+  },
+  "schemes.typeTermLoan": {
+    "en": "Term Loan Schemes",
+    "hi": "टर्म लोन योजनाएं",
+    "curr_te": "टर्म लोन योजनाएं"
+  },
+  "schemes.underReviewOnly": {
+    "en": "Under Review",
+    "hi": "समीक्षाधीन योजनाएं",
+    "curr_te": "समीक्षाधीन योजनाएं"
+  },
+  "schemes.verifiedOnly": {
+    "en": "Verified Schemes Only",
+    "hi": "केवल सत्यापित योजनाएं",
+    "curr_te": "केवल सत्यापित योजनाएं"
+  },
+  "schemes.viewDetails": {
+    "en": "View Details",
+    "hi": "विवरण देखें",
+    "curr_te": "विवरण देखें"
+  }
+}

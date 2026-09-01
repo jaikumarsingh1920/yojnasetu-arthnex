@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partnerApi';
 import { ApplicationResponse, ApprovalReadinessResponse, ApplicationDocument } from '../types';
 import { ApplicationStatusBadge } from '../components/Badge';
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react';
 
 export const PartnerDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id: applicationId } = useParams<{ id: string }>();
   const { role } = useAuth();
 
@@ -182,7 +184,7 @@ export const PartnerDetail: React.FC = () => {
     return (
       <div className="py-20 text-center">
         <div className="w-10 h-10 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-xs text-slate-500 mt-3 font-medium">Loading partner review workspace...</p>
+        <p className="text-xs text-slate-500 mt-3 font-medium">{t('partner.loadingWorkspace', 'Loading partner review workspace...')}</p>
       </div>
     );
   }
@@ -190,10 +192,10 @@ export const PartnerDetail: React.FC = () => {
   if (!appData) {
     return (
       <div className="max-w-4xl mx-auto my-12 px-4">
-        <Alert type="error" title="Access Restriction">{errorMsg || "Application not found or inaccessible."}</Alert>
+        <Alert type="error" title={t('partner.accessRestriction', 'Access Restriction')}>{errorMsg || t('partner.appNotFound', 'Application not found or inaccessible.')}</Alert>
         <div className="mt-4">
           <Link to="/partner" className="text-xs font-bold text-sky-700 hover:underline flex items-center gap-1">
-            <ArrowLeft className="w-4 h-4" /> Back to Queue
+            <ArrowLeft className="w-4 h-4" /> {t('partner.backToQueue', 'Back to Queue')}
           </Link>
         </div>
       </div>
@@ -203,10 +205,25 @@ export const PartnerDetail: React.FC = () => {
   const isDecisionMaker = role === 'PARTNER_ADMIN' || role === 'SYSTEM_ADMIN';
   const isFinalized = appData.status === 'APPROVED' || appData.status === 'REJECTED';
 
+  const handleMarkCompleted = async () => {
+    if (!applicationId) return;
+    const notes = window.prompt(t('partner.promptDisbursementNotes', 'Enter optional completion / disbursement notes:'));
+    if (notes === null) return;
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const updated = await partnerApi.completeApplication(applicationId, notes);
+      setAppData(updated);
+      setSuccessMsg('Application marked COMPLETED / Benefit Disbursed successfully!');
+    } catch (err: any) {
+      setErrorMsg('Mark completed failed: ' + (err.response?.data?.detail || err.message));
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <Link to="/partner" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-        <ArrowLeft className="w-4 h-4" /> Back to Queue List
+        <ArrowLeft className="w-4 h-4" /> {t('partner.backToQueueList', 'Back to Queue List')}
       </Link>
 
       {/* Header */}
@@ -214,20 +231,29 @@ export const PartnerDetail: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ApplicationStatusBadge status={appData.status} />
-            <span className="text-xs font-mono text-slate-500 font-bold">App ID: {appData.application_id}</span>
+            <span className="text-xs font-mono text-slate-500 font-bold">{t('partner.appId', 'App ID: {{id}}', { id: appData.application_id })}</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900">{appData.scheme_name || `Scheme ${appData.scheme_id}`}</h1>
-          <p className="text-xs text-slate-500 mt-1">Beneficiary User ID: {appData.user_id}</p>
+          <p className="text-xs text-slate-500 mt-1">{t('partner.beneficiaryUserId', 'Beneficiary User ID: {{id}}', { id: appData.user_id })}</p>
         </div>
 
         {/* Action Decision Buttons */}
+        {appData.status === 'APPROVED' && isDecisionMaker && (
+          <button
+            onClick={handleMarkCompleted}
+            className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5"
+          >
+            <ShieldCheck className="w-4 h-4" /> {t('partner.markCompletedBtn', 'Mark Completed / Benefit Disbursed')}
+          </button>
+        )}
+
         {!isFinalized && (
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setIsCorrectionModalOpen(true)}
               className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5"
             >
-              <AlertTriangle className="w-4 h-4" /> Request Correction
+              <AlertTriangle className="w-4 h-4" /> {t('partner.requestCorrectionBtn', 'Request Correction')}
             </button>
 
             {isDecisionMaker && (
@@ -236,7 +262,7 @@ export const PartnerDetail: React.FC = () => {
                   onClick={() => setIsRejectModalOpen(true)}
                   className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5"
                 >
-                  <XCircle className="w-4 h-4" /> Reject Application
+                  <XCircle className="w-4 h-4" /> {t('partner.rejectAppBtn', 'Reject Application')}
                 </button>
 
                 <button
@@ -244,7 +270,7 @@ export const PartnerDetail: React.FC = () => {
                   disabled={Boolean(readiness && !readiness.can_approve)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CheckCircle2 className="w-4 h-4" /> Issue Approval Decision
+                  <CheckCircle2 className="w-4 h-4" /> {t('partner.issueApprovalBtn', 'Issue Approval Decision')}
                 </button>
               </>
             )}
@@ -257,11 +283,11 @@ export const PartnerDetail: React.FC = () => {
 
       {/* Approval Readiness Alert */}
       {readiness && !isFinalized && (
-        <Alert type={readiness.can_approve ? "success" : "warning"} title="Approval Readiness Status">
+        <Alert type={readiness.can_approve ? "success" : "warning"} title={t('partner.approvalReadinessStatus', 'Approval Readiness Status')}>
           <p className="font-semibold">{readiness.message}</p>
           {readiness.blocking_documents.length > 0 && (
             <p className="mt-1 text-xs text-amber-900">
-              Unverified Documents: {readiness.blocking_documents.join(', ')}
+              {t('partner.unverifiedDocs', 'Unverified Documents:')} {readiness.blocking_documents.join(', ')}
             </p>
           )}
         </Alert>
@@ -274,7 +300,7 @@ export const PartnerDetail: React.FC = () => {
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-3">
               <FileCheck2 className="w-5 h-5 text-amber-600" />
-              Document Verification Queue ({appData.documents.length})
+              {t('partner.docQueueTitle', 'Document Verification Queue ({{count}})', { count: appData.documents.length })}
             </h3>
 
             <div className="space-y-4">
@@ -283,7 +309,7 @@ export const PartnerDetail: React.FC = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-bold text-sm text-slate-900">{doc.document_name}</h4>
-                      <p className="text-xs text-slate-500">{doc.requirement_type} document</p>
+                      <p className="text-xs text-slate-500">{doc.requirement_type} {t('partner.document', 'document')}</p>
                     </div>
 
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${
@@ -299,11 +325,11 @@ export const PartnerDetail: React.FC = () => {
 
                   {doc.is_uploaded ? (
                     <div className="text-xs text-slate-700 bg-white p-2.5 rounded border border-slate-200 flex justify-between items-center">
-                      <span>File: <strong>{doc.file_name}</strong></span>
-                      <span className="text-[11px] text-slate-400">Uploaded {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : ''}</span>
+                      <span>{t('applications.fileLabel', 'File:')} <strong>{doc.file_name}</strong></span>
+                      <span className="text-[11px] text-slate-400">{t('partner.uploadedOn', 'Uploaded')} {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : ''}</span>
                     </div>
                   ) : (
-                    <p className="text-xs text-rose-700 italic">Not uploaded by beneficiary</p>
+                    <p className="text-xs text-rose-700 italic">{t('partner.notUploadedByBeneficiary', 'Not uploaded by beneficiary')}</p>
                   )}
 
                   {/* Verification Actions */}
@@ -313,14 +339,14 @@ export const PartnerDetail: React.FC = () => {
                         onClick={() => setRejectingDoc(doc)}
                         className="bg-rose-50 hover:bg-rose-100 text-rose-800 px-3 py-1.5 rounded border border-rose-300 font-bold transition"
                       >
-                        Reject Document
+                        {t('partner.rejectDocBtn', 'Reject Document')}
                       </button>
 
                       <button
                         onClick={() => handleVerifyDocument(doc.app_document_id)}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded font-bold shadow transition flex items-center gap-1"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Verify Document
+                        <CheckCircle2 className="w-3.5 h-3.5" /> {t('partner.verifyDocBtn', 'Verify Document')}
                       </button>
                     </div>
                   )}
@@ -333,7 +359,7 @@ export const PartnerDetail: React.FC = () => {
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-3">
               <MessageSquare className="w-5 h-5 text-sky-600" />
-              Internal Agency Review Notes ({appData.review_notes?.length || 0})
+              {t('partner.reviewNotesTitle', 'Internal Agency Review Notes ({{count}})', { count: appData.review_notes?.length || 0 })}
             </h3>
 
             {appData.review_notes && appData.review_notes.length > 0 && (
@@ -355,7 +381,7 @@ export const PartnerDetail: React.FC = () => {
                 <textarea
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
-                  placeholder="Add internal partner review notes..."
+                  placeholder={t('partner.addNotesPlaceholder', 'Add internal partner review notes...')}
                   className="w-full p-3 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-sky-500 outline-none"
                   rows={3}
                 />
@@ -364,7 +390,7 @@ export const PartnerDetail: React.FC = () => {
                   disabled={!noteText}
                   className="bg-gov-navy hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition disabled:opacity-50"
                 >
-                  Add Internal Note
+                  {t('partner.addNoteBtn', 'Add Internal Note')}
                 </button>
               </form>
             )}
@@ -385,17 +411,17 @@ export const PartnerDetail: React.FC = () => {
       {rejectingDoc && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded-2xl max-w-md w-full space-y-4 shadow-xl border border-slate-200">
-            <h3 className="text-base font-bold text-slate-900">Reject Document '{rejectingDoc.document_name}'</h3>
+            <h3 className="text-base font-bold text-slate-900">{t('partner.rejectDocTitle', "Reject Document '{{name}}'", { name: rejectingDoc.document_name })}</h3>
             <form onSubmit={handleRejectDocumentSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Mandatory Rejection Reason
+                  {t('partner.mandatoryRejectReason', 'Mandatory Rejection Reason')}
                 </label>
                 <textarea
                   required
                   value={docRejectReason}
                   onChange={(e) => setDocRejectReason(e.target.value)}
-                  placeholder="e.g. Document image is blurry or income proof mismatch."
+                  placeholder={t('partner.docRejectPlaceholder', 'e.g. Document image is blurry or income proof mismatch.')}
                   className="w-full p-3 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                   rows={3}
                 />
@@ -406,13 +432,13 @@ export const PartnerDetail: React.FC = () => {
                   onClick={() => setRejectingDoc(null)}
                   className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100"
                 >
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow"
                 >
-                  Confirm Document Rejection
+                  {t('partner.confirmDocRejectBtn', 'Confirm Document Rejection')}
                 </button>
               </div>
             </form>
@@ -424,17 +450,17 @@ export const PartnerDetail: React.FC = () => {
       {isRejectModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded-2xl max-w-md w-full space-y-4 shadow-xl border border-slate-200">
-            <h3 className="text-base font-bold text-slate-900">Reject Application</h3>
+            <h3 className="text-base font-bold text-slate-900">{t('partner.rejectAppTitle', 'Reject Application')}</h3>
             <form onSubmit={handleRejectFinalSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Mandatory Rejection Reason
+                  {t('partner.mandatoryRejectReason', 'Mandatory Rejection Reason')}
                 </label>
                 <textarea
                   required
                   value={finalRejectReason}
                   onChange={(e) => setFinalRejectReason(e.target.value)}
-                  placeholder="e.g. Ineligible income slab or mandatory documents not provided."
+                  placeholder={t('partner.finalRejectPlaceholder', 'e.g. Ineligible income slab or mandatory documents not provided.')}
                   className="w-full p-3 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 outline-none"
                   rows={3}
                 />
@@ -445,13 +471,13 @@ export const PartnerDetail: React.FC = () => {
                   onClick={() => setIsRejectModalOpen(false)}
                   className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100"
                 >
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow"
                 >
-                  Confirm Application Rejection
+                  {t('partner.confirmAppRejectBtn', 'Confirm Application Rejection')}
                 </button>
               </div>
             </form>
@@ -465,31 +491,31 @@ export const PartnerDetail: React.FC = () => {
           <div className="bg-white p-6 rounded-2xl max-w-md w-full space-y-4 shadow-xl border border-slate-200">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-amber-600" />
-              Request Application Correction
+              {t('partner.requestCorrectionTitle', 'Request Application Correction')}
             </h3>
             <form onSubmit={handleRequestCorrectionSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Mandatory Correction Reason
+                  {t('partner.mandatoryCorrectionReason', 'Mandatory Correction Reason')}
                 </label>
                 <textarea
                   required
                   value={correctionReason}
                   onChange={(e) => setCorrectionReason(e.target.value)}
-                  placeholder="e.g. Uploaded Aadhaar card scan is blurry. Please re-upload legible document."
+                  placeholder={t('partner.correctionReasonPlaceholder', 'e.g. Uploaded Aadhaar card scan is blurry. Please re-upload legible document.')}
                   className="w-full p-3 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
                   rows={3}
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Target Documents / Fields (Comma-separated)
+                  {t('partner.targetFieldsLabel', 'Target Documents / Fields (Comma-separated)')}
                 </label>
                 <input
                   type="text"
                   value={correctionFields}
                   onChange={(e) => setCorrectionFields(e.target.value)}
-                  placeholder="e.g. Identity Proof, Address Proof"
+                  placeholder={t('partner.targetFieldsPlaceholder', 'e.g. Identity Proof, Address Proof')}
                   className="w-full p-2.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
@@ -499,13 +525,13 @@ export const PartnerDetail: React.FC = () => {
                   onClick={() => setIsCorrectionModalOpen(false)}
                   className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100"
                 >
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow"
                 >
-                  Send Correction Request
+                  {t('partner.sendCorrectionBtn', 'Send Correction Request')}
                 </button>
               </div>
             </form>

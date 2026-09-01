@@ -9,6 +9,7 @@ import { ProtectedRoute, RoleGate } from './components/ProtectedRoute';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { Profile } from './pages/Profile';
 import { Dashboard } from './pages/Dashboard';
 import { Schemes } from './pages/Schemes';
 import { SchemeDetail } from './pages/SchemeDetail';
@@ -21,9 +22,15 @@ import { PartnerDetail } from './pages/PartnerDetail';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Notifications } from './pages/Notifications';
 import { SavedSchemes } from './pages/SavedSchemes';
+import { ChannelPartners } from './pages/ChannelPartners';
 import { Unauthorized } from './pages/Unauthorized';
 import { NotFound } from './pages/NotFound';
 import { AICopilot } from './components/ai/AICopilot';
+
+import { ComparisonProvider } from './context/ComparisonContext';
+import { TextSizeProvider } from './context/TextSizeContext';
+import { ComparisonTray } from './components/ComparisonTray';
+import { Compare } from './pages/Compare';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,20 +45,27 @@ export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <div className="flex flex-col min-h-screen bg-slate-50">
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/schemes" element={<Schemes />} />
-                <Route path="/schemes/:schemeId" element={<SchemeDetail />} />
-                <Route path="/recommendations" element={<Recommendations />} />
-                <Route path="/calculator" element={<CalculatorPage />} />
-                <Route path="/unauthorized" element={<Unauthorized />} />
+        <TextSizeProvider>
+          <ComparisonProvider>
+            <Router>
+              <div className="flex flex-col min-h-screen bg-slate-50">
+                <Navbar />
+                <main className="flex-grow">
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/auth/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/auth/register" element={<Register />} />
+                  <Route path="/schemes" element={<Schemes />} />
+                  <Route path="/schemes/:schemeId" element={<SchemeDetail />} />
+                  <Route path="/compare" element={<Compare />} />
+                  <Route path="/recommendations" element={<Recommendations />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/channel-partners" element={<ChannelPartners />} />
+                  <Route path="/calculator" element={<CalculatorPage />} />
+                  <Route path="/unauthorized" element={<Unauthorized />} />
 
                 {/* Authenticated Notifications Route */}
                 <Route
@@ -143,11 +157,14 @@ export const App: React.FC = () => {
             </main>
             <Footer />
             <AICopilot />
+            <ComparisonTray />
           </div>
         </Router>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
+      </ComparisonProvider>
+    </TextSizeProvider>
+  </AuthProvider>
+</QueryClientProvider>
+);
 };
 
 export default App;

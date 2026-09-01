@@ -8,6 +8,24 @@ interface Props {
   citation: SourceCitation;
 }
 
+const sanitizeClientSnippet = (text?: string): string => {
+  if (!text) return '';
+  let clean = text;
+  clean = clean.replace(/Rule\s+Code:\s*\w+[-_]?\d*/gi, '');
+  clean = clean.replace(/\bRULE[-_]?\d+\b/gi, '');
+  clean = clean.replace(/Field:\s*[\w_]+(?:\s*(?:IN|==|!=|>|<|>=|<=)\s*[^;\.\n]+)*(?:;|\.|\n|$)/gi, '');
+  clean = clean.replace(/Requirement\s+Field:\s*\w+/gi, '');
+  clean = clean.replace(/Requirement\s+Value:\s*[^;\.\n]+/gi, '');
+  clean = clean.replace(/\b(?:PM_SURAJ|AUTHORISED_SCA|AUTHORISED_CA)\b/gi, 'Authorized Partner Portal');
+  clean = clean.replace(/\bTRADITIONAL_TRADE_\d+\b/gi, 'Traditional Artisanship & Trade');
+  clean = clean.replace(/\bSMALL_MICRO_BUSINESS\b/gi, 'Small & Micro Enterprise');
+  clean = clean.replace(/\bAPPLICATION_ROUTE\b/gi, 'Application Route');
+  clean = clean.replace(/\bapplication_route\b/gi, 'application route');
+  clean = clean.replace(/\bDescription:\s*/gi, '');
+  clean = clean.replace(/\s{2,}/g, ' ').trim();
+  return clean;
+};
+
 export const SourceCitationCard: React.FC<Props> = ({ citation }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -17,6 +35,8 @@ export const SourceCitationCard: React.FC<Props> = ({ citation }) => {
       navigate(`/schemes/${citation.scheme_id}`);
     }
   };
+
+  const safeSnippet = sanitizeClientSnippet(citation.snippet);
 
   return (
     <div
@@ -37,9 +57,9 @@ export const SourceCitationCard: React.FC<Props> = ({ citation }) => {
         {citation.scheme_name || citation.scheme_id}
       </p>
 
-      {citation.snippet && (
+      {safeSnippet && (
         <p className="text-[10px] text-slate-600 line-clamp-2 leading-tight">
-          "{citation.snippet}"
+          "{safeSnippet}"
         </p>
       )}
 

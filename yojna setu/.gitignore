@@ -1,0 +1,20 @@
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+*.log
+logs/
+
+# Dependencies & Build
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Databases
+*.db
+*.sqlite3

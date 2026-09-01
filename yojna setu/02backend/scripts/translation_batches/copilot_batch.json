@@ -1,0 +1,18 @@
+{
+  "copilot.chatError": {
+    "en": "I encountered an issue processing your request. Please check your internet connection or try again.",
+    "hi": "आपके अनुरोध को संसाधित करने में समस्या आई। कृपया अपना इंटरनेट कनेक्शन जांचें या पुनः प्रयास करें।"
+  },
+  "copilot.conversationCleared": {
+    "en": "Conversation cleared. How can I assist you with government schemes today?",
+    "hi": "बातचीत साफ़ कर दी गई। आज मैं सरकारी योजनाओं में आपकी किस प्रकार सहायता कर सकता हूँ?"
+  },
+  "copilot.defaultWelcome": {
+    "en": "Namaste! 👋\nI can help you discover government schemes, check eligibility guidelines, understand required documents, calculate loan EMIs, and route to official portals.\n\nAsk any question — type or speak.",
+    "hi": "नमस्ते! 👋\nमैं आपको सरकारी योजनाएं खोजने, पात्रता दिशानिर्देश जांचने, आवश्यक दस्तावेज़ समझने, ऋण ईएमआई की गणना करने और आधिकारिक पोर्टलों पर जाने में मदद कर सकता हूँ।\n\nकोई भी प्रश्न पूछें — टाइप करें या बोलें।"
+  },
+  "copilot.schemeWelcome": {
+    "en": "Namaste! 👋\nI am with you on this scheme page. Ask me about interest rates, loan limits, eligibility requirements, or documents for this scheme.",
+    "hi": "नमस्ते! 👋\nमैं इस योजना पृष्ठ पर आपके साथ हूँ। इस योजना के लिए ब्याज दरों, ऋण सीमाओं, पात्रता आवश्यकताओं या दस्तावेज़ों के बारे में मुझसे पूछें।"
+  }
+}

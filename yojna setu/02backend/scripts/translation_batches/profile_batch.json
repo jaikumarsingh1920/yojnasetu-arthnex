@@ -1,0 +1,54 @@
+{
+  "profile.calcSyncNote": {
+    "en": "Pre-fills the Financial Calculator across all matched loan schemes.",
+    "hi": "सभी मिलान ऋण योजनाओं में वित्तीय कैलकुलेटर को पहले से भरता है।"
+  },
+  "profile.completePending": {
+    "en": "Complete missing details below to unlock more accurate scheme matches.",
+    "hi": "अधिक सटीक योजना मिलान अनलॉक करने के लिए नीचे दिए गए विवरण पूरे करें।"
+  },
+  "profile.completeReady": {
+    "en": "Comprehensive profile — all 90 schemes can be evaluated accurately.",
+    "hi": "व्यापक प्रोफ़ाइल — सभी 90 योजनाओं का सटीक मूल्यांकन किया जा सकता है।"
+  },
+  "profile.invalidAge": {
+    "en": "Age must be between 14 and 120 years.",
+    "hi": "आयु 14 से 120 वर्ष के बीच होनी चाहिए।"
+  },
+  "profile.invalidCost": {
+    "en": "Project cost cannot be negative.",
+    "hi": "परियोजना लागत नकारात्मक नहीं हो सकती।"
+  },
+  "profile.invalidIncome": {
+    "en": "Annual income cannot be negative.",
+    "hi": "वार्षिक आय नकारात्मक नहीं हो सकती।"
+  },
+  "profile.privacyGuaranteeDesc": {
+    "en": "YojnaSetu strictly stores only structured eligibility attributes. No personal identification documents, aadhaar scans, or certificates are ever uploaded or stored. Recommendations are calculated deterministically on the server.",
+    "hi": "योजनासेतु केवल संरचित पात्रता विशेषताओं को संग्रहीत करता है। कोई व्यक्तिगत पहचान दस्तावेज, आधार स्कैन या प्रमाणपत्र कभी भी अपलोड या संग्रहीत नहीं किया जाता है।"
+  },
+  "profile.saveError": {
+    "en": "Failed to save profile. Please check inputs.",
+    "hi": "प्रोफ़ाइल सहेजने में विफल। कृपया इनपुट जांचें।"
+  },
+  "profile.sectionEconomicDesc": {
+    "en": "Required for income ceiling checks on means-tested welfare and interest subvention schemes.",
+    "hi": "कल्याणकारी और ब्याज अनुदान योजनाओं के लिए आय सीमा जांच हेतु आवश्यक।"
+  },
+  "profile.sectionEducationDesc": {
+    "en": "Helps match schemes requiring 8th pass (e.g. PMEGP) or specialized artisan credit.",
+    "hi": "शैक्षणिक योग्यता या विशेष कारीगर योजनाओं के मिलान में सहायक।"
+  },
+  "profile.sectionEnterpriseDesc": {
+    "en": "Pre-fills the Scheme-Aware Financial Calculator and matches loan limit ceilings.",
+    "hi": "वित्तीय कैलकुलेटर को स्वतः भरता है और ऋण सीमा से मिलान करता है।"
+  },
+  "profile.sectionPersonalDesc": {
+    "en": "Demographic parameters used for age criteria and affirmative social credit schemes.",
+    "hi": "आयु और सामाजिक कल्याणकारी योजनाओं के लिए जनसांख्यिकीय मानदंड।"
+  },
+  "profile.subtitle": {
+    "en": "Your structured profile acts as the single source of truth for deterministic eligibility evaluation across all 90 government schemes. Zero document uploads required.",
+    "hi": "आपकी संरचित प्रोफ़ाइल सभी 90 सरकारी योजनाओं में नियम-आधारित पात्रता मूल्यांकन के लिए कार्य करती है। किसी दस्तावेज अपलोड की आवश्यकता नहीं है।"
+  }
+}

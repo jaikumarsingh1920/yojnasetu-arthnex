@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Bell, CheckCheck, Filter, ArrowRight, Settings, CheckCircle2, ShieldCheck, Mail, Phone, MessageSquare, Smartphone } from 'lucide-react';
 import { notificationApi } from '../api/notificationApi';
 import { NotificationItem, NotificationPreference } from '../types';
 import { Alert } from '../components/Alert';
 
 export const Notifications: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -119,11 +121,11 @@ export const Notifications: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 bg-sky-900 text-sky-200 text-xs font-bold px-3 py-1 rounded-full mb-2 border border-sky-700">
             <Bell className="w-4 h-4 text-sky-400" />
-            Communication & Notification Center
+            {t('notifications.centerBadge', 'Communication & Notification Center')}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold">Notifications & Application Alerts</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold">{t('notifications.title', 'Notifications & Application Alerts')}</h1>
           <p className="text-xs sm:text-sm text-sky-100 mt-1">
-            Real-time status updates for applications, document verification results, and authority reviews.
+            {t('notifications.subtitle', 'Real-time status updates for applications, document verification results, and authority reviews.')}
           </p>
         </div>
 
@@ -132,7 +134,7 @@ export const Notifications: React.FC = () => {
             onClick={() => setIsPrefModalOpen(true)}
             className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 shadow transition flex items-center gap-1.5"
           >
-            <Settings className="w-4 h-4 text-sky-400" /> Delivery Preferences
+            <Settings className="w-4 h-4 text-sky-400" /> {t('notifications.deliveryPreferences', 'Delivery Preferences')}
           </button>
 
           {unreadCount > 0 && (
@@ -140,7 +142,7 @@ export const Notifications: React.FC = () => {
               onClick={handleMarkAllRead}
               className="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5"
             >
-              <CheckCheck className="w-4 h-4" /> Mark All as Read
+              <CheckCheck className="w-4 h-4" /> {t('notifications.markAllRead', 'Mark All as Read')}
             </button>
           )}
         </div>
@@ -162,7 +164,7 @@ export const Notifications: React.FC = () => {
                   tabFilter === st ? 'bg-sky-800 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                {st}
+                {st === 'ALL' ? t('common.all', 'ALL') : st === 'UNREAD' ? t('common.unread', 'UNREAD') : t('common.read', 'READ')}
                 {st === 'UNREAD' && unreadCount > 0 && (
                   <span className="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-extrabold">
                     {unreadCount}
@@ -180,15 +182,15 @@ export const Notifications: React.FC = () => {
               onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
               className="px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold bg-white outline-none focus:ring-2 focus:ring-sky-500"
             >
-              <option value="">All Notification Types</option>
-              <option value="APPLICATION_SUBMITTED">Submitted</option>
-              <option value="APPLICATION_UNDER_REVIEW">Under Review</option>
-              <option value="DOCUMENT_VERIFIED">Document Verified</option>
-              <option value="DOCUMENT_REJECTED">Document Rejected</option>
-              <option value="CORRECTION_REQUIRED">Correction Required</option>
-              <option value="APPLICATION_RESUBMITTED">Resubmitted</option>
-              <option value="APPLICATION_APPROVED">Approved</option>
-              <option value="APPLICATION_REJECTED">Rejected</option>
+              <option value="">{t('notifications.allTypes', 'All Notification Types')}</option>
+              <option value="APPLICATION_SUBMITTED">{t('notifications.submitted', 'Submitted')}</option>
+              <option value="APPLICATION_UNDER_REVIEW">{t('notifications.underReview', 'Under Review')}</option>
+              <option value="DOCUMENT_VERIFIED">{t('notifications.docVerified', 'Document Verified')}</option>
+              <option value="DOCUMENT_REJECTED">{t('notifications.docRejected', 'Document Rejected')}</option>
+              <option value="CORRECTION_REQUIRED">{t('notifications.correctionReq', 'Correction Required')}</option>
+              <option value="APPLICATION_RESUBMITTED">{t('notifications.resubmitted', 'Resubmitted')}</option>
+              <option value="APPLICATION_APPROVED">{t('notifications.approved', 'Approved')}</option>
+              <option value="APPLICATION_REJECTED">{t('notifications.rejected', 'Rejected')}</option>
             </select>
           </div>
         </div>
@@ -197,14 +199,14 @@ export const Notifications: React.FC = () => {
         {isLoading ? (
           <div className="py-16 text-center">
             <div className="w-8 h-8 border-4 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs text-slate-500 mt-2 font-medium">Loading notifications...</p>
+            <p className="text-xs text-slate-500 mt-2 font-medium">{t('notifications.loading', 'Loading notifications...')}</p>
           </div>
         ) : notifications.length === 0 ? (
           <div className="py-16 text-center space-y-2">
             <Bell className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-            <h3 className="text-base font-bold text-slate-800">No Notifications Found</h3>
+            <h3 className="text-base font-bold text-slate-800">{t('notifications.noNotifications', 'No Notifications Found')}</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              There are currently no notifications matching your filter criteria.
+              {t('notifications.allCaughtUp', "You're all caught up with your updates.")}
             </p>
           </div>
         ) : (
@@ -232,7 +234,7 @@ export const Notifications: React.FC = () => {
                         ? 'bg-amber-100 text-amber-800 border-amber-300'
                         : 'bg-slate-100 text-slate-700 border-slate-300'
                     }`}>
-                      {item.priority}
+                      {item.priority === 'URGENT' ? t('notifications.urgent', 'URGENT') : item.priority === 'HIGH' ? t('notifications.high', 'HIGH') : item.priority}
                     </span>
                   </div>
 
@@ -248,7 +250,7 @@ export const Notifications: React.FC = () => {
                 <div className="flex items-center gap-2 shrink-0">
                   {item.application_id && (
                     <button className="bg-sky-800 hover:bg-sky-900 text-white text-xs font-bold px-4 py-2 rounded-lg transition flex items-center gap-1">
-                      Open Details <ArrowRight className="w-3.5 h-3.5" />
+                      {t('common.openDetails', 'Open Details')} <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
@@ -265,7 +267,7 @@ export const Notifications: React.FC = () => {
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <h3 className="text-base font-bold flex items-center gap-2">
                 <Settings className="w-5 h-5 text-sky-600" />
-                Notification Delivery Preferences
+                {t('notifications.deliveryPreferences', 'Notification Delivery Preferences')}
               </h3>
               <button
                 onClick={() => setIsPrefModalOpen(false)}
@@ -276,7 +278,7 @@ export const Notifications: React.FC = () => {
             </div>
 
             <p className="text-xs text-slate-500">
-              Configure delivery channels for real-time application updates and verification alerts.
+              {t('notifications.prefModalDesc', 'Configure delivery channels for real-time application updates and verification alerts.')}
             </p>
 
             <div className="space-y-4">
@@ -284,8 +286,8 @@ export const Notifications: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Bell className="w-4 h-4 text-sky-600" />
                   <div>
-                    <p className="text-xs font-bold">In-App Notifications</p>
-                    <p className="text-[10px] text-slate-500">Header bell & portal alerts</p>
+                    <p className="text-xs font-bold">{t('notifications.inAppTitle', 'In-App Notifications')}</p>
+                    <p className="text-[10px] text-slate-500">{t('notifications.inAppDesc', 'Header bell & portal alerts')}</p>
                   </div>
                 </div>
                 <input
@@ -300,8 +302,8 @@ export const Notifications: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Mail className="w-4 h-4 text-indigo-600" />
                   <div>
-                    <p className="text-xs font-bold">Email Notifications</p>
-                    <p className="text-[10px] text-slate-500">Email status updates (Adapter ready)</p>
+                    <p className="text-xs font-bold">{t('notifications.emailTitle', 'Email Notifications')}</p>
+                    <p className="text-[10px] text-slate-500">{t('notifications.emailDesc', 'Email status updates (Adapter ready)')}</p>
                   </div>
                 </div>
                 <input
@@ -316,8 +318,8 @@ export const Notifications: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Phone className="w-4 h-4 text-emerald-600" />
                   <div>
-                    <p className="text-xs font-bold">SMS Alerts</p>
-                    <p className="text-[10px] text-slate-500">Mobile SMS alerts (Adapter ready)</p>
+                    <p className="text-xs font-bold">{t('notifications.smsTitle', 'SMS Alerts')}</p>
+                    <p className="text-[10px] text-slate-500">{t('notifications.smsDesc', 'Mobile SMS alerts (Adapter ready)')}</p>
                   </div>
                 </div>
                 <input
@@ -332,8 +334,8 @@ export const Notifications: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <MessageSquare className="w-4 h-4 text-green-600" />
                   <div>
-                    <p className="text-xs font-bold">WhatsApp Updates</p>
-                    <p className="text-[10px] text-slate-500">WhatsApp Business notifications</p>
+                    <p className="text-xs font-bold">{t('notifications.whatsAppTitle', 'WhatsApp Updates')}</p>
+                    <p className="text-[10px] text-slate-500">{t('notifications.whatsAppDesc', 'WhatsApp Business notifications')}</p>
                   </div>
                 </div>
                 <input
@@ -348,8 +350,8 @@ export const Notifications: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Smartphone className="w-4 h-4 text-purple-600" />
                   <div>
-                    <p className="text-xs font-bold">Mobile Push</p>
-                    <p className="text-[10px] text-slate-500">Device push notifications</p>
+                    <p className="text-xs font-bold">{t('notifications.mobilePushTitle', 'Mobile Push')}</p>
+                    <p className="text-[10px] text-slate-500">{t('notifications.mobilePushDesc', 'Device push notifications')}</p>
                   </div>
                 </div>
                 <input
@@ -366,7 +368,7 @@ export const Notifications: React.FC = () => {
                 onClick={() => setIsPrefModalOpen(false)}
                 className="bg-sky-800 hover:bg-sky-900 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow transition"
               >
-                Close & Save Preferences
+                {t('notifications.savePreferences', 'Close & Save Preferences')}
               </button>
             </div>
           </div>

@@ -8,8 +8,12 @@ export interface User {
   user_id: string;
   email?: string | null;
   phone?: string | null;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  auth_provider?: string | null;
   role: UserRole;
   is_active: boolean;
+  preferred_language?: string;
   partner_id?: string | null;
   created_at: string;
   updated_at?: string;
@@ -18,6 +22,7 @@ export interface User {
 export interface TokenResponse {
   access_token: string;
   token_type: string;
+  expires_in?: number;
   user: User;
 }
 
@@ -25,6 +30,11 @@ export interface LoginRequest {
   username?: string;
   identifier?: string;
   password: string;
+}
+
+export interface GoogleLoginRequest {
+  id_token: string;
+  preferred_language?: string;
 }
 
 export interface RegisterRequest {
@@ -49,14 +59,19 @@ export interface SchemeRule {
   priority: number;
   condition_group?: string | null;
   error_message?: string | null;
+  description?: string | null;
 }
 
 export interface SchemeDocument {
   document_id: string;
   scheme_id: string;
   document_name: string;
-  requirement_type: string; // REQUIRED, OPTIONAL, CONDITIONAL
+  requirement_type: string; // REQUIRED, OPTIONAL, CONDITIONAL, MANDATORY
   condition?: string | null;
+  applicant_type?: string | null;
+  source_document?: string | null;
+  source_page?: string | null;
+  source_section?: string | null;
   active: boolean;
 }
 
@@ -91,17 +106,25 @@ export interface Scheme {
   state_coverage?: string | null;
   min_age?: number | null;
   max_age?: number | null;
-  income_limit?: number | null;
+  loan_available?: string | null;
+  min_loan_amount?: number | null;
   max_loan_amount?: number | null;
   max_project_cost?: number | null;
   max_subsidy_amount?: number | null;
   subsidy_percentage?: number | null;
   financing_percentage?: number | null;
   interest_rate?: number | null;
+  interest_rate_min?: number | null;
+  interest_rate_max?: number | null;
+  benefit_description?: string | null;
   repayment_period_months?: number | null;
   moratorium_period_months?: number | null;
   collateral_required?: string | null;
+  application_mode?: string | null;
   application_route?: string | null;
+  partner_count?: number | null;
+  application_steps?: string | null;
+  required_documents?: string | null;
   application_url?: string | null;
   official_portal?: string | null;
   official_source_url?: string | null;
@@ -109,8 +132,12 @@ export interface Scheme {
   purpose?: string | null;
   target_beneficiary?: string | null;
   max_loan_amount_raw?: string | null;
-  interest_rate_type?: string | null;
-  interest_rate_min_raw?: string | null;
+  financial_category?: string | null;
+  is_credit_scheme?: boolean;
+  calculator_applicable?: boolean;
+  financial_assistance_summary?: string | null;
+  grant_amount?: number | null;
+  repayment_period_max_months?: number | null;
   verification_status: string;
   rules?: SchemeRule[];
   documents?: SchemeDocument[];
@@ -125,8 +152,41 @@ export interface PaginatedSchemeListResponse {
   pages: number;
 }
 
+export interface FilterOptionItem {
+  label: string;
+  value: string;
+  count: number;
+}
+
+export interface FilterOptionsResponse {
+  ministries: FilterOptionItem[];
+  sectors: FilterOptionItem[];
+  financial_types: FilterOptionItem[];
+  beneficiary_categories: FilterOptionItem[];
+  states: FilterOptionItem[];
+  application_routes: FilterOptionItem[];
+  total_schemes: number;
+}
+
+export interface SchemePersonalizedEligibility {
+  status: 'ELIGIBLE' | 'INSUFFICIENT_INFORMATION' | 'INELIGIBLE';
+  reasons: string[];
+  missing_fields: string[];
+}
+
+export interface SchemeComparisonItem {
+  scheme: Scheme;
+  personalized_eligibility?: SchemePersonalizedEligibility | null;
+}
+
+export interface SchemeComparisonResponse {
+  compared_schemes: SchemeComparisonItem[];
+  invalid_ids: string[];
+}
+
+
 // ─────────────────────────────────────────────────────────────
-// Beneficiary Profile Input Type
+// Beneficiary Profile Input & Completion Types
 // ─────────────────────────────────────────────────────────────
 
 export interface BeneficiaryProfileInput {
@@ -134,11 +194,22 @@ export interface BeneficiaryProfileInput {
   annual_income?: number | null;
   social_category?: string | null;
   is_sc?: boolean | null;
+  is_pwd?: boolean | null;
+  disability_status?: string | null;
+  is_minority?: boolean | null;
   gender?: string | null;
+  marital_status?: string | null;
   state?: string | null;
   district?: string | null;
+  employment_status?: string | null;
+  occupation?: string | null;
+  education_level?: string | null;
   applicant_type?: string | null;
   entrepreneur_type?: string | null;
+  is_artisan?: boolean | null;
+  is_farmer?: boolean | null;
+  is_street_vendor?: boolean | null;
+  is_safai_karamchari?: boolean | null;
   business_stage?: string | null;
   is_new_unit?: boolean | null;
   sector?: string | null;
@@ -147,6 +218,22 @@ export interface BeneficiaryProfileInput {
   requested_loan_amount?: number | null;
   collateral_available?: boolean | null;
   application_route?: string | null;
+}
+
+export interface MissingFieldDetail {
+  field: string;
+  label: string;
+  impact_reason: string;
+  category: string;
+}
+
+export interface CitizenProfileResponse {
+  profile: BeneficiaryProfileInput;
+  completion_percentage: number;
+  completed_fields_count: number;
+  total_fields_count: number;
+  missing_fields: MissingFieldDetail[];
+  is_eligible_for_smart_matching: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -167,12 +254,32 @@ export interface RecommendationItem {
   scheme_name: string;
   eligibility_status: "ELIGIBLE" | "INELIGIBLE" | "INSUFFICIENT_INFORMATION" | "CONDITIONAL";
   score: number;
+  eligible?: boolean;
+  matched_rules?: string[];
+  failed_rules?: string[];
+  missing_information?: string[];
   matched_factors: string[];
   unmatched_factors: string[];
   not_evaluated_factors: string[];
   eligibility_reasons: string[];
   recommendation_reasons: string[];
   score_breakdown: ScoreDimensionBreakdown[];
+  financial_category?: string | null;
+  is_credit_scheme?: boolean;
+  calculator_applicable?: boolean;
+  financial_assistance_summary?: string | null;
+  max_loan_amount?: number | null;
+  interest_rate?: number | null;
+  repayment_period_max_months?: number | null;
+  subsidy_percentage?: number | null;
+  grant_amount?: number | null;
+  ministry?: string | null;
+  source_organization?: string | null;
+  official_portal?: string | null;
+  application_url?: string | null;
+  official_source_url?: string | null;
+  source_document?: string | null;
+  is_direct_portal_scheme?: boolean;
 }
 
 export interface RecommendationResponse {
@@ -182,6 +289,8 @@ export interface RecommendationResponse {
   excluded_scheme_count: number;
   insufficient_info_scheme_count: number;
   recommendations: RecommendationItem[];
+  ineligible_schemes?: RecommendationItem[];
+  insufficient_info_schemes?: RecommendationItem[];
   missing_profile_fields: string[];
 }
 
@@ -254,7 +363,10 @@ export type ApplicationStatus =
   | "UNDER_REVIEW"
   | "CORRECTION_REQUIRED"
   | "APPROVED"
-  | "REJECTED";
+  | "REJECTED"
+  | "WITHDRAWN"
+  | "COMPLETED";
+
 
 export interface ApplicationDocument {
   app_document_id: string;

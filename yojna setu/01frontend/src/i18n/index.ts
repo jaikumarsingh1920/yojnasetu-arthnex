@@ -48,6 +48,17 @@ const getInitialLanguage = (): string => {
   return 'en';
 };
 
+export const humanizeMissingKey = (key: string, defaultValue?: string): string => {
+  if (defaultValue && defaultValue !== key) return defaultValue;
+  const lastPart = key.split('.').pop() || key;
+  const unCamel = lastPart.replace(/([a-z])([A-Z])/g, (_m, p1, p2) => `${p1} ${p2}`).replace(/_/g, ' ');
+  return unCamel
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+};
+
 const initialLang = getInitialLanguage();
 document.documentElement.lang = initialLang;
 
@@ -70,6 +81,13 @@ i18n.use(initReactI18next).init({
   fallbackLng: 'en',
   interpolation: {
     escapeValue: false, // React already escapes values
+  },
+  parseMissingKeyHandler: (key: string, defaultValue?: string) => {
+    const result = humanizeMissingKey(key, defaultValue);
+    if (import.meta.env.DEV) {
+      console.warn(`[i18n] Missing translation for key: "${key}". Fallback to: "${result}"`);
+    }
+    return result;
   },
 });
 

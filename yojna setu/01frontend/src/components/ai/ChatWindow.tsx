@@ -21,20 +21,28 @@ export const ChatWindow: React.FC<Props> = ({
   applicationIdContext,
 }) => {
   const { t, i18n } = useTranslation();
-  const [messages, setMessages] = useState<ChatMessageItem[]>([
+  const [messages, setMessages] = useState<ChatMessageItem[]>(() => [
     {
       id: 'welcome-msg',
       sender: 'assistant',
-      text: 'Namaste! 👋\nI can help you find schemes, check eligibility, understand documents, estimate loan EMIs, and track your application.\n\nJust tell me what you need — you can type or speak.',
+      text: schemeIdContext
+        ? t('copilot.schemeWelcome', 'Namaste! 👋\nI am with you on this scheme page. Ask me about interest rates, loan limits, eligibility requirements, or documents for this scheme.')
+        : t('copilot.defaultWelcome', 'Namaste! 👋\nI can help you discover government schemes, check eligibility guidelines, understand required documents, calculate loan EMIs, and route to official portals.\n\nAsk any question — type or speak.'),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      suggestedQuestions: [
-        '💡 I want to start a small business',
-        '🔎 Which schemes might I qualify for?',
-        '📄 What documents do I need?',
-        '💰 I need a ₹2 lakh loan',
-        '📋 Help me with my application',
-        '🗣️ Speak to me in Hindi'
-      ]
+      suggestedQuestions: schemeIdContext
+        ? [
+            t('copilot.amIEligible', '💡 Am I eligible for this scheme?'),
+            t('copilot.whatDocsNeed', '📄 What documents do I need?'),
+            t('copilot.whatInterestBenefit', '💰 What is the interest rate / benefit?'),
+            t('copilot.howToApplyPortal', '🌐 How do I apply on the official portal?')
+          ]
+        : [
+            t('copilot.startBusiness', '💡 I want to start a small business'),
+            t('copilot.whichSchemesQualify', '🔎 Which schemes might I qualify for?'),
+            t('copilot.whatDocsNeed', '📄 What documents do I need?'),
+            t('copilot.need2LakhLoan', '💰 I need a ₹2 lakh loan'),
+            t('copilot.speakHindi', '🗣️ Speak to me in Hindi')
+          ]
     }
   ]);
 
@@ -45,6 +53,23 @@ export const ChatWindow: React.FC<Props> = ({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-collapse on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        onMinimize();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [onMinimize]);
 
   useEffect(() => {
     scrollToBottom();
@@ -101,7 +126,7 @@ export const ChatWindow: React.FC<Props> = ({
       const errorMsg: ChatMessageItem = {
         id: `error-${Date.now()}`,
         sender: 'assistant',
-        text: 'I encountered an issue processing your request. Please check your internet connection or try again.',
+        text: t('copilot.chatError', 'I encountered an issue processing your request. Please check your internet connection or try again.'),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -130,13 +155,13 @@ export const ChatWindow: React.FC<Props> = ({
       {
         id: `welcome-${Date.now()}`,
         sender: 'assistant',
-        text: 'Conversation cleared. How can I assist you with government schemes today?',
+        text: t('copilot.conversationCleared', 'Conversation cleared. How can I assist you with government schemes today?'),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         suggestedQuestions: [
-          '💡 I want to start a small business',
-          '🔎 Which schemes might I qualify for?',
-          '📄 What documents do I need?',
-          '💰 I need a ₹2 lakh loan'
+          t('copilot.startBusiness', '💡 I want to start a small business'),
+          t('copilot.whichSchemesQualify', '🔎 Which schemes might I qualify for?'),
+          t('copilot.whatDocsNeed', '📄 What documents do I need?'),
+          t('copilot.need2LakhLoan', '💰 I need a ₹2 lakh loan')
         ]
       }
     ]);
@@ -147,7 +172,7 @@ export const ChatWindow: React.FC<Props> = ({
     .slice(-1)[0]?.text;
 
   return (
-    <div className="fixed bottom-4 right-4 w-[420px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-2rem)] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-300 flex flex-col z-50 overflow-hidden text-slate-900 animate-in fade-in slide-in-from-bottom-4 duration-200">
+    <div ref={containerRef} className="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 w-[min(420px,calc(100vw-1.5rem))] h-[min(600px,calc(100dvh-1.5rem))] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-300 flex flex-col z-50 overflow-hidden text-slate-900 animate-in fade-in slide-in-from-bottom-4 duration-200">
       {/* Header */}
       <div className="bg-gradient-to-r from-gov-navy via-sky-900 to-slate-900 text-white p-3.5 flex justify-between items-center border-b border-sky-800 shrink-0">
         <div className="flex items-center gap-2">
@@ -157,7 +182,7 @@ export const ChatWindow: React.FC<Props> = ({
           <div>
             <h3 className="font-extrabold text-xs leading-tight">YojnaSetu AI</h3>
             <span className="text-[10px] text-sky-200 block">
-              Your guide to government schemes
+              {t('copilot.assistantSubtitle', 'Your guide to government schemes')}
             </span>
           </div>
         </div>
@@ -166,21 +191,21 @@ export const ChatWindow: React.FC<Props> = ({
           <button
             onClick={handleClearChat}
             className="p-1 text-slate-300 hover:text-white hover:bg-sky-800 rounded transition"
-            title="Clear Conversation"
+            title={t('copilot.clearChat', 'Clear Conversation')}
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onMinimize}
             className="p-1 text-slate-300 hover:text-white hover:bg-sky-800 rounded transition"
-            title="Minimize"
+            title={t('copilot.minimize', 'Minimize')}
           >
             <Minus className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onClose}
             className="p-1 text-slate-300 hover:text-white hover:bg-rose-900 rounded transition"
-            title="Close"
+            title={t('common.close', 'Close')}
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -201,13 +226,13 @@ export const ChatWindow: React.FC<Props> = ({
           <div className="flex items-center justify-between gap-2 text-xs text-sky-800 font-bold bg-sky-50 p-2.5 rounded-xl border border-sky-200 w-full">
             <div className="flex items-center gap-2">
               <div className="w-3.5 h-3.5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
-              <span>Checking verified government scheme information...</span>
+              <span>{t('copilot.searching', 'Checking verified government scheme information...')}</span>
             </div>
             <button
               onClick={handleStopGeneration}
               className="p-1 text-slate-600 hover:text-rose-700 bg-white rounded border border-slate-300 text-[10px] flex items-center gap-1"
             >
-              <Square className="w-2.5 h-2.5 fill-current" /> Stop
+              <Square className="w-2.5 h-2.5 fill-current" /> {t('copilot.stop', 'Stop')}
             </button>
           </div>
         )}
@@ -232,7 +257,7 @@ export const ChatWindow: React.FC<Props> = ({
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about schemes, eligibility, loan EMIs, or documents..."
+            placeholder={t('copilot.placeholder', 'Ask about schemes, eligibility, loan EMIs, or documents...')}
             className="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-sky-500 bg-white"
           />
 

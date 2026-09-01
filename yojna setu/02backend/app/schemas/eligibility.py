@@ -37,6 +37,11 @@ class SchemeEligibilityResult(BaseModel):
     verification_status: str
     status: SchemeEligibilityStatus
     
+    # Structured reasons for explainability and edge case handling
+    matched_rules: List[str] = Field(default_factory=list, description="Factual list of passed rule explanations")
+    failed_rules: List[str] = Field(default_factory=list, description="Factual list of failed rule explanations")
+    missing_information: List[str] = Field(default_factory=list, description="Factual list of missing information explanations")
+
     # Question A: Hard Eligibility Rule Evaluations
     hard_rules_passed: List[RuleEvaluationDetail] = Field(default_factory=list)
     hard_rules_failed: List[RuleEvaluationDetail] = Field(default_factory=list)

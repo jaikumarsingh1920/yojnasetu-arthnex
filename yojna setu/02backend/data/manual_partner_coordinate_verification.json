@@ -1,0 +1,412 @@
+[
+  {
+    "partner_code": "SCA-DEB3021A",
+    "partner_name": "Andhra Pradesh Scheduled Castes Cooperative Finance Corporation Ltd (APSCCFC)",
+    "latitude": 16.4801662,
+    "longitude": 80.6170467,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at SP River View Apartments, 3rd Floor, Tadepalli, Amaravathi 522501 identified from official NSFDC SCA directory and cross-verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-3E0937B8",
+    "partner_name": "Dadra & Nagar Haveli, Daman & Diu SCs/STs/OBCs & Minorities Financial & Development Corporation (DNDSFDC)",
+    "latitude": 20.2736768,
+    "longitude": 73.0045787,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Ground Floor, Right Wing, New Collectorate Building, Opp 66 KVA Sub-Station, Silvassa 396230 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-857DE02A",
+    "partner_name": "Gujarat Scheduled Castes Development Corporation (GSCDC)",
+    "latitude": 23.2156209,
+    "longitude": 72.6550405,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Dr Jivraj Mehta Bhawan, Block-10, 2nd Floor, Old Sachivalaya, Gandhinagar 382010 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-D454A54F",
+    "partner_name": "Gujarat Dr. Ambedkar Antyodaya Vikas Nigam",
+    "latitude": 23.2114934,
+    "longitude": 72.650198,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Karmayogi Bhavan, Block 2, Sector 10A, Gandhinagar 382010 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-3134EBED",
+    "partner_name": "Goa State SCs & OBCs Finance & Development Corporation Ltd",
+    "latitude": 15.4951492,
+    "longitude": 73.8354156,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at 4th Floor, Spaces Building, EDC Patto Plaza, Panaji, Goa 403001 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-B2CDFE28",
+    "partner_name": "Haryana Scheduled Castes Finance and Development Corporation",
+    "latitude": 30.7334256,
+    "longitude": 76.7713451,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at SCO-2427-28, Sector 22-C, Chandigarh 160022 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-1865CC8B",
+    "partner_name": "Himachal Pradesh SCs & STs Development Corporation",
+    "latitude": 30.9077569,
+    "longitude": 77.1023645,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Kalyan Bhawan, Solan, Himachal Pradesh 173212 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-B8912CD8",
+    "partner_name": "Jharkhand State Scheduled Castes Cooperative Development Corporation (JSCDC)",
+    "latitude": 23.390876,
+    "longitude": 85.3278238,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Kalyan Complex, 3rd Floor, Balihar Road, Morabadi, Ranchi 834008 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-2BF7F421",
+    "partner_name": "Jammu & Kashmir SCs, STs & OBCs Development Corporation (JKSCSTBCDC)",
+    "latitude": 32.7035439,
+    "longitude": 74.8732909,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at 135-A, Last Morh, Gandhi Nagar, Jammu 180004 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-6BB98176",
+    "partner_name": "Kerala State Development Corporation for SCs & STs Ltd (KSDC)",
+    "latitude": 10.345369,
+    "longitude": 76.2111482,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Town Hall Road, Thrissur, Kerala 680020 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-CE7F5DB7",
+    "partner_name": "Madhya Pradesh State Cooperative SC Finance & Development Corporation (MPSCFDC)",
+    "latitude": 23.239184,
+    "longitude": 77.3900841,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Rajiv Gandhi Bhawan, 35, Shyamla Hills, Bhopal 462002 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-CC4A4734",
+    "partner_name": "Mahatma Phule Backward Classes Development Corporation Ltd (MPBCDC)",
+    "latitude": 19.1111705,
+    "longitude": 72.8304076,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at 1-N, Supreme Shopping Centre, Gulmohar Cross Road No.9, JVPD Scheme, Juhu, Mumbai 400049 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-ADB4D96A",
+    "partner_name": "Sahityaratna Lokshahir Annabhau Sathe Development Corporation Ltd (SLASDC)",
+    "latitude": 19.0733955,
+    "longitude": 72.8832792,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at New Administration Building No.2, 3rd Floor, Ramkrushna Chemburkar Marg, Chembur (E), Mumbai 400071 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-7D640DD0",
+    "partner_name": "Sant Rohidas Leather Industries & Charmakar Development Corporation (LIDCOM)",
+    "latitude": 18.9321087,
+    "longitude": 72.8341438,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Bombay Life Building, 5th Floor, 45, Veer Nariman Road, Fort, Mumbai 400001 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-8D6A057E",
+    "partner_name": "Manipur Tribal Development Corporation Ltd (MTDC)",
+    "latitude": 24.8253007,
+    "longitude": 93.9291572,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Lamphelpat, Imphal, Manipur 795004 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-F871886F",
+    "partner_name": "Meghalaya Cooperative Apex Bank Ltd (MCAB)",
+    "latitude": 25.569032,
+    "longitude": 91.8840157,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at M.G. Road, Kutchery, Shillong, Meghalaya 793001 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-95C619DE",
+    "partner_name": "Mizoram Urban Cooperative Development Bank Ltd (MUCO Bank)",
+    "latitude": 23.7373016,
+    "longitude": 92.7157174,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Lawlsawmiliani Building, Top Floor, Zarkawt, Aizawl 796001 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-12CF538A",
+    "partner_name": "Mizoram Khadi & Village Industries Board (MKVIB)",
+    "latitude": 23.7373016,
+    "longitude": 92.7157174,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at 'Zorun', Zarkawt, Aizawl, Mizoram 796007 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-E95D97C4",
+    "partner_name": "Sikkim Scheduled Castes, Scheduled Tribes & Backward Classes Development Corporation (SSCSTBCDC)",
+    "latitude": 27.329046,
+    "longitude": 88.6122673,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Bhanupath, Gangtok, Sikkim 737101 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SCA-7D797F19",
+    "partner_name": "Uttarakhand Bahu-udeshiya Vitta Evam Vikas Nigam (UBVEVN)",
+    "latitude": 30.3255646,
+    "longitude": 78.0436813,
+    "source_name": "STATE/UT-WISE LIST OF STATE CHANNELISING AGENCIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_164458_Ip6UJm.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Physical office at Janjati Directorate, Bhagat Singh Colony, Adhoiwala, Dehradun 248001 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "PSB-80953BA7",
+    "partner_name": "Union Bank of India (Rural & Agri Business Department, Central Office)",
+    "latitude": 18.9259759,
+    "longitude": 72.8242068,
+    "source_name": "LIST OF PUBLIC SECTOR BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260408_100623_Bea3za.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Central Office at Union Bank Bhavan, 239 Vidhan Bhavan Marg, Nariman Point, Mumbai 400021 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "PSB-7C010301",
+    "partner_name": "Punjab & Sind Bank (Priority Sector Advance Department)",
+    "latitude": 28.6433841,
+    "longitude": 77.1777613,
+    "source_name": "LIST OF PUBLIC SECTOR BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260408_100623_Bea3za.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Department office at 5th Floor, 21 Rajendra Place, New Delhi 110008 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "PSB-939BC20A",
+    "partner_name": "Indian Bank Corporate Office",
+    "latitude": 13.0554718,
+    "longitude": 80.2639706,
+    "source_name": "LIST OF PUBLIC SECTOR BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260408_100623_Bea3za.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Corporate Office at 254-260, Avvai Shanmugam Salai, Royapettah, Chennai 600014 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "PSB-FC9FA12B",
+    "partner_name": "Bank of Maharashtra (Head Office Lokmangal)",
+    "latitude": 18.5325915,
+    "longitude": 73.8513115,
+    "source_name": "LIST OF PUBLIC SECTOR BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260408_100623_Bea3za.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head Office at 'Lokmangal', 1501, Shivajinagar, Pune 411005 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "RRB-C5F4B14E",
+    "partner_name": "Jharkhand Gramin Bank (Jharkhand Rajya Gramin Bank)",
+    "latitude": 23.3700501,
+    "longitude": 85.3250387,
+    "source_name": "LIST OF REGIONAL RURAL BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_163145_9tiTZM.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at Zila Parishad Market Complex, 3rd Floor, Kutchery Road, Ranchi 834001 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "RRB-0456B02A",
+    "partner_name": "Uttar Pradesh Gramin Bank (Aryavart Bank / Baroda UP Bank Head Office)",
+    "latitude": 26.8611743,
+    "longitude": 81.0039196,
+    "source_name": "LIST OF REGIONAL RURAL BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_163145_9tiTZM.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at 2nd & 3rd Floor, NBCC Commercial Complex, Vardan Khand, Gomti Nagar Extension, Lucknow 226010 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "RRB-6D3573F7",
+    "partner_name": "Andhra Pradesh Grameena Bank (Andhra Pragathi Grameena Bank)",
+    "latitude": 16.2915189,
+    "longitude": 80.4541588,
+    "source_name": "LIST OF REGIONAL RURAL BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_163145_9tiTZM.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at 4th Floor, Raghu Mansion, 4-1, Broadipet, Guntur 522002 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "RRB-68A175F7",
+    "partner_name": "Madhya Pradesh Gramin Bank (Head Office)",
+    "latitude": 22.7493079,
+    "longitude": 75.903541,
+    "source_name": "LIST OF REGIONAL RURAL BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_163145_9tiTZM.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at C-21 Business Park, MR-10, Radisson Square, Indore 452010 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "RRB-241925E5",
+    "partner_name": "Puducherry Grama Bank (Puduvai Bharathiar Grama Bank)",
+    "latitude": 11.9496801,
+    "longitude": 79.8317937,
+    "source_name": "LIST OF REGIONAL RURAL BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_163145_9tiTZM.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at No.441, Mahatma Gandhi Road, Muthialpet, Puducherry 605003 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "RRB-54AF87EC",
+    "partner_name": "West Bengal Gramin Bank (Paschim Banga Gramin Bank)",
+    "latitude": 22.5736296,
+    "longitude": 88.3251045,
+    "source_name": "LIST OF REGIONAL RURAL BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_163145_9tiTZM.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at Natabar Paul Road, Chatterjee Para More, Howrah 711101 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "RRB-5E34EB8E",
+    "partner_name": "Manipur Rural Bank",
+    "latitude": 24.7996733,
+    "longitude": 93.9350847,
+    "source_name": "LIST OF REGIONAL RURAL BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_163145_9tiTZM.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at Keishampat, Keisham Leikai, Imphal, Manipur 795001 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "RRB-180F880C",
+    "partner_name": "Odisha Gramya Bank (Head Office)",
+    "latitude": 20.2661224,
+    "longitude": 85.7832241,
+    "source_name": "LIST OF REGIONAL RURAL BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260401_163145_9tiTZM.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at Gandamunda, Khandagiri, Bhubaneswar 751030 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "NBFC_MFI-7516BC41",
+    "partner_name": "Anik Financial Services Private Limited",
+    "latitude": 18.4056517,
+    "longitude": 76.5662656,
+    "source_name": "LIST OF NBFC-MFIs",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20251223_101231_7smjJC.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Registered office at Sahyadri Building, Behind Amitesh Hotel, Ambajogai Road, Latur 413512 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "NBFC_MFI-00055867",
+    "partner_name": "Grameen Development & Finance Private Limited",
+    "latitude": 26.0491,
+    "longitude": 91.3909,
+    "source_name": "LIST OF NBFC-MFIs",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20251223_101231_7smjJC.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Office at Dubjent, Kulshi Road, Chhaygaon, Kamrup, Assam 781124 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "NBFC_MFI-486BB9C8",
+    "partner_name": "ASA International Microfinance Ltd (Kolkata)",
+    "latitude": 22.5700255,
+    "longitude": 88.4347847,
+    "source_name": "LIST OF NBFC-MFIs",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20251223_101231_7smjJC.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Office at Victoria Park, 4th Floor, GN-37/2, Sector-V, Salt Lake City, Kolkata 700091 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "NBFC_MFI-A68682C0",
+    "partner_name": "Satin Creditcare Network Ltd",
+    "latitude": 28.5114646,
+    "longitude": 77.0876926,
+    "source_name": "LIST OF NBFC-MFIs",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20251223_101231_7smjJC.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Corporate office at Plot No.492, Udyog Vihar, Phase-III, Gurugram, Haryana 122016 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "NBFC_MFI-3ED74E1A",
+    "partner_name": "Pahal Financial Services Pvt. Ltd",
+    "latitude": 23.0535306,
+    "longitude": 72.4934085,
+    "source_name": "LIST OF NBFC-MFIs",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20251223_101231_7smjJC.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Office at 7th Floor, Binori B Square-2, Ambli Road, Ahmedabad 380054 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "COOPERATIVE_BANK-1878CA4C",
+    "partner_name": "Shri Mahila Sewa Sahakari Bank Ltd",
+    "latitude": 23.0231657,
+    "longitude": 72.5602628,
+    "source_name": "LIST OF COOPERATIVE SOCIETIES/BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20251223_101341_Zcm8s6.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at 109, Sakar-II, Opp Town Hall, Ellisbridge, Ahmedabad 380006 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "COOPERATIVE_BANK-FF665773",
+    "partner_name": "Konoklata Mahila Urban Cooperative Bank",
+    "latitude": 26.182565,
+    "longitude": 91.7405855,
+    "source_name": "LIST OF COOPERATIVE SOCIETIES/BANKS",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20251223_101341_Zcm8s6.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at Hem Baruah Road, Panbazar, Guwahati, Assam 781001 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "SMALL_FINANCE_BANK-2C8A70B8",
+    "partner_name": "Ujjivan Small Finance Bank Ltd (Head Office)",
+    "latitude": 12.9390255,
+    "longitude": 77.6238477,
+    "source_name": "Small Finance Bank",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260408_100851_UrGTfH.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Head office at Grape Garden, No.27, 3rd A Cross, 6th Block, Koramangala, Bengaluru 560095 verified via OpenStreetMap."
+  },
+  {
+    "partner_code": "COOPERATIVE_SOCIETY-B47F5EE2",
+    "partner_name": "Streenidhi Credit Cooperative Federation Ltd (Telangana)",
+    "latitude": 17.4079134,
+    "longitude": 78.4701354,
+    "source_name": "LIST OF COOPERATIVE SOCIETIES",
+    "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/20260408_101711_6Iyved.pdf",
+    "confidence": "HIGH",
+    "verification_notes": "Office at 401 & 402, 4th Floor, My Home Sarovar Plaza, Secretariat Road, Saifabad, Hyderabad 500004 verified via OpenStreetMap."
+  }
+]

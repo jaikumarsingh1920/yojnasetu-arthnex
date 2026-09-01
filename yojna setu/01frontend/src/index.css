@@ -3,15 +3,74 @@
 @tailwind utilities;
 
 @layer base {
+  html[data-text-size="small"] {
+    font-size: 15px;
+  }
+  html[data-text-size="default"],
+  html:not([data-text-size]) {
+    font-size: 16px;
+  }
+  html[data-text-size="large"] {
+    font-size: 18px;
+  }
+
+  @media (max-width: 640px) {
+    html[data-text-size="small"] {
+      font-size: 14px;
+    }
+    html[data-text-size="default"],
+    html:not([data-text-size]) {
+      font-size: 15px;
+    }
+    html[data-text-size="large"] {
+      font-size: 17px;
+    }
+  }
+
   body {
     @apply bg-slate-50 text-slate-900 antialiased font-sans min-h-screen selection:bg-sky-500 selection:text-white;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-panel-dark {
+  background: rgba(13, 30, 54, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Tri-color Accent Bar */
+.gov-tricolor-bar {
+  background: linear-gradient(90deg, #ff6b00 0%, #ff6b00 33%, #ffffff 33%, #ffffff 66%, #059669 66%, #059669 100%);
+  height: 3px;
+  width: 100%;
+}
+
+/* Hero Mesh Background */
+.hero-mesh-gradient {
+  background: radial-gradient(circle at 10% 20%, rgba(255, 107, 0, 0.15) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(0, 112, 243, 0.15) 0%, transparent 40%),
+              radial-gradient(circle at 50% 50%, rgba(5, 150, 105, 0.08) 0%, transparent 50%),
+              linear-gradient(135deg, #07172c 0%, #0d2a4d 50%, #040e1b 100%);
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
@@ -22,4 +81,31 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Leaflet Map Frame Isolation & Containment */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1 !important;
+  position: relative !important;
+  font-family: inherit !important;
+  border-radius: inherit;
+}
+
+.leaflet-pane {
+  z-index: 10 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 20 !important;
+}
+
+.leaflet-control {
+  z-index: 25 !important;
+}
+
+.leaflet-popup {
+  z-index: 30 !important;
 }

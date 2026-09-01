@@ -14,6 +14,14 @@ class ApplicationUpdateRequest(BaseModel):
     profile: BeneficiaryProfileInput = Field(..., description="Updated beneficiary profile details for draft application")
 
 
+class ApplicationSubmitRequest(BaseModel):
+    partner_id: str = Field(..., description="Target Channel Partner UUID for routing funds")
+
+
+class ApplicationWithdrawRequest(BaseModel):
+    reason: Optional[str] = Field(None, description="Optional withdrawal reason")
+
+
 class ApplicationDocumentResponse(BaseModel):
     app_document_id: str
     application_id: str

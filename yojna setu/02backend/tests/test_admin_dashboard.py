@@ -116,30 +116,49 @@ def test_admin_rbac_access_control(db, admin_headers, beneficiary_headers, partn
 
 
 def test_admin_dashboard_summary_metrics(db, admin_headers):
-    """Verify Dashboard Summary API returns accurate database metrics across 56 schemes."""
+    """Verify Dashboard Summary API returns accurate database governance metrics without application tracking."""
     res = client.get("/api/v1/admin/dashboard", headers=admin_headers)
     assert res.status_code == 200
     data = res.json()
 
-    assert data["total_schemes"] == 56
-    assert data["verified_schemes"] == 56
-    assert data["total_rules"] == 57
-    assert data["total_documents"] == 20
+    assert data["total_schemes"] >= 90
+    assert data["verified_schemes"] >= 90
+    assert data["total_rules"] >= 126
+    assert data["total_documents"] >= 98
+    assert data["total_ministries"] >= 10
+    assert data["total_changelogs"] >= 200
     assert data["avg_parameter_completeness"] > 0.0
     assert "system_health" in data
     assert data["system_health"]["overall_status"] == "ONLINE"
 
+    # Verify out-of-scope application tracking fields are strictly removed
+    assert "applications_total" not in data
+    assert "applications_by_status" not in data
+    assert "pending_document_verifications" not in data
+
+
+def test_removed_admin_application_processing_endpoints(db, admin_headers):
+    """Verify that out-of-scope application processing endpoints have been removed from admin router."""
+    resp1 = client.get("/api/v1/admin/applications", headers=admin_headers)
+    assert resp1.status_code == 404
+
+    resp2 = client.get("/api/v1/admin/applications/stats", headers=admin_headers)
+    assert resp2.status_code == 404
+
+    resp3 = client.post("/api/v1/admin/applications/app-123/reassign", headers=admin_headers, json={})
+    assert resp3.status_code == 404
+
 
 def test_scheme_audit_list(db, admin_headers):
-    """Verify Scheme Audit List API returns all 56 schemes with VERIFIED status and completeness scores."""
+    """Verify Scheme Audit List API returns schemes with VERIFIED status and completeness scores."""
     res = client.get("/api/v1/admin/schemes?page_size=100", headers=admin_headers)
     assert res.status_code == 200
     data = res.json()
 
-    assert data["total"] == 56
-    assert len(data["items"]) == 56
+    assert data["total"] >= 90
+    assert len(data["items"]) >= 90
 
-    # Verify all 56 schemes maintain VERIFIED status
+    # Verify schemes maintain VERIFIED status
     for item in data["items"]:
         assert item["verification_status"] == "VERIFIED"
         assert item["completeness_score"] >= 0.0
@@ -167,25 +186,25 @@ def test_scheme_audit_detail(db, admin_headers):
 
 
 def test_rule_audit_list(db, admin_headers):
-    """Verify Rule Audit List API returns all 57 database rules."""
+    """Verify Rule Audit List API returns database rules."""
     res = client.get("/api/v1/admin/rules?page_size=100", headers=admin_headers)
     assert res.status_code == 200
     data = res.json()
 
-    assert data["total"] == 57
-    assert len(data["items"]) == 57
+    assert data["total"] >= 126
+    assert len(data["items"]) >= 100
     assert "field" in data["items"][0]
     assert "operator" in data["items"][0]
 
 
 def test_document_audit_list(db, admin_headers):
-    """Verify Document Audit List API returns all 20 document requirements."""
+    """Verify Document Audit List API returns document requirements."""
     res = client.get("/api/v1/admin/documents?page_size=100", headers=admin_headers)
     assert res.status_code == 200
     data = res.json()
 
-    assert data["total"] == 20
-    assert len(data["items"]) == 20
+    assert data["total"] >= 98
+    assert len(data["items"]) >= 98
     assert "document_name" in data["items"][0]
 
 

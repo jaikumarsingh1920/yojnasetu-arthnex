@@ -16,6 +16,7 @@ from app.models.application import (
 from app.models.scheme import Scheme
 from app.models.document import SchemeDocument
 from app.models.user import User, UserRole
+from app.models.partner import Partner
 from app.schemas.profile import BeneficiaryProfileInput
 from app.schemas.application import (
     ApplicationCreateRequest,
@@ -32,28 +33,38 @@ VALID_TRANSITIONS: Dict[str, set] = {
     ApplicationStatus.DRAFT.value: {
         ApplicationStatus.DOCUMENTS_PENDING.value,
         ApplicationStatus.READY_FOR_SUBMISSION.value,
+        ApplicationStatus.WITHDRAWN.value,
     },
     ApplicationStatus.DOCUMENTS_PENDING.value: {
         ApplicationStatus.READY_FOR_SUBMISSION.value,
+        ApplicationStatus.WITHDRAWN.value,
     },
     ApplicationStatus.READY_FOR_SUBMISSION.value: {
         ApplicationStatus.SUBMITTED.value,
+        ApplicationStatus.WITHDRAWN.value,
     },
     ApplicationStatus.SUBMITTED.value: {
         ApplicationStatus.UNDER_REVIEW.value,
+        ApplicationStatus.WITHDRAWN.value,
     },
     ApplicationStatus.UNDER_REVIEW.value: {
         ApplicationStatus.APPROVED.value,
         ApplicationStatus.REJECTED.value,
         ApplicationStatus.CORRECTION_REQUIRED.value,
+        ApplicationStatus.WITHDRAWN.value,
     },
     ApplicationStatus.CORRECTION_REQUIRED.value: {
         ApplicationStatus.DOCUMENTS_PENDING.value,
         ApplicationStatus.READY_FOR_SUBMISSION.value,
         ApplicationStatus.SUBMITTED.value,
+        ApplicationStatus.WITHDRAWN.value,
     },
-    ApplicationStatus.APPROVED.value: set(),
+    ApplicationStatus.APPROVED.value: {
+        ApplicationStatus.COMPLETED.value,
+    },
     ApplicationStatus.REJECTED.value: set(),
+    ApplicationStatus.WITHDRAWN.value: set(),
+    ApplicationStatus.COMPLETED.value: set(),
 }
 
 ACTIVE_STATUSES = {
@@ -425,7 +436,8 @@ class ApplicationService:
         cls,
         db: Session,
         application_id: str,
-        current_user: User
+        current_user: User,
+        partner_id: str
     ) -> Application:
         """
         Submits an application:
@@ -436,6 +448,24 @@ class ApplicationService:
         5. Record status history atomically
         """
         app_obj = cls.get_application_by_id(db, application_id, current_user)
+
+        if not partner_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A valid Channel Partner must be selected to submit this application. Direct loans are not entertained."
+            )
+
+        partner = db.query(Partner).filter(
+            Partner.partner_id == partner_id,
+            Partner.is_active == True,
+            Partner.is_accepting_applications == True
+        ).first()
+
+        if not partner:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The selected partner is invalid, inactive, or not accepting applications."
+            )
 
         if app_obj.status == ApplicationStatus.SUBMITTED.value:
             raise HTTPException(
@@ -463,6 +493,7 @@ class ApplicationService:
 
         now = utc_now()
         app_obj.status = new_status
+        app_obj.assigned_partner_id = partner_id
         app_obj.submitted_at = now
         app_obj.updated_at = now
 
@@ -550,3 +581,58 @@ class ApplicationService:
             page_size=page_size,
             pages=pages
         )
+
+    @classmethod
+    def withdraw_application(
+        cls,
+        db: Session,
+        application_id: str,
+        current_user: User,
+        reason: Optional[str] = None
+    ) -> Application:
+        """
+        Allows a beneficiary to withdraw their active application.
+        Transitions state to WITHDRAWN and logs history & notifications.
+        """
+        app_obj = cls.get_application_by_id(db, application_id, current_user)
+
+        if app_obj.status in (ApplicationStatus.APPROVED.value, ApplicationStatus.REJECTED.value, ApplicationStatus.WITHDRAWN.value, ApplicationStatus.COMPLETED.value):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot withdraw application in finalized status '{app_obj.status}'."
+            )
+
+        old_status = app_obj.status
+        new_status = ApplicationStatus.WITHDRAWN.value
+        cls.validate_transition(old_status, new_status)
+
+        now = utc_now()
+        app_obj.status = new_status
+        app_obj.updated_at = now
+
+        withdraw_reason = reason.strip() if reason and reason.strip() else "Beneficiary withdrew application."
+
+        history = ApplicationStatusHistory(
+            application_id=application_id,
+            old_status=old_status,
+            new_status=new_status,
+            changed_by=current_user.user_id,
+            reason=withdraw_reason
+        )
+        db.add(history)
+        db.commit()
+
+        from app.events.notifications import NotificationPublisher, NotificationEventType
+
+        NotificationPublisher.publish(
+            db=db,
+            event_type=NotificationEventType.APPLICATION_WITHDRAWN,
+            application_id=application_id,
+            recipient_user_id=current_user.user_id,
+            scheme_name=app_obj.scheme.scheme_name if app_obj.scheme else "",
+            payload={"withdrawn_at": now.isoformat(), "reason": withdraw_reason}
+        )
+        db.commit()
+
+        return cls.get_application_by_id(db, application_id, current_user)
+

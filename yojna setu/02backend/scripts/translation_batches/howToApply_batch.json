@@ -1,0 +1,58 @@
+{
+  "howToApply.directPortalDesc": {
+    "en": "Applications for this scheme are handled directly on the verified official government portal. You do not need to visit middle-men or unverified agencies.",
+    "hi": "इस योजना के आवेदन सीधे सत्यापित आधिकारिक सरकारी पोर्टल पर स्वीकार किए जाते हैं। आपको किसी बिचौलिए के पास जाने की आवश्यकता नहीं है।"
+  },
+  "howToApply.disclaimer": {
+    "en": "Eligibility guidance only. Final eligibility and approval are determined by the concerned government authority.",
+    "hi": "केवल पात्रता मार्गदर्शन। अंतिम पात्रता और स्वीकृति संबंधित सरकारी प्राधिकरण द्वारा निर्धारित की जाती है।"
+  },
+  "howToApply.noSourceLink": {
+    "en": "Official online application route is currently not verified.",
+    "hi": "आधिकारिक ऑनलाइन आवेदन मार्ग वर्तमान में उपलब्ध नहीं है।"
+  },
+  "howToApply.partnerDesc": {
+    "en": "This scheme is disbursed through authorized State Channelizing Agencies (SCAs), Public Sector Banks (PSBs), and Regional Rural Banks (RRBs).",
+    "hi": "यह योजना अधिकृत राज्य चैनलाइजिंग एजेंसियों (SCA), सार्वजनिक क्षेत्र के बैंकों (PSB) और क्षेत्रीय ग्रामीण बैंकों (RRB) के माध्यम से संचालित होती है।"
+  },
+  "howToApply.step1PartnerDesc": {
+    "en": "Ensure you have physical originals and copies of all documents listed below.",
+    "hi": "सुनिश्चित करें कि आपके पास नीचे सूचीबद्ध सभी दस्तावेजों की मूल और फोटोकॉपी उपलब्ध है।"
+  },
+  "howToApply.step1PortalDesc": {
+    "en": "Keep digital copies of your Aadhaar, bank passbook, and proof of category/income ready.",
+    "hi": "अपने आधार, बैंक पासबुक और श्रेणी/आय प्रमाण पत्र की डिजिटल प्रतियां तैयार रखें।"
+  },
+  "howToApply.step1UnverifiedDesc": {
+    "en": "Check the authoritative ministry notification link below for eligibility criteria.",
+    "hi": "पात्रता और शर्तों के लिए नीचे दिए गए आधिकारिक मंत्रालय अधिसूचना लिंक की जांच करें।"
+  },
+  "howToApply.step2PartnerDesc": {
+    "en": "Use our verified GPS locator to find the closest State Channelizing Agency or bank branch.",
+    "hi": "निकटतम SCA या बैंक शाखा खोजने के लिए हमारे सत्यापित GPS लोकेटर का उपयोग करें।"
+  },
+  "howToApply.step2PortalDesc": {
+    "en": "Click the button below to safely open the official government portal in a secure window.",
+    "hi": "सुरक्षित विंडो में आधिकारिक सरकारी पोर्टल खोलने के लिए नीचे दिए गए बटन पर क्लिक करें।"
+  },
+  "howToApply.step2UnverifiedDesc": {
+    "en": "Visit your local District Welfare Officer, DIC, or Lead Bank District Manager.",
+    "hi": "अपने स्थानीय जिला कल्याण अधिकारी, डीआईसी (DIC) या लीड बैंक प्रबंधक से संपर्क करें।"
+  },
+  "howToApply.step3PartnerDesc": {
+    "en": "Submit your application form and project proposal directly at the partner counter.",
+    "hi": "अपना आवेदन पत्र और परियोजना प्रस्ताव सीधे पार्टनर काउंटर पर जमा करें।"
+  },
+  "howToApply.step3PortalDesc": {
+    "en": "Authenticate via Aadhaar OTP, complete the scheme form, and save your Application Reference Number.",
+    "hi": "आधार ओटीपी से प्रमाणित करें, फॉर्म भरें और अपना आवेदन संदर्भ नंबर सुरक्षित रखें।"
+  },
+  "howToApply.subtitle": {
+    "en": "Official step-by-step application guidance based on verified government directives.",
+    "hi": "सत्यापित सरकारी दिशा-निर्देशों पर आधारित आधिकारिक चरण-दर-चरण आवेदन मार्गदर्शन।"
+  },
+  "howToApply.unverifiedDesc": {
+    "en": "Application route could not be verified from an open online portal or channel partner registry. Applications are accepted directly through concerned District Departments or institutional windows.",
+    "hi": "खुले ऑनलाइन पोर्टल से आवेदन मार्ग सत्यापित नहीं हो सका। आवेदन सीधे संबंधित जिला विभागों या संस्थागत खिड़की के माध्यम से स्वीकार किए जाते हैं।"
+  }
+}

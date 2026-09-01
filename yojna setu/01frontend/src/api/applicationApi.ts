@@ -52,8 +52,14 @@ export const applicationApi = {
     return response.data;
   },
 
-  submitApplication: async (applicationId: string): Promise<ApplicationResponse> => {
-    const response = await apiClient.post<ApplicationResponse>(`/applications/${applicationId}/submit`);
+  submitApplication: async (applicationId: string, partnerId: string): Promise<ApplicationResponse> => {
+    const response = await apiClient.post<ApplicationResponse>(`/applications/${applicationId}/submit`, { partner_id: partnerId });
+    return response.data;
+  },
+
+  withdrawApplication: async (applicationId: string, reason?: string): Promise<ApplicationResponse> => {
+    const response = await apiClient.post<ApplicationResponse>(`/applications/${applicationId}/withdraw`, { reason });
     return response.data;
   },
 };
+

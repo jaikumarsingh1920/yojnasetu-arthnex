@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/Alert';
+import { GoogleAuthButton } from '../components/GoogleAuthButton';
 import { LogIn, Lock, Mail, ShieldCheck } from 'lucide-react';
 
 export const Login: React.FC = () => {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,8 +36,6 @@ export const Login: React.FC = () => {
         navigate(targetFrom, { replace: true });
       } else if (userRole === 'SYSTEM_ADMIN') {
         navigate('/admin', { replace: true });
-      } else if (userRole === 'PARTNER_USER' || userRole === 'PARTNER_ADMIN') {
-        navigate('/partner', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
@@ -66,16 +67,39 @@ export const Login: React.FC = () => {
             alt="YojnaSetu Logo"
             className="w-16 h-16 rounded-2xl mx-auto object-contain bg-slate-950 p-1.5 shadow-md border border-slate-700"
           />
-          <h2 className="text-2xl font-extrabold text-slate-900">Sign In to YojnaSetu</h2>
-          <p className="text-xs text-slate-500">Access scheme discovery, application workflow, and partner reviews</p>
+          <h2 className="text-2xl font-extrabold text-slate-900">{t('auth.loginTitle')}</h2>
+          <p className="text-xs text-slate-500">{t('auth.loginSubtitle')}</p>
         </div>
 
         {errorMsg && <Alert type="error">{errorMsg}</Alert>}
 
+        {/* Google Authentication Button */}
+        <div className="space-y-4">
+          <GoogleAuthButton
+            mode="login"
+            onSuccess={() => {
+              const targetFrom = (location.state as any)?.from?.pathname;
+              if (targetFrom && targetFrom !== '/' && targetFrom !== '/login') {
+                navigate(targetFrom, { replace: true });
+              } else {
+                navigate('/dashboard', { replace: true });
+              }
+            }}
+            onError={(msg) => setErrorMsg(msg)}
+          />
+
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest absolute">
+              {t('common.or', 'OR')}
+            </span>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Email or Phone Number
+              {t('auth.emailOrPhone')}
             </label>
             <div className="relative">
               <input
@@ -83,7 +107,7 @@ export const Login: React.FC = () => {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. ben10@example.com or admin@yojnasetu.gov.in"
+                placeholder={t('auth.emailOrPhonePlaceholder', 'e.g. ben10@example.com or 9876543210')}
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"
               />
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
@@ -92,7 +116,7 @@ export const Login: React.FC = () => {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Password
+              {t('auth.password')}
             </label>
             <div className="relative">
               <input
@@ -110,36 +134,23 @@ export const Login: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-gov-blue hover:bg-gov-navy text-white font-bold py-3 rounded-lg text-sm shadow transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-gov-blue hover:bg-gov-navy text-white font-bold py-3 px-4 rounded-xl text-sm shadow transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <LogIn className="w-4 h-4" />
-                Sign In
+                {t('auth.signInBtn')}
               </>
             )}
           </button>
         </form>
 
-        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 space-y-2">
-          <p className="font-extrabold text-slate-900 flex items-center gap-1.5 border-b border-slate-200 pb-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            Development / Test Credentials:
-          </p>
-          <div className="space-y-1.5 text-[11px]">
-            <p>• <span className="font-bold text-slate-800">Beneficiary:</span> <code className="bg-slate-200/80 text-slate-900 font-mono px-1.5 py-0.5 rounded border border-slate-300 font-bold">ben10@example.com / Secret123!</code></p>
-            <p>• <span className="font-bold text-slate-800">Partner User:</span> <code className="bg-slate-200/80 text-slate-900 font-mono px-1.5 py-0.5 rounded border border-slate-300 font-bold">p1user@example.com / Secret123!</code></p>
-            <p>• <span className="font-bold text-slate-800">Partner Admin:</span> <code className="bg-slate-200/80 text-slate-900 font-mono px-1.5 py-0.5 rounded border border-slate-300 font-bold">p1admin@example.com / Secret123!</code></p>
-            <p>• <span className="font-bold text-slate-800">System Admin:</span> <code className="bg-slate-200/80 text-slate-900 font-mono px-1.5 py-0.5 rounded border border-slate-300 font-bold">admin@yojnasetu.gov.in / Secret123!</code></p>
-          </div>
-        </div>
-
-        <div className="text-center pt-2 text-xs text-slate-600">
-          Don't have an account yet?{' '}
-          <Link to="/register" className="font-bold text-sky-700 hover:underline">
-            Register Here
+        <div className="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+          {t('auth.noAccount')}{' '}
+          <Link to="/register" className="font-bold text-sky-600 hover:text-sky-700">
+            {t('auth.registerBtn')}
           </Link>
         </div>
       </div>

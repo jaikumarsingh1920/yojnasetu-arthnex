@@ -144,7 +144,7 @@ def submitted_app_id(partner_client, ben_headers):
             assert up_res.status_code == 200
 
     # Submit application
-    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers)
+    sub_res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers, json={"partner_id": "partner-org-1"})
     assert sub_res.status_code == 200
     assert sub_res.json()["status"] == "SUBMITTED"
     return app_id
@@ -340,7 +340,7 @@ def test_application_rejection_workflow(partner_client, ben_headers, p1_admin_he
     app_id = app_res.json()["application_id"]
 
     # Submit application
-    client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers)
+    client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers, json={"partner_id": "partner-org-1"})
 
     # Rejection without reason -> 400
     rej_no_reason = client.post(

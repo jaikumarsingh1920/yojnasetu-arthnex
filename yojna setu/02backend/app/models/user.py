@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
-from sqlalchemy import String, Boolean, DateTime, ForeignKey
+from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
 
@@ -43,9 +43,29 @@ class User(Base):
         nullable=True,
         index=True
     )
-    hashed_password: Mapped[str] = mapped_column(
+    hashed_password: Mapped[Optional[str]] = mapped_column(
         String(255),
-        nullable=False
+        nullable=True
+    )
+    full_name: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True
+    )
+    avatar_url: Mapped[Optional[str]] = mapped_column(
+        String(1024),
+        nullable=True
+    )
+    auth_provider: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="LOCAL",
+        server_default="LOCAL"
+    )
+    google_id: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        unique=True,
+        nullable=True,
+        index=True
     )
     role: Mapped[str] = mapped_column(
         String(50),
@@ -67,7 +87,13 @@ class User(Base):
     preferred_language: Mapped[str] = mapped_column(
         String(10),
         nullable=False,
-        default="en"
+        default="en",
+        server_default="en"
+    )
+    profile_data: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        comment="JSON serialized citizen profile data"
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

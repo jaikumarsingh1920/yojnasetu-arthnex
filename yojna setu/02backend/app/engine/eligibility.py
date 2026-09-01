@@ -29,11 +29,11 @@ class DeterministicEligibilityEngine:
         """
         fn = field_name.strip().lower()
 
-        if fn in ("annual_income", "income_limit"):
+        if fn in ("annual_income", "income_limit", "income"):
             return profile.annual_income
         elif fn in ("age", "age_min", "age_max"):
             return profile.age
-        elif fn == "social_category":
+        elif fn in ("social_category", "category", "caste"):
             return profile.social_category
         elif fn == "sc_required":
             if profile.is_sc is not None:
@@ -57,16 +57,48 @@ class DeterministicEligibilityEngine:
             return profile.is_new_unit
         elif fn == "sector":
             return profile.sector
-        elif fn == "activity_type":
+        elif fn in ("activity_type", "activity", "activity_supported"):
             return profile.activity_type
-        elif fn in ("project_cost", "max_project_cost"):
+        elif fn in ("project_cost", "max_project_cost", "cost_limit"):
             return profile.project_cost
-        elif fn in ("requested_loan_amount", "max_loan_amount"):
+        elif fn in ("requested_loan_amount", "max_loan_amount", "loan_amount"):
             return profile.requested_loan_amount
-        elif fn == "collateral_required":
+        elif fn in ("collateral_required", "collateral_available"):
             return profile.collateral_available
         elif fn == "application_route":
             return profile.application_route
+        elif fn in ("education", "education_level", "education_qualification", "minimum_education"):
+            return profile.education_level
+        elif fn in ("employment_status", "employment"):
+            return profile.employment_status
+        elif fn in ("pwd", "is_pwd", "disability", "disability_status", "divyangjan"):
+            return profile.is_pwd
+        elif fn in ("minority", "is_minority", "minority_status"):
+            if profile.is_minority is not None:
+                return profile.is_minority
+            if profile.social_category:
+                return profile.social_category.strip().upper() == "MINORITY"
+            return None
+        elif fn in ("artisan", "is_artisan", "craftsman", "artisan_status"):
+            if profile.is_artisan is not None:
+                return profile.is_artisan
+            if profile.applicant_type:
+                return profile.applicant_type.strip().upper() in ["ARTISAN", "CRAFTSMAN"]
+            return None
+        elif fn in ("farmer", "is_farmer", "kisan", "agriculture"):
+            if profile.is_farmer is not None:
+                return profile.is_farmer
+            if profile.applicant_type:
+                return profile.applicant_type.strip().upper() == "FARMER"
+            return None
+        elif fn in ("street_vendor", "is_street_vendor", "vendor", "svanidhi"):
+            if profile.is_street_vendor is not None:
+                return profile.is_street_vendor
+            if profile.applicant_type:
+                return profile.applicant_type.strip().upper() == "STREET_VENDOR"
+            return None
+        elif fn in ("safai_karamchari", "is_safai_karamchari", "sanitation_worker", "manual_scavenger"):
+            return profile.is_safai_karamchari
 
         if hasattr(profile, fn):
             return getattr(profile, fn)
@@ -258,7 +290,7 @@ class DeterministicEligibilityEngine:
 
             rtype = rule.rule_type.upper()
 
-            if rtype == "ELIGIBILITY":
+            if rtype in ("ELIGIBILITY", "HARD"):
                 if res_type == RuleEvaluationResult.PASS:
                     hard_passed.append(detail)
                 elif res_type == RuleEvaluationResult.FAIL:
@@ -273,6 +305,10 @@ class DeterministicEligibilityEngine:
         # -------------------------------------------------------------
         # 3. Question A: Hard Eligibility Status Determination
         # -------------------------------------------------------------
+        passed_reasons = [r.reason for r in hard_passed]
+        failed_reasons = [r.reason for r in hard_failed]
+        unknown_reasons = [r.reason for r in unknown_eligibility]
+
         if len(hard_failed) > 0:
             overall_status = SchemeEligibilityStatus.INELIGIBLE
             explanations.append(f"Ineligible: Failed {len(hard_failed)} mandatory hard eligibility rule(s).")
@@ -292,6 +328,9 @@ class DeterministicEligibilityEngine:
             scheme_name=scheme.scheme_name,
             verification_status=scheme.verifications[0].verification_status if scheme.verifications else "VERIFIED",
             status=overall_status,
+            matched_rules=passed_reasons,
+            failed_rules=failed_reasons,
+            missing_information=unknown_reasons,
             hard_rules_passed=hard_passed,
             hard_rules_failed=hard_failed,
             unknown_eligibility_rules=unknown_eligibility,

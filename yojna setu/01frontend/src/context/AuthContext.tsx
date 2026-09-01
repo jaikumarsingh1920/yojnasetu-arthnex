@@ -9,6 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   role: UserRole | null;
   login: (credentials: LoginRequest) => Promise<TokenResponse>;
+  loginWithGoogle: (idToken: string, preferredLanguage?: string) => Promise<TokenResponse>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -61,6 +62,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithGoogle = async (idToken: string, preferredLanguage?: string): Promise<TokenResponse> => {
+    setIsLoading(true);
+    try {
+      const res = await authApi.loginWithGoogle(idToken, preferredLanguage);
+      setToken(res.access_token);
+      setUser(res.user);
+      localStorage.setItem('yojnasetu_access_token', res.access_token);
+      localStorage.setItem('yojnasetu_user', JSON.stringify(res.user));
+      return res;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async (payload: RegisterRequest) => {
     setIsLoading(true);
     try {
@@ -92,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!token && !!user,
         role: user ? user.role : null,
         login,
+        loginWithGoogle,
         register,
         logout,
         refreshUser,

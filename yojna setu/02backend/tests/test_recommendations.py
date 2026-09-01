@@ -75,17 +75,18 @@ def sample_profile():
 # 1. ELIGIBILITY INTEGRATION TESTS
 # ─────────────────────────────────────────────────────────────────
 
-def test_evaluate_all_56_schemes(rec_client, sample_profile):
+def test_evaluate_all_schemes(rec_client, sample_profile):
     _, session_factory = rec_client
     db = session_factory()
+    total_schemes = db.query(Scheme).count()
     req = RecommendationRequest(profile=sample_profile, top_k=5)
     res = DeterministicRecommendationEngine.get_recommendations(db, req)
     db.close()
 
-    assert res.evaluated_scheme_count == 56
+    assert res.evaluated_scheme_count == total_schemes
     assert res.eligible_scheme_count > 0
     assert res.excluded_scheme_count > 0
-    assert res.eligible_scheme_count + res.excluded_scheme_count + res.insufficient_info_scheme_count == 56
+    assert res.eligible_scheme_count + res.excluded_scheme_count + res.insufficient_info_scheme_count == total_schemes
 
 
 def test_hard_ineligible_schemes_excluded(rec_client):
@@ -258,13 +259,14 @@ def test_zero_eligible_schemes(rec_client, monkeypatch):
 
     profile = BeneficiaryProfileInput(age=5)
     req = RecommendationRequest(profile=profile, top_k=5)
+    total_schemes = db.query(Scheme).count()
     res = DeterministicRecommendationEngine.get_recommendations(db, req)
     db.close()
 
-    assert res.evaluated_scheme_count == 56
+    assert res.evaluated_scheme_count == total_schemes
     assert res.eligible_scheme_count == 0
     assert res.recommendations == []
-    assert res.excluded_scheme_count == 56
+    assert res.excluded_scheme_count == total_schemes
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -293,7 +295,11 @@ def test_explanations_populated(rec_client, sample_profile):
 # ─────────────────────────────────────────────────────────────────
 
 def test_recommendation_api_post(rec_client):
-    client, _ = rec_client
+    client, session_factory = rec_client
+    db = session_factory()
+    total_schemes = db.query(Scheme).count()
+    db.close()
+
     payload = {
         "profile": {
             "age": 28,
@@ -313,7 +319,7 @@ def test_recommendation_api_post(rec_client):
     assert response.status_code == 200
     data = response.json()
 
-    assert data["evaluated_scheme_count"] == 56
+    assert data["evaluated_scheme_count"] == total_schemes
     assert data["eligible_scheme_count"] > 0
     assert len(data["recommendations"]) == 3
 
@@ -335,3 +341,215 @@ def test_recommendation_api_invalid_payload(rec_client):
     # top_k = 0 invalid (ge=1)
     res = client.post("/api/v1/recommendations", json={"profile": {}, "top_k": 0})
     assert res.status_code == 422
+
+
+# ─────────────────────────────────────────────────────────────────
+# 9. TASK-032: EXPLAINABLE SCHEME RECOMMENDATION TESTS
+# ─────────────────────────────────────────────────────────────────
+
+def test_clearly_eligible_scheme_has_matched_rules_and_no_failed_rules(rec_client, sample_profile):
+    """Test 1: Clearly eligible applicant has eligible=True, matched_rules populated, failed_rules empty."""
+    _, session_factory = rec_client
+    db = session_factory()
+    req = RecommendationRequest(profile=sample_profile, top_k=5)
+    res = DeterministicRecommendationEngine.get_recommendations(db, req)
+    db.close()
+
+    assert len(res.recommendations) > 0
+    top_item = res.recommendations[0]
+    assert top_item.eligible is True
+    assert top_item.eligibility_status == "ELIGIBLE"
+    assert len(top_item.matched_rules) > 0
+    assert len(top_item.failed_rules) == 0
+    assert len(top_item.missing_information) == 0
+    # Every passed rule is factual
+    assert any("satisfies" in r or "within" in r or "eligible" in r.lower() for r in top_item.matched_rules)
+
+
+def test_clearly_ineligible_scheme_has_failed_rules(rec_client):
+    """Test 2: Clearly ineligible profile has eligible=False and failed_rules populated with exact factual reason."""
+    _, session_factory = rec_client
+    db = session_factory()
+
+    # Profile with age 17 (below minimum 18) and annual income ₹10,00,000 (exceeds ₹3,00,000 ceiling)
+    ineligible_profile = BeneficiaryProfileInput(
+        age=17,
+        annual_income=1000000.0,
+        social_category="GENERAL",
+        is_sc=False,
+    )
+    req = RecommendationRequest(profile=ineligible_profile, top_k=5)
+    res = DeterministicRecommendationEngine.get_recommendations(db, req)
+    db.close()
+
+    assert len(res.ineligible_schemes) > 0
+    # Check term loan scheme (SIH26092-053) in ineligibles
+    term_loan = next((item for item in res.ineligible_schemes if item.scheme_id == "SIH26092-053"), None)
+    assert term_loan is not None
+    assert term_loan.eligible is False
+    assert term_loan.eligibility_status == "INELIGIBLE"
+    assert len(term_loan.failed_rules) > 0
+    # Must contain age failure or income failure
+    reasons_text = " ".join(term_loan.failed_rules)
+    assert "below minimum requirement of 18" in reasons_text or "exceeds limit" in reasons_text
+
+
+def test_missing_income_tracked_in_missing_information_without_false_failure(rec_client):
+    """Test 3: Missing income must produce missing_information note and NOT a false 'income exceeds limit'."""
+    _, session_factory = rec_client
+    db = session_factory()
+
+    # Profile with no income provided
+    missing_income_profile = BeneficiaryProfileInput(
+        age=28,
+        annual_income=None,
+        social_category="SC",
+        is_sc=True,
+    )
+    req = RecommendationRequest(profile=missing_income_profile, top_k=5)
+    res = DeterministicRecommendationEngine.get_recommendations(db, req)
+    db.close()
+
+    # Find scheme with income limit in insufficient info list
+    insufficient_items = res.insufficient_info_schemes
+    assert len(insufficient_items) > 0
+
+    income_limited_scheme = next((s for s in insufficient_items if any("income" in r.lower() for r in s.missing_information)), None)
+    assert income_limited_scheme is not None
+    assert income_limited_scheme.eligible is False
+    assert income_limited_scheme.eligibility_status == "INSUFFICIENT_INFORMATION"
+
+    # Crucial: Must NOT contain false failure "exceeds limit"
+    all_missing_text = " ".join(income_limited_scheme.missing_information)
+    assert "Missing annual income" in all_missing_text or "income" in all_missing_text.lower()
+    assert len(income_limited_scheme.failed_rules) == 0
+
+
+def test_missing_project_cost_tracked_in_missing_information(rec_client):
+    """Test 4: Missing project cost tracked without false rejection."""
+    _, session_factory = rec_client
+    db = session_factory()
+
+    missing_cost_profile = BeneficiaryProfileInput(
+        age=28,
+        annual_income=180000.0,
+        social_category="SC",
+        is_sc=True,
+        project_cost=None,
+        requested_loan_amount=None,
+    )
+    req = RecommendationRequest(profile=missing_cost_profile, top_k=5)
+    res = DeterministicRecommendationEngine.get_recommendations(db, req)
+    db.close()
+
+    assert "project_cost" in res.missing_profile_fields
+    assert "requested_loan_amount" in res.missing_profile_fields
+    # Top recommendations are still evaluated for hard eligibility
+    assert len(res.recommendations) > 0
+
+
+def test_multiple_rule_failures_all_returned(rec_client):
+    """Test 5: Profile that fails multiple rules returns ALL relevant failed rules."""
+    _, session_factory = rec_client
+    db = session_factory()
+
+    multi_fail_profile = BeneficiaryProfileInput(
+        age=16,                       # Fails age_min (18) on PMEGP
+        annual_income=2500000.0,      # Fails income ceiling (500000) on Term Loan
+        social_category="GENERAL",    # Fails SC requirement on Term Loan
+        is_sc=False,
+    )
+    req = RecommendationRequest(profile=multi_fail_profile, top_k=50)
+    res = DeterministicRecommendationEngine.get_recommendations(db, req)
+    db.close()
+
+    # Check SIH26092-053 (Term Loan) which fails both income ceiling and SC requirement
+    term_loan = next((item for item in res.ineligible_schemes if item.scheme_id == "SIH26092-053"), None)
+    assert term_loan is not None
+    assert term_loan.eligible is False
+    assert len(term_loan.failed_rules) >= 2
+    failed_text = " ".join(term_loan.failed_rules)
+    assert "income" in failed_text.lower() or "500,000" in failed_text
+
+    # Check SIH26092-001 (PMEGP) which fails age requirement (min 18)
+    pmegp = next((item for item in res.ineligible_schemes if item.scheme_id == "SIH26092-001"), None)
+    if pmegp:
+        pmegp_text = " ".join(pmegp.failed_rules)
+        assert "age" in pmegp_text.lower() or "18" in pmegp_text
+
+
+def test_boundary_value_exactly_at_limit(rec_client):
+    """Test 6: Boundary value exactly at limit satisfies official eligibility criteria."""
+    _, session_factory = rec_client
+    db = session_factory()
+
+    # Exact boundary: age = 18, annual_income = 500,000.0 (exact limit of ₹500,000 for NSFDC Term Loan)
+    boundary_profile = BeneficiaryProfileInput(
+        age=18,
+        annual_income=500000.0,
+        social_category="SC",
+        is_sc=True,
+        applicant_type="INDIVIDUAL",
+        sector="MICRO_FINANCE",
+        activity_type="SMALL_MICRO_BUSINESS",
+        project_cost=100000.0,
+        requested_loan_amount=90000.0,
+    )
+    req = RecommendationRequest(profile=boundary_profile, top_k=50)
+    res = DeterministicRecommendationEngine.get_recommendations(db, req)
+    db.close()
+
+    term_loan = next((item for item in res.recommendations if item.scheme_id == "SIH26092-053"), None)
+    assert term_loan is not None
+    assert term_loan.eligible is True
+    assert term_loan.eligibility_status == "ELIGIBLE"
+    # Income rule passed
+    income_passed = any("500,000.00" in r and "satisfies" in r for r in term_loan.matched_rules)
+    assert income_passed
+
+
+def test_boundary_value_just_above_limit(rec_client):
+    """Test 7: Boundary value just above limit (₹500,001) fails eligibility."""
+    _, session_factory = rec_client
+    db = session_factory()
+
+    above_boundary_profile = BeneficiaryProfileInput(
+        age=18,
+        annual_income=500001.0,  # ₹1 over limit of ₹500,000
+        social_category="SC",
+        is_sc=True,
+        applicant_type="INDIVIDUAL",
+    )
+    req = RecommendationRequest(profile=above_boundary_profile, top_k=50)
+    res = DeterministicRecommendationEngine.get_recommendations(db, req)
+    db.close()
+
+    # Should NOT be in eligible recommendations for term loan
+    term_loan_eligible = next((item for item in res.recommendations if item.scheme_id == "SIH26092-053"), None)
+    assert term_loan_eligible is None
+
+    # Must be in ineligibles with exact exceeded amount
+    term_loan_ineligible = next((item for item in res.ineligible_schemes if item.scheme_id == "SIH26092-053"), None)
+    assert term_loan_ineligible is not None
+    assert term_loan_ineligible.eligible is False
+    assert any("500,000.00" in r and "exceeds" in r.lower() for r in term_loan_ineligible.failed_rules)
+
+
+def test_selected_scheme_id_preservation_to_partner_locator(rec_client, sample_profile):
+    """Test 8: Recommendation item preserves exact scheme_id for seamless partner locator query."""
+    client, session_factory = rec_client
+    db = session_factory()
+    req = RecommendationRequest(profile=sample_profile, top_k=5)
+    res = DeterministicRecommendationEngine.get_recommendations(db, req)
+    db.close()
+
+    for item in res.recommendations:
+        assert item.scheme_id.startswith("SIH26092-")
+        # Query nearest partners with this exact scheme_id
+        partner_res = client.get(f"/api/v1/partner/nearest?latitude=28.6139&longitude=77.2090&scheme_id={item.scheme_id}")
+        assert partner_res.status_code == 200
+        partners = partner_res.json()
+        if len(partners) > 0:
+            for p in partners:
+                assert p["is_scheme_matched"] is True
+

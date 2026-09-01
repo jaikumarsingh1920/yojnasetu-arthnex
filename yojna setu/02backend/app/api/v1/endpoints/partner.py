@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, Path, status
 from sqlalchemy.orm import Session
 
@@ -7,6 +7,7 @@ from app.models.user import User, UserRole
 from app.schemas.partner import (
     PaginatedPartnerApplicationListResponse,
     PartnerApplicationDetailResponse,
+    NearestPartnerResponse,
     DocumentReviewRequest,
     DocumentReviewResponse,
     ApplicationAssignmentRequest,
@@ -17,8 +18,86 @@ from app.schemas.partner import (
     RequestCorrectionRequest,
 )
 from app.services.partner_service import PartnerService
+from app.services.geo_partner_service import GeoPartnerLocatorService
 
 router = APIRouter()
+
+
+@router.get(
+    "/nearest",
+    response_model=List[NearestPartnerResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Find nearest channel partners",
+    description="Returns a list of active, eligible channel partners sorted by distance and filtered by NPA limits."
+)
+def get_nearest_partners(
+    latitude: float = Query(..., description="User's latitude"),
+    longitude: float = Query(..., description="User's longitude"),
+    radius_km: float = Query(100.0, description="Search radius in km"),
+    max_npa: float = Query(10.0, description="Maximum acceptable NPA percentage"),
+    partner_type: Optional[str] = Query(None, description="Filter by partner type"),
+    partner_category: Optional[str] = Query(None, description="Filter by category (AUTHORIZED_SCHEME_PARTNER, IMPLEMENTING_ASSISTANCE_CENTRE, NEARBY_FINANCIAL_SERVICE_POINT)"),
+    district: Optional[str] = Query(None, description="Filter by district (e.g. Gorakhpur, Lucknow)"),
+    state: Optional[str] = Query(None, description="Filter by state (e.g. Uttar Pradesh)"),
+    scheme_id: Optional[str] = Query(None, description="Filter by compatible scheme"),
+    loan_category: Optional[str] = Query(None, description="Filter by loan category"),
+    service_type: Optional[str] = Query(None, description="Filter by service type"),
+    limit: int = Query(100, ge=1, le=100, description="Max results"),
+    db: Session = Depends(get_db)
+):
+    """
+    Geospatial partner lookup prioritizing low NPA and proximity.
+    """
+    return GeoPartnerLocatorService.find_nearest_partners(
+        db=db,
+        latitude=latitude,
+        longitude=longitude,
+        radius_km=radius_km,
+        max_npa=max_npa,
+        partner_type=partner_type,
+        partner_category=partner_category,
+        district=district,
+        state=state,
+        scheme_id=scheme_id,
+        loan_category=loan_category,
+        service_type=service_type,
+        limit=limit
+    )
+
+
+@router.get(
+    "/directory",
+    response_model=List[NearestPartnerResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Browse channel partners directory",
+    description="Returns active partners filtered by scheme, district, or category without requiring user coordinates."
+)
+def browse_partner_directory(
+    district: Optional[str] = Query(None, description="Filter by district"),
+    state: Optional[str] = Query(None, description="Filter by state"),
+    partner_category: Optional[str] = Query(None, description="Filter by category"),
+    scheme_id: Optional[str] = Query(None, description="Filter by scheme"),
+    limit: int = Query(100, ge=1, le=200, description="Max results"),
+    db: Session = Depends(get_db)
+):
+    """
+    Browse partner directory with fallback origin.
+    """
+    # Default origin center (India central or UP)
+    default_lat = 26.7606 if district and "gorakhpur" in district.lower() else 28.6139
+    default_lng = 83.3732 if district and "gorakhpur" in district.lower() else 77.2090
+    return GeoPartnerLocatorService.find_nearest_partners(
+        db=db,
+        latitude=default_lat,
+        longitude=default_lng,
+        radius_km=5000.0,
+        max_npa=100.0,
+        district=district,
+        state=state,
+        partner_category=partner_category,
+        scheme_id=scheme_id,
+        limit=limit
+    )
 
 
 @router.get(
@@ -238,3 +317,20 @@ def process_review_decision(
     current_user: User = Depends(require_roles(UserRole.PARTNER_ADMIN, UserRole.SYSTEM_ADMIN))
 ):
     return PartnerService.process_review_decision(db, application_id, current_user, req)
+
+
+@router.post(
+    "/applications/{application_id}/complete",
+    response_model=PartnerApplicationDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Mark application completed / benefit disbursed",
+    description="Transitions application status from APPROVED to COMPLETED."
+)
+def complete_application(
+    application_id: str = Path(..., description="Application UUID"),
+    notes: Optional[str] = Query(None, description="Optional completion notes or disbursement reference"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.PARTNER_ADMIN, UserRole.SYSTEM_ADMIN))
+):
+    return PartnerService.complete_application(db, application_id, current_user, notes)
+

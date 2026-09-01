@@ -159,4 +159,4 @@ def test_sse_streaming_chunk_generation(db):
 
     assert len(chunks) > 0
     full_text = "".join(chunks)
-    assert "Required Documents" in full_text or "MSME" in full_text or "Scheme" in full_text
+    assert "Required Documents" in full_text or "MSME" in full_text or "scheme" in full_text.lower()

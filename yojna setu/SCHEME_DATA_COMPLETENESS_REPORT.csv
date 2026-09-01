@@ -1,0 +1,91 @@
+scheme_id,scheme_name,known_fields,not_applicable_fields,not_specified_fields,conditional_fields,source_conflicts,official_source,last_verified,completeness_percentage
+SIH26092-001,Prime Minister Employment Generation Programme (PMEGP),26,0,6,0,0,https://msme.gov.in/programmes-schemes/prime-ministers-employment-generation-programme-pmegp,2026-09-01,81.2
+SIH26092-002,Pradhan Mantri MUDRA Yojana (PMMY),25,0,7,0,0,https://financialservices.gov.in/pradhan-mantri-mudra-yojana-pmmy,2026-09-01,78.1
+SIH26092-003,Stand-Up India,25,0,7,0,0,https://www.standupmitra.in/,2026-09-01,78.1
+SIH26092-004,PM SVANidhi,28,0,4,0,0,https://pmsvanidhi.mohua.gov.in/,2026-09-01,87.5
+SIH26092-005,PM Vishwakarma,29,0,3,0,0,https://pmvishwakarma.gov.in/,2026-09-01,90.6
+SIH26092-006,PM Formalisation of Micro food processing Enterprises (PMFME),25,0,7,0,0,https://pmfme.mofpi.gov.in/,2026-09-01,78.1
+SIH26092-007,Credit Guarantee Scheme for Micro and Small Enterprises (CGTMSE),22,6,4,0,0,https://www.myscheme.gov.in/schemes/cgssd,2026-09-01,84.6
+SIH26092-008,PM-DAKSH (Pradhan Mantri Dakshta Aur Kushalta Sampann Hitgrahi),21,6,5,0,0,https://pmdaksh.dosje.gov.in/,2026-09-01,80.8
+SIH26092-009,MSME Champions Scheme,22,6,4,0,0,https://www.myscheme.gov.in/schemes/msme-sri,2026-09-01,84.6
+SIH26092-010,MSME Sustainable (ZED) Certification Scheme,22,6,4,0,0,https://www.cgtmse.in/,2026-09-01,84.6
+SIH26092-011,Credit Guarantee Scheme for Subordinate Debt (CGSSD),24,0,8,0,0,https://msme.gov.in/programmes-schemes/credit-linked-capital-subsidy-scheme,2026-09-01,75.0
+SIH26092-012,NSTFDC Term Loan Scheme,27,0,5,0,0,https://msme.gov.in/programmes-schemes/interest-subvention-scheme-incremental-credit-msmes,2026-09-01,84.4
+SIH26092-013,NSTFDC – Adivasi Mahila Sashaktikaran Yojana (AMSY),28,0,4,0,0,https://www.myscheme.gov.in/schemes/2is-sc-st,2026-09-01,87.5
+SIH26092-014,NSTFDC – Micro Credit Scheme for SHGs,27,0,5,0,0,https://msme.gov.in/programmes-schemes/micro-and-small-enterprises-cluster-development-programme-mse-cdp,2026-09-01,84.4
+SIH26092-015,NBCFDC Individual Term Loan Scheme,27,0,5,1,0,https://texmin.nic.in/schemes/amended-technology-upgradation-fund-scheme-atufs,2026-09-01,84.4
+SIH26092-016,NBCFDC New Swarnima for Women,28,0,4,0,0,https://texmin.nic.in/schemes/national-handloom-development-programme,2026-09-01,87.5
+SIH26092-017,NBCFDC Loan for Artisans and Traditional Occupations,27,0,5,0,0,https://texmin.nic.in/schemes/comprehensive-handicrafts-cluster-development-scheme,2026-09-01,84.4
+SIH26092-018,Deendayal Antyodaya Yojana - National Rural Livelihoods Mission (DAY-NRLM),28,0,4,0,0,https://nrlm.gov.in/,2026-09-01,87.5
+SIH26092-019,Startup India Seed Fund Scheme (SISFS),25,0,7,0,0,https://www.startupindia.gov.in/content/sih/en/fund-of-funds-for-startups.html,2026-09-01,78.1
+SIH26092-020,Credit Guarantee Scheme for Startups (CGSS),21,6,5,0,0,https://www.startupindia.gov.in/content/sih/en/startup-india-seed-fund-scheme.html,2026-09-01,80.8
+SIH26092-021,Concessional Credit/Weaver MUDRA Scheme,21,6,5,0,0,https://texmin.nic.in/schemes/weaver-mudra-scheme,2026-09-01,80.8
+SIH26092-022,National Handloom Development Programme (NHDP),22,6,4,0,0,https://texmin.nic.in/schemes/national-handloom-development-programme,2026-09-01,84.6
+SIH26092-023,SFURTI,22,6,4,0,0,https://sfurti.msme.gov.in/,2026-09-01,84.6
+SIH26092-024,ASPIRE,22,6,4,0,0,https://aspire.msme.gov.in/,2026-09-01,84.6
+SIH26092-025,Pradhan Mantri Matsya Sampada Yojana (PMMSY),22,6,4,0,0,https://pmmsy.dof.gov.in/,2026-09-01,84.6
+SIH26092-026,PMMKSSY,27,0,5,0,0,https://pmmsy.dof.gov.in/pmmkssy,2026-09-01,84.4
+SIH26092-027,NSKFDC Swachhta Udyami Yojana – sanitation equipment/vehicles,22,6,4,0,0,https://nskfdc.nic.in/en/swachhta-udyami-yojana,2026-09-01,84.6
+SIH26092-028,NSKFDC General Term Loan,22,6,4,0,0,https://nskfdc.nic.in/en/general-term-loan,2026-09-01,84.6
+SIH26092-029,NSKFDC Micro Credit Finance,22,6,4,0,0,https://nskfdc.nic.in/en/micro-credit-finance,2026-09-01,84.6
+SIH26092-030,NSKFDC Mahila Samriddhi Yojana,23,6,3,0,0,https://nskfdc.nic.in/en/mahila-samriddhi-yojana,2026-09-01,88.5
+SIH26092-031,NDFDC Micro Financing Scheme,22,6,4,0,0,https://ndfdc.nic.in/micro-financing-scheme,2026-09-01,84.6
+SIH26092-032,NDFDC Self-Employment Loan,22,6,4,0,0,https://ndfdc.nic.in/self-employment-loan,2026-09-01,84.6
+SIH26092-033,DAY-NULM SEP – Individual,22,6,4,0,0,https://nulm.gov.in/SEP_Individual,2026-09-01,84.6
+SIH26092-034,DAY-NULM SEP – Group,21,6,5,0,0,https://nulm.gov.in/SEP_Group,2026-09-01,80.8
+SIH26092-035,DAY-NRLM Revolving Fund,23,6,3,0,0,https://nrlm.gov.in/revolving_fund,2026-09-01,88.5
+SIH26092-036,DAY-NRLM Community Investment Fund,23,6,3,0,0,https://nrlm.gov.in/community_investment_fund,2026-09-01,88.5
+SIH26092-037,Agriculture Infrastructure Fund (AIF),28,0,4,0,0,https://agriinfra.dac.gov.in/,2026-09-01,87.5
+SIH26092-038,Kisan Credit Card – Fisheries Working Capital,27,0,5,0,0,https://dof.gov.in/kcc-fisheries,2026-09-01,84.4
+SIH26092-039,PMKSY – Integrated Cold Chain,24,0,8,0,0,https://mofpi.gov.in/schemes/pradhan-mantri-kisan-sampada-yojana,2026-09-01,75.0
+SIH26092-040,PMKSY – Agro-Processing Cluster,21,6,5,0,0,https://mofpi.gov.in/schemes/pradhan-mantri-kisan-sampada-yojana,2026-09-01,80.8
+SIH26092-041,Coir Udyami Yojana,22,6,4,0,0,https://coirboard.gov.in/?page_id=221,2026-09-01,84.6
+SIH26092-042,Mahila Coir Yojana,23,6,3,0,0,https://coirboard.gov.in/?page_id=223,2026-09-01,88.5
+SIH26092-043,TREAD for Women,23,6,3,0,0,https://msme.gov.in/programmes-schemes/trade-related-entrepreneurship-assistance-and-development-tread-scheme-women,2026-09-01,88.5
+SIH26092-044,Procurement and Marketing Support Scheme,22,6,4,0,0,https://msme.gov.in/programmes-schemes/procurement-and-marketing-support-pms-scheme,2026-09-01,84.6
+SIH26092-045,NSIC Raw Material Assistance,22,6,4,0,0,https://www.nsic.co.in/Schemes/Raw-Material-Assistance.aspx,2026-09-01,84.6
+SIH26092-046,MSME Innovative – Incubation,23,6,3,0,0,https://innovative.msme.gov.in/Incubation,2026-09-01,88.5
+SIH26092-047,MSME Innovative – Design,23,6,3,0,0,https://innovative.msme.gov.in/Design,2026-09-01,88.5
+SIH26092-048,MSME Innovative – IPR Facilitation,22,6,4,0,0,https://innovative.msme.gov.in/IPR,2026-09-01,84.6
+SIH26092-049,"MSME Innovative (Incubation, Design and IPR) Scheme",22,6,4,0,0,https://zed.msme.gov.in/,2026-09-01,84.6
+SIH26092-050,Micro & Small Enterprises Cluster Development Programme (MSE-CDP),22,6,4,0,0,https://lean.msme.gov.in/,2026-09-01,84.6
+SIH26092-051,Credit Guarantee Scheme for Micro and Small Enterprises (CGTMSE),21,6,5,0,0,https://www.cgtmse.in/,2026-09-01,80.8
+SIH26092-052,NSFDC Micro Finance Scheme (MFS),28,0,4,0,0,https://pmsuraj.dosje.gov.in/,2026-09-01,87.5
+SIH26092-053,NSFDC Term Loan,28,0,4,0,0,https://pmsuraj.dosje.gov.in/,2026-09-01,87.5
+SIH26092-054,NSFDC Aajeevika Micro-Finance Yojana (AMY),28,0,4,0,0,https://pmsuraj.dosje.gov.in/,2026-09-01,87.5
+SIH26092-055,NSFDC Udyam Nidhi Yojana (UNY),28,0,4,0,0,https://pmsuraj.dosje.gov.in/,2026-09-01,87.5
+SIH26092-056,NSFDC Educational Loan Scheme (ELS),28,0,4,0,0,https://pmsuraj.dosje.gov.in/,2026-09-01,87.5
+SIH26092-057,NSFDC Mahila Samriddhi Yojana (MSY),26,0,6,0,0,https://pmsuraj.dosje.gov.in/,2026-09-01,81.2
+SIH26092-058,NSFDC Green Business Scheme (GBS),26,0,6,0,0,https://pmsuraj.dosje.gov.in/,2026-09-01,81.2
+SIH26092-059,NSTFDC Adivasi Shiksha Rrinn Yojana (ASRY),26,0,6,0,0,https://nstfdc.tribal.gov.in/,2026-09-01,81.2
+SIH26092-060,Credit Enhancement Guarantee Scheme for Scheduled Castes (CEGSSC),18,6,8,0,0,https://www.ifcicegssc.in/,2026-09-01,69.2
+SIH26092-061,Pradhan Mantri Van Dhan Yojana (PMVDY),19,6,7,0,0,https://trifed.tribal.gov.in/pradhan-mantri-van-dhan-yojana,2026-09-01,73.1
+SIH26092-062,Gramodyog Vikas Yojana (GVY),20,6,6,0,0,https://www.kviconline.gov.in/kvis/gramodyog.jsp,2026-09-01,76.9
+SIH26092-063,NSFDC Mahila Kisan Yojana (MKY),27,0,5,0,0,https://pmsuraj.dosje.gov.in/,2026-09-01,84.4
+SIH26092-064,NBCFDC Shilp Sampada Scheme,26,0,6,0,0,https://nbcfdc.nic.in/en/term-loan,2026-09-01,81.2
+SIH26092-065,PM Young Achievers Scholarship Award Scheme for Vibrant India (PM-YASASVI),20,6,6,0,0,https://scholarships.gov.in/,2026-09-01,76.9
+SIH26092-066,Scheme for Residential Education for Students in High Schools in Targeted Areas (SHRESHTA),21,6,5,0,0,https://shreshta.admissions.nic.in/,2026-09-01,80.8
+SIH26092-067,NMDFC Virasat Scheme for Craftspersons and Artisans,26,0,6,0,0,https://www.nmdfc.org/,2026-09-01,81.2
+SIH26092-068,Divyangjan Swavalamban Yojana (NDFDC),24,0,8,0,0,https://ndfdc.nic.in/,2026-09-01,75.0
+SIH26092-069,SAMARTH — Scheme for Capacity Building in Textile Sector,19,6,7,0,0,https://samarth-textiles.gov.in/,2026-09-01,73.1
+SIH26092-070,Animal Husbandry Infrastructure Development Fund (AHIDF),22,0,10,0,0,https://ahidf.udyamimitra.in/,2026-09-01,68.8
+SIH26092-071,Special Credit Linked Capital Subsidy Scheme for SC/ST (SCLCSS under NSSH),20,6,6,0,0,https://www.scsthub.in/,2026-09-01,76.9
+SIH26092-072,NSKFDC Sanitary Marts Scheme,24,0,8,0,0,https://www.nskfdc.nic.in/,2026-09-01,75.0
+SIH26092-073,NBCFDC Krishi Sampada Scheme,26,0,6,0,0,https://nbcfdc.nic.in/en/new-swarnima,2026-09-01,81.2
+SIH26092-074,Pradhan Mantri Janjati Adivasi Nyaya Maha Abhiyan (PM-JANMAN),18,6,8,0,0,https://tribal.nic.in/ScholarshiP.aspx,2026-09-01,69.2
+SIH26092-075,Pradhan Mantri Jan Dhan Yojana (PMJDY),30,0,2,0,0,https://pmjdy.gov.in/,2026-09-01,93.8
+SIH26092-076,Pradhan Mantri Suraksha Bima Yojana (PMSBY),24,6,2,0,0,https://jansuraksha.gov.in/Files/PMJJBY/English/Rules.pdf,2026-09-01,92.3
+SIH26092-077,Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY),24,6,2,0,0,https://jansuraksha.gov.in/Files/PMSBY/English/Rules.pdf,2026-09-01,92.3
+SIH26092-078,Atal Pension Yojana (APY),24,6,2,0,0,https://www.npscra.nsdl.co.in/scheme-details.php,2026-09-01,92.3
+SIH26092-079,ADIP — Scheme of Assistance to Disabled Persons for Purchase/Fitting of Aids and Appliances,25,6,1,0,0,https://adip.depwd.gov.in/,2026-09-01,96.2
+SIH26092-080,Deendayal Disabled Rehabilitation Scheme (DDRS),24,6,2,0,0,https://disabilityaffairs.gov.in/content/page/ddrs.php,2026-09-01,92.3
+SIH26092-081,SIPDA — Scheme for Implementation of Persons with Disabilities Act,24,6,2,0,0,https://disabilityaffairs.gov.in/content/page/sipda.php,2026-09-01,92.3
+SIH26092-082,National Means-cum-Merit Scholarship Scheme (NMMSS),25,6,1,0,0,https://scholarships.gov.in/,2026-09-01,96.2
+SIH26092-083,Central Sector Interest Subsidy (CSIS) Scheme for Higher Education Loans,31,0,1,0,0,https://www.vidyalakshmi.co.in/,2026-09-01,96.9
+SIH26092-084,Coir Vikas Yojana (CVY) — Mahila Coir Yojana & Skill Upgradation,25,6,1,0,0,https://coirboard.gov.in/?page_id=219,2026-09-01,96.2
+SIH26092-085,MSME Competitive (LEAN) Scheme,25,6,1,0,0,https://champions.gov.in/,2026-09-01,96.2
+SIH26092-086,MSME Trade Enablement and Marketing (TEAM) Scheme on ONDC,25,6,1,0,0,https://team.msme.gov.in/,2026-09-01,96.2
+SIH26092-087,Pradhan Mantri Matru Vandana Yojana (PMMVY - Mission Shakti),25,6,1,0,0,https://pmmvy.wcd.gov.in/,2026-09-01,96.2
+SIH26092-088,Sukanya Samriddhi Yojana (SSY),24,6,2,0,0,https://www.indiapost.gov.in/Financial/Pages/Content/Post-Office-Saving-Schemes.aspx,2026-09-01,92.3
+SIH26092-089,Lakhpati Didi Rural SHG Micro-Enterprise Initiative (DAY-NRLM),32,0,0,0,0,https://nrlm.gov.in/lakhpatididi,2026-09-01,100.0
+SIH26092-090,Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana (AB-PMJAY),24,6,2,0,0,https://pmjay.gov.in/,2026-09-01,92.3

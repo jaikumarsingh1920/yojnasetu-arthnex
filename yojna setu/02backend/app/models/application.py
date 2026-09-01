@@ -16,6 +16,8 @@ class ApplicationStatus(str, Enum):
     CORRECTION_REQUIRED = "CORRECTION_REQUIRED"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
+    WITHDRAWN = "WITHDRAWN"
+    COMPLETED = "COMPLETED"
 
 
 class DocumentVerificationStatus(str, Enum):

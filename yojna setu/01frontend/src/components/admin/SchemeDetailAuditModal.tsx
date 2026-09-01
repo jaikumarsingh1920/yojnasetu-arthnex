@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminApi, SchemeAuditDetailResponse } from '../../api/adminApi';
-import { X, ShieldCheck, AlertTriangle, FileText, CheckCircle, Database, HelpCircle } from 'lucide-react';
+import { X, ShieldCheck, AlertTriangle, FileText, CheckCircle, Database, HelpCircle, ExternalLink } from 'lucide-react';
 
 interface Props {
   schemeId: string;
@@ -55,7 +55,19 @@ export const SchemeDetailAuditModal: React.FC<Props> = ({ schemeId, onClose }) =
               <span className="text-xs font-mono text-slate-400">{detail.scheme_id}</span>
             </div>
             <h2 className="text-xl font-extrabold text-white">{detail.scheme_name}</h2>
-            <p className="text-xs text-slate-400">{detail.ministry} • {detail.sector}</p>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 pt-1">
+              <span>{detail.ministry} • {detail.sector}</span>
+              {detail.official_source_url && (
+                <a
+                  href={detail.official_source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sky-400 hover:text-sky-300 inline-flex items-center gap-1 font-bold"
+                >
+                  Official Source Guidelines <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -134,11 +146,11 @@ export const SchemeDetailAuditModal: React.FC<Props> = ({ schemeId, onClose }) =
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                   <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Scheme Purpose</span>
-                  <p className="text-xs text-slate-800 leading-relaxed">{detail.purpose || 'N/A'}</p>
+                  <p className="text-xs text-slate-800 leading-relaxed">{detail.purpose || 'Not specified in official source'}</p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                   <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Target Group</span>
-                  <p className="text-xs text-slate-800 leading-relaxed">{detail.target_groups || 'N/A'}</p>
+                  <p className="text-xs text-slate-800 leading-relaxed">{detail.target_groups || 'Not specified in official source'}</p>
                 </div>
               </div>
 
@@ -158,11 +170,11 @@ export const SchemeDetailAuditModal: React.FC<Props> = ({ schemeId, onClose }) =
               {/* Unknown Fields */}
               {detail.unknown_fields.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-bold text-amber-800 uppercase mb-2">Unknown Parameters Requiring Completion ({detail.unknown_fields.length})</h4>
+                  <h4 className="text-xs font-bold text-amber-800 uppercase mb-2">Unverified Parameters Requiring Completion ({detail.unknown_fields.length})</h4>
                   <div className="flex flex-wrap gap-2">
                     {detail.unknown_fields.map((f) => (
                       <span key={f} className="text-xs bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-1 rounded-md font-mono">
-                        {f}: UNKNOWN
+                        {f}: Not specified in verified source / Configuration required
                       </span>
                     ))}
                   </div>
@@ -174,7 +186,12 @@ export const SchemeDetailAuditModal: React.FC<Props> = ({ schemeId, onClose }) =
           {activeTab === 'RULES' && (
             <div className="space-y-4">
               {detail.rules.length === 0 ? (
-                <p className="text-xs text-slate-500 py-4 text-center">No explicit condition rules configured for this scheme.</p>
+                <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-center space-y-1">
+                  <span className="text-xs font-bold text-amber-900 block">Eligibility rules not sufficiently configured</span>
+                  <p className="text-[11px] text-amber-700">
+                    This scheme does not yet have explicit condition rules registered in the deterministic database. (0 rules does NOT mean everyone is eligible).
+                  </p>
+                </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
@@ -209,7 +226,7 @@ export const SchemeDetailAuditModal: React.FC<Props> = ({ schemeId, onClose }) =
           {activeTab === 'DOCUMENTS' && (
             <div className="space-y-4">
               {detail.documents.length === 0 ? (
-                <p className="text-xs text-slate-500 py-4 text-center">No documents registered for this scheme.</p>
+                <p className="text-xs text-slate-500 py-4 text-center">No document requirements registered for this scheme.</p>
               ) : (
                 <div className="space-y-2">
                   {detail.documents.map((d) => (
@@ -218,8 +235,16 @@ export const SchemeDetailAuditModal: React.FC<Props> = ({ schemeId, onClose }) =
                         <span className="font-bold text-slate-900 block">{d.document_name}</span>
                         <span className="text-slate-500 text-[11px]">{d.applicant_type || 'ALL'} • Source: {d.source_document || 'Official Guidelines'}</span>
                       </div>
-                      <span className="bg-sky-100 text-sky-800 px-2.5 py-1 rounded font-bold text-[10px] border border-sky-300">
-                        {d.requirement_type}
+                      <span className={`px-2.5 py-1 rounded font-bold text-[10px] border ${
+                        d.requirement_type === 'MANDATORY' || d.requirement_type === 'REQUIRED'
+                          ? 'bg-rose-100 text-rose-800 border-rose-300'
+                          : d.requirement_type === 'CONDITIONAL'
+                          ? 'bg-amber-100 text-amber-800 border-amber-300'
+                          : d.requirement_type === 'OPTIONAL'
+                          ? 'bg-sky-100 text-sky-800 border-sky-300'
+                          : 'bg-slate-100 text-slate-800 border-slate-300'
+                      }`}>
+                        {d.requirement_type === 'MANDATORY' ? 'REQUIRED' : d.requirement_type}
                       </span>
                     </div>
                   ))}

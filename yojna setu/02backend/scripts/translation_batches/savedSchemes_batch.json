@@ -1,0 +1,34 @@
+{
+  "savedSchemes.emailMe": {
+    "en": "Email Me Details",
+    "hi": "मुझे विवरण ईमेल करें"
+  },
+  "savedSchemes.emailSuccess": {
+    "en": "Scheme details emailed to your registered address!",
+    "hi": "योजना का विवरण आपके पंजीकृत पते पर भेज दिया गया है!"
+  },
+  "savedSchemes.emptyState": {
+    "en": "You have not saved any schemes yet. Browse schemes and click 'Save Scheme' to add them here.",
+    "hi": "आपने अभी तक कोई योजना नहीं सहेजी है।"
+  },
+  "savedSchemes.loginToSaveDesc": {
+    "en": "Please login to save schemes to your account. You can review saved schemes anytime from your dashboard.",
+    "hi": "अपने खाते में योजनाओं को सहेजने के लिए कृपया लॉगिन करें। आप अपने डैशबोर्ड से कभी भी सहेजी गई योजनाओं की समीक्षा कर सकते हैं।"
+  },
+  "savedSchemes.remove": {
+    "en": "Remove",
+    "hi": "हटाएं"
+  },
+  "savedSchemes.saveModalDesc": {
+    "en": "Please login to save schemes to your account. You can review saved schemes anytime from your dashboard.",
+    "hi": "अपने खाते में योजनाओं को सहेजने के लिए कृपया लॉगिन करें। आप अपने डैशबोर्ड से कभी भी सहेजी गई योजनाओं की समीक्षा कर सकते हैं।"
+  },
+  "savedSchemes.subtitle": {
+    "en": "Bookmarked schemes saved to your YojnaSetu account for quick reference.",
+    "hi": "त्वरित संदर्भ के लिए आपके खाते में सहेजी गई योजनाएं।"
+  },
+  "savedSchemes.title": {
+    "en": "Your Saved Schemes",
+    "hi": "आपकी सहेजी गई योजनाएं"
+  }
+}

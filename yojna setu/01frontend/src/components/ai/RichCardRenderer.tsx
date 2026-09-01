@@ -61,7 +61,7 @@ export const RichCardRenderer: React.FC<Props> = ({ card }) => {
           <div className="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
             <span className="text-slate-400 block">{t('schemes.subsidy', 'Govt Subsidy')}</span>
             <span className="font-extrabold text-sky-300 text-xs">
-              {formatCurrency(fin.subsidy_amount, 'N/A')}
+              {formatCurrency(fin.subsidy_amount, 'Not applicable')}
             </span>
           </div>
           <div className="bg-slate-800/80 p-2 rounded-lg border border-slate-700">

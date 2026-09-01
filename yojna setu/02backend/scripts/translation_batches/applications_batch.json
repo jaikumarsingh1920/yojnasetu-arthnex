@@ -1,0 +1,34 @@
+{
+  "applications.actionRequiredDesc": {
+    "en": "The reviewing channel partner authority has requested corrections or additional details for your application.",
+    "hi": "समीक्षा करने वाले चैनल पार्टनर प्राधिकरण ने आपके आवेदन के लिए सुधार या अतिरिक्त विवरण का अनुरोध किया है।"
+  },
+  "applications.docDisclaimer": {
+    "en": "* Final document requirements may vary. Please verify them on the official application portal.",
+    "hi": "* अंतिम दस्तावेज़ आवश्यकताएं भिन्न हो सकती हैं। कृपया आधिकारिक आवेदन पोर्टल पर उनकी पुष्टि करें।"
+  },
+  "applications.guidanceSubtitle": {
+    "en": "YojnaSetu helps you discover schemes, review eligibility, and prepare your document checklists. Final application submission and approval are handled directly on the concerned official government portal.",
+    "hi": "योजनासेतु आपको योजनाओं की खोज करने, पात्रता की समीक्षा करने और दस्तावेज़ चेकलिस्ट तैयार करने में मदद करता है। अंतिम आवेदन जमा करना और अनुमोदन संबंधित आधिकारिक सरकारी पोर्टल पर सीधे संभाला जाता है।"
+  },
+  "applications.noRecordsMatching": {
+    "en": "You don't have any application records matching the selected status filter.",
+    "hi": "चयनित स्थिति फ़िल्टर से मेल खाने वाला कोई आवेदन रिकॉर्ड नहीं है।"
+  },
+  "applications.officialNoticeDesc": {
+    "en": "YojnaSetu helps citizens organize documents and verify eligibility rules. Final application submission, document verification, and approval are performed on the official government website.",
+    "hi": "योजनासेतु नागरिकों को दस्तावेज़ व्यवस्थित करने और पात्रता नियमों को सत्यापित करने में मदद करता है। अंतिम आवेदन जमा करना, दस्तावेज़ सत्यापन और अनुमोदन आधिकारिक सरकारी वेबसाइट पर किया जाता है।"
+  },
+  "applications.portalReminderDesc": {
+    "en": "Once you complete your document checklist on YojnaSetu, use the reference link to submit your official application on the concerned government portal. Keep your official reference/acknowledgement number for tracking.",
+    "hi": "योजनासेतु पर अपनी दस्तावेज़ चेकलिस्ट पूरी करने के बाद, संबंधित सरकारी पोर्टल पर अपना आधिकारिक आवेदन जमा करने के लिए संदर्भ लिंक का उपयोग करें। ट्रैकिंग के लिए अपना आधिकारिक संदर्भ/पावती नंबर अपने पास रखें।"
+  },
+  "applications.readyToApplyDesc": {
+    "en": "When you are ready, click below to open the verified official portal and complete your application.",
+    "hi": "जब आप तैयार हों, सत्यापित आधिकारिक पोर्टल खोलने और अपना आवेदन पूरा करने के लिए नीचे क्लिक करें।"
+  },
+  "applications.subtitle": {
+    "en": "Track your scheme application status, required checklists, and partner verification notes.",
+    "hi": "अपनी योजना आवेदन स्थिति, आवश्यक चेकलिस्ट और आधिकारिक प्रक्रियाओं को ट्रैक करें।"
+  }
+}

@@ -203,3 +203,154 @@ def test_deterministic_repeated_execution(db_session):
         assert len(subsequent_res.hard_rules_passed) == len(first_res.hard_rules_passed)
         assert len(subsequent_res.financial_rules) == len(first_res.financial_rules)
         assert subsequent_res.explanations == first_res.explanations
+
+
+# -------------------------------------------------------------
+# 7. TASK-033: ELIGIBILITY ENGINE EDGE CASE HARDENING TESTS
+# -------------------------------------------------------------
+
+def test_edge_case_income_boundaries(db_session):
+    """Verify income boundaries: exactly at limit (PASS), just below limit (PASS), just above limit (FAIL)."""
+    scheme = db_session.query(Scheme).filter(Scheme.scheme_id == "SIH26092-053").first()
+    assert scheme is not None
+    limit = scheme.income_limit # 500,000.0
+
+    # 1. Exactly at limit (500,000.0) -> ELIGIBLE
+    p_exact = BeneficiaryProfileInput(is_sc=True, social_category="SC", annual_income=float(limit), age=25)
+    res_exact = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_exact)
+    assert res_exact.status == SchemeEligibilityStatus.ELIGIBLE
+    assert any("satisfies limit" in r for r in res_exact.matched_rules)
+    assert len(res_exact.failed_rules) == 0
+
+    # 2. Just below limit (499,999.0) -> ELIGIBLE
+    p_below = BeneficiaryProfileInput(is_sc=True, social_category="SC", annual_income=float(limit) - 1.0, age=25)
+    res_below = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_below)
+    assert res_below.status == SchemeEligibilityStatus.ELIGIBLE
+    assert len(res_below.failed_rules) == 0
+
+    # 3. Just above limit (500,001.0) -> INELIGIBLE
+    p_above = BeneficiaryProfileInput(is_sc=True, social_category="SC", annual_income=float(limit) + 1.0, age=25)
+    res_above = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_above)
+    assert res_above.status == SchemeEligibilityStatus.INELIGIBLE
+    assert any("exceeds limit" in r for r in res_above.failed_rules)
+
+
+def test_edge_case_age_boundaries(db_session):
+    """Verify age boundaries: minimum age exact, min age below, max age exact, max age above."""
+    # Find scheme with both age_min or age_max or create custom rule evaluation
+    scheme = db_session.query(Scheme).filter(Scheme.age_min.isnot(None)).first()
+    if not scheme:
+        scheme = db_session.query(Scheme).first()
+        scheme.age_min = 18
+        scheme.age_max = 50
+
+    min_age = scheme.age_min or 18
+    max_age = scheme.age_max or 50
+
+    # 1. Min age exact boundary (18) -> PASSES age rule
+    p_min_exact = BeneficiaryProfileInput(age=min_age, is_sc=True, social_category="SC", annual_income=100000.0)
+    res_min = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_min_exact)
+    assert not any("below minimum requirement" in r for r in res_min.failed_rules)
+
+    # 2. Min age below boundary (17) -> FAILS age rule
+    p_min_below = BeneficiaryProfileInput(age=min_age - 1, is_sc=True, social_category="SC", annual_income=100000.0)
+    res_min_below = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_min_below)
+    assert res_min_below.status == SchemeEligibilityStatus.INELIGIBLE
+    assert any("below minimum requirement" in r for r in res_min_below.failed_rules)
+
+    # 3. Max age exact boundary (50) -> PASSES age max rule
+    if scheme.age_max is not None:
+        p_max_exact = BeneficiaryProfileInput(age=max_age, is_sc=True, social_category="SC", annual_income=100000.0)
+        res_max = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_max_exact)
+        assert not any("exceeds maximum limit" in r for r in res_max.failed_rules)
+
+        # 4. Max age above boundary (51) -> FAILS age max rule
+        p_max_above = BeneficiaryProfileInput(age=max_age + 1, is_sc=True, social_category="SC", annual_income=100000.0)
+        res_max_above = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_max_above)
+        assert res_max_above.status == SchemeEligibilityStatus.INELIGIBLE
+        assert any("exceeds maximum limit" in r for r in res_max_above.failed_rules)
+
+
+def test_edge_case_missing_income_insufficient_info(db_session):
+    """Verify missing income produces INSUFFICIENT_INFORMATION, never silently eligible or falsely failed."""
+    scheme = db_session.query(Scheme).filter(Scheme.scheme_id == "SIH26092-053").first()
+    assert scheme is not None
+
+    p_missing_income = BeneficiaryProfileInput(
+        age=25,
+        social_category="SC",
+        is_sc=True,
+        annual_income=None # Explicitly missing
+    )
+    res = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_missing_income)
+    assert res.status == SchemeEligibilityStatus.INSUFFICIENT_INFORMATION
+    assert len(res.missing_information) > 0
+    assert any("annual income" in r.lower() for r in res.missing_information)
+    assert len(res.failed_rules) == 0
+
+
+def test_edge_case_missing_category_and_education(db_session):
+    """Verify missing social category and education are handled without silent true."""
+    # Test SC required rule evaluation with missing category
+    scheme = db_session.query(Scheme).filter(Scheme.scheme_id == "SIH26092-053").first()
+    assert scheme is not None
+
+    p_no_category = BeneficiaryProfileInput(
+        age=25,
+        annual_income=100000.0,
+        social_category=None,
+        is_sc=None
+    )
+    res = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_no_category)
+    assert res.status == SchemeEligibilityStatus.INSUFFICIENT_INFORMATION
+    assert len(res.missing_information) > 0
+
+    # Test education level resolution
+    p_with_edu = BeneficiaryProfileInput(
+        age=25,
+        education_level="10TH_PASS"
+    )
+    act_val = DeterministicEligibilityEngine.resolve_field_value("education_level", p_with_edu)
+    assert act_val == "10TH_PASS"
+
+
+def test_edge_case_unsupported_activity(db_session):
+    """Verify unsupported activity fails operator IN evaluation."""
+    res_pass, _ = evaluate_operator("IN", "TAILORING, CARPENTRY, WEAVING", "ENUM", "TAILORING")
+    assert res_pass == RuleEvaluationResult.PASS
+
+    res_fail, reason = evaluate_operator("IN", "TAILORING, CARPENTRY, WEAVING", "ENUM", "NUCLEAR_RESEARCH")
+    assert res_fail == RuleEvaluationResult.FAIL
+    assert "not in required list" in reason
+
+
+def test_edge_case_multiple_simultaneous_failures(db_session):
+    """Verify profile with multiple simultaneous rule violations returns ALL failure reasons."""
+    scheme = db_session.query(Scheme).filter(Scheme.scheme_id == "SIH26092-053").first()
+    assert scheme is not None
+
+    # Fails both income limit (2,000,000 > 500,000) and SC requirement (GENERAL != SC)
+    p_multi_fail = BeneficiaryProfileInput(
+        age=25,
+        annual_income=2000000.0,
+        social_category="GENERAL",
+        is_sc=False
+    )
+    res = DeterministicEligibilityEngine.evaluate_scheme(scheme, p_multi_fail)
+    assert res.status == SchemeEligibilityStatus.INELIGIBLE
+    assert len(res.failed_rules) >= 2
+    assert any("exceeds limit" in r for r in res.failed_rules)
+    assert any("Expected True" in r or "flag is False" in r for r in res.failed_rules)
+
+
+def test_edge_case_incomplete_profile_never_silently_eligible(db_session):
+    """Verify completely empty profile never evaluates to ELIGIBLE on schemes with mandatory criteria."""
+    empty_profile = BeneficiaryProfileInput()
+    scheme = db_session.query(Scheme).filter(Scheme.scheme_id == "SIH26092-053").first()
+    assert scheme is not None
+
+    res = DeterministicEligibilityEngine.evaluate_scheme(scheme, empty_profile)
+    assert res.status == SchemeEligibilityStatus.INSUFFICIENT_INFORMATION
+    assert len(res.missing_information) > 0
+    assert res.status != SchemeEligibilityStatus.ELIGIBLE
+

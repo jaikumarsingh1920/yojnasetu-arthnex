@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { Alert } from '../components/Alert';
+import { GoogleAuthButton } from '../components/GoogleAuthButton';
 import { UserRole } from '../types';
 import { UserPlus, Mail, Lock, Phone, Shield } from 'lucide-react';
 
 export const Register: React.FC = () => {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -61,23 +64,41 @@ export const Register: React.FC = () => {
             alt="YojnaSetu Logo"
             className="w-16 h-16 rounded-2xl mx-auto object-contain bg-slate-950 p-1.5 shadow-md border border-slate-700"
           />
-          <h2 className="text-2xl font-extrabold text-slate-900">Create YojnaSetu Account</h2>
-          <p className="text-xs text-slate-500">Register to apply for welfare schemes and track financing approvals</p>
+          <h2 className="text-2xl font-extrabold text-slate-900">{t('auth.registerTitle')}</h2>
+          <p className="text-xs text-slate-500">{t('auth.registerSubtitle')}</p>
         </div>
 
         {errorMsg && <Alert type="error">{errorMsg}</Alert>}
 
+        {/* Google Authentication Button */}
+        <div className="space-y-4">
+          <GoogleAuthButton
+            mode="register"
+            onSuccess={() => {
+              navigate('/dashboard', { replace: true });
+            }}
+            onError={(msg) => setErrorMsg(msg)}
+          />
+
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest absolute">
+              {t('common.or', 'OR')}
+            </span>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Email Address
+              {t('auth.email')}
             </label>
             <div className="relative">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
+                placeholder={t('auth.emailPlaceholder', 'name@example.com')}
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"
               />
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
@@ -86,7 +107,7 @@ export const Register: React.FC = () => {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Phone Number (Optional)
+              {t('auth.phone')}
             </label>
             <div className="relative">
               <input
@@ -102,7 +123,7 @@ export const Register: React.FC = () => {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Password
+              {t('auth.password')}
             </label>
             <div className="relative">
               <input
@@ -110,51 +131,33 @@ export const Register: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
+                placeholder="••••••••"
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"
               />
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Account Role Type
-            </label>
-            <div className="relative">
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none bg-white"
-              >
-                <option value="BENEFICIARY">BENEFICIARY (Individual / Business)</option>
-                <option value="PARTNER_USER">PARTNER_USER (Agency Document Reviewer)</option>
-                <option value="PARTNER_ADMIN">PARTNER_ADMIN (Agency Decision Admin)</option>
-              </select>
-              <Shield className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
-            </div>
-          </div>
-
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-gov-saffron hover:bg-orange-600 text-white font-bold py-3 rounded-lg text-sm shadow transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-gov-blue hover:bg-gov-navy text-white font-bold py-3 px-4 rounded-xl text-sm shadow transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <UserPlus className="w-4 h-4" />
-                Complete Registration
+                {t('auth.registerBtn')}
               </>
             )}
           </button>
         </form>
 
-        <div className="text-center pt-2 text-xs text-slate-600">
-          Already registered?{' '}
-          <Link to="/login" className="font-bold text-sky-700 hover:underline">
-            Sign In Here
+        <div className="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+          {t('auth.hasAccount')}{' '}
+          <Link to="/login" className="font-bold text-sky-600 hover:text-sky-700">
+            {t('auth.signInBtn')}
           </Link>
         </div>
       </div>

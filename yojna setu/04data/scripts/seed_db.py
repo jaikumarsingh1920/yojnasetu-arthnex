@@ -19,8 +19,8 @@ from app.models import Base, Scheme, SchemeVerification, SchemeRule, SchemeDocum
 
 RAW_DATA_DIR = os.path.join(DATA_DIR, "raw")
 
-VALID_OPERATORS = {">=", "=", "IN", ">", "<="}
-VALID_REQUIREMENT_TYPES = {"REQUIRED", "PARTNER_VERIFICATION", "CONDITIONAL"}
+VALID_OPERATORS = {">=", "=", "IN", ">", "<=", "<", "CONTAINS", "NOT_IN"}
+VALID_REQUIREMENT_TYPES = {"REQUIRED", "PARTNER_VERIFICATION", "CONDITIONAL", "MANDATORY", "OPTIONAL"}
 
 OFFICIAL_URL_MAPPING = {
     "SIH26092-001": "https://www.kviconline.gov.in/pmegpeportal/pmegpfilters/jsp/pmegponline.jsp",
@@ -42,6 +42,40 @@ OFFICIAL_URL_MAPPING = {
     "SIH26092-054": "https://pmsuraj.dosje.gov.in/",
     "SIH26092-055": "https://pmsuraj.dosje.gov.in/",
     "SIH26092-056": "https://pmsuraj.dosje.gov.in/",
+    "SIH26092-057": "https://pmsuraj.dosje.gov.in/",
+    "SIH26092-058": "https://pmsuraj.dosje.gov.in/",
+    "SIH26092-059": "https://nstfdc.tribal.gov.in/",
+    "SIH26092-060": "https://www.ifcicegssc.in/",
+    "SIH26092-061": "https://trifed.tribal.gov.in/",
+    "SIH26092-062": "https://www.kviconline.gov.in/",
+    "SIH26092-063": "https://pmsuraj.dosje.gov.in/",
+    "SIH26092-064": "https://nbcfdc.nic.in/",
+    "SIH26092-065": "https://scholarships.gov.in/",
+    "SIH26092-066": "https://shreshta.admissions.nic.in/",
+    "SIH26092-067": "https://www.nmdfc.org/",
+    "SIH26092-068": "https://ndfdc.nic.in/",
+    "SIH26092-069": "https://samarth-textiles.gov.in/",
+    "SIH26092-070": "https://ahidf.udyamimitra.in/",
+    "SIH26092-071": "https://www.scsthub.in/",
+    "SIH26092-072": "https://www.nskfdc.nic.in/",
+    "SIH26092-073": "https://nbcfdc.nic.in/",
+    "SIH26092-074": "https://tribal.nic.in/",
+    "SIH26092-075": "https://pmjdy.gov.in/",
+    "SIH26092-076": "https://jansuraksha.gov.in/",
+    "SIH26092-077": "https://jansuraksha.gov.in/",
+    "SIH26092-078": "https://www.npscra.nsdl.co.in/",
+    "SIH26092-079": "https://adip.depwd.gov.in/",
+    "SIH26092-080": "https://disabilityaffairs.gov.in/",
+    "SIH26092-081": "https://disabilityaffairs.gov.in/",
+    "SIH26092-082": "https://scholarships.gov.in/",
+    "SIH26092-083": "https://www.vidyalakshmi.co.in/",
+    "SIH26092-084": "https://coirboard.gov.in/",
+    "SIH26092-085": "https://champions.gov.in/",
+    "SIH26092-086": "https://team.msme.gov.in/",
+    "SIH26092-087": "https://pmmvy.wcd.gov.in/",
+    "SIH26092-088": "https://www.indiapost.gov.in/",
+    "SIH26092-089": "https://nrlm.gov.in/",
+    "SIH26092-090": "https://pmjay.gov.in/",
 }
 
 
@@ -83,8 +117,8 @@ def validate_csv_files():
     with open(schemes_fp, "r", encoding="utf-8") as f:
         master_rows = list(csv.DictReader(f))
     
-    if len(master_rows) != 56:
-        raise ValueError(f"Expected exactly 56 master scheme records, found {len(master_rows)}")
+    if len(master_rows) < 56:
+        raise ValueError(f"Expected at least 56 master scheme records, found {len(master_rows)}")
 
     master_ids = set()
     for row in master_rows:
@@ -100,8 +134,8 @@ def validate_csv_files():
     with open(rules_fp, "r", encoding="utf-8") as f:
         rule_rows = list(csv.DictReader(f))
     
-    if len(rule_rows) != 57:
-        raise ValueError(f"Expected exactly 57 rule records, found {len(rule_rows)}")
+    if len(rule_rows) < 57:
+        raise ValueError(f"Expected at least 57 rule records, found {len(rule_rows)}")
 
     for r in rule_rows:
         sid = r["scheme_id"].strip()
@@ -116,8 +150,8 @@ def validate_csv_files():
     with open(docs_fp, "r", encoding="utf-8") as f:
         doc_rows = list(csv.DictReader(f))
     
-    if len(doc_rows) != 20:
-        raise ValueError(f"Expected exactly 20 document records, found {len(doc_rows)}")
+    if len(doc_rows) < 20:
+        raise ValueError(f"Expected at least 20 document records, found {len(doc_rows)}")
 
     for d in doc_rows:
         sid = d["scheme_id"].strip()
@@ -150,7 +184,7 @@ def seed_database(db: Session):
             "source_organization": row.get("source_organization", "").strip(),
             "ministry": row.get("ministry", "").strip(),
             "implementing_agency": row.get("implementing_agency", "").strip(),
-            "scheme_status": row.get("scheme_status", "").strip(),
+            "scheme_status": row.get("scheme_status", "").strip() or "ACTIVE",
             "short_description": row.get("short_description", "").strip(),
             "detailed_description": row.get("detailed_description", "").strip(),
             "purpose": row.get("purpose", "").strip(),
@@ -171,7 +205,7 @@ def seed_database(db: Session):
             "age_max_raw": row.get("age_max", "").strip(),
 
             "income_limit": parse_numeric(row.get("income_limit", "")),
-            "income_limit_raw": row.get("income_limit", "").strip(),
+            "income_limit_raw": row.get("income_limit_raw", "").strip() or row.get("income_limit", "").strip() or "UNKNOWN",
             "income_operator": row.get("income_operator", "").strip(),
             "income_definition": row.get("income_definition", "").strip(),
 
@@ -224,27 +258,27 @@ def seed_database(db: Session):
 
             "grant_available": row.get("grant_available", "").strip(),
             "grant_amount": parse_numeric(row.get("grant_amount", "")),
-            "grant_amount_raw": row.get("grant_amount", "").strip(),
+            "grant_amount_raw": row.get("grant_amount_raw", "").strip() or row.get("grant_amount", "").strip() or ("NOT_APPLICABLE" if row.get("grant_available") == "NO" else ""),
 
             "interest_rate_min": parse_numeric(row.get("interest_rate_min", "")),
-            "interest_rate_min_raw": row.get("interest_rate_min", "").strip(),
+            "interest_rate_min_raw": row.get("interest_rate_min_raw", "").strip() or row.get("interest_rate_min", "").strip() or ("CONDITIONAL" if row.get("interest_rate_type") == "CONDITIONAL" else ("NOT_APPLICABLE" if row.get("loan_available") == "NO" else "")),
             "interest_rate_max": parse_numeric(row.get("interest_rate_max", "")),
-            "interest_rate_max_raw": row.get("interest_rate_max", "").strip(),
+            "interest_rate_max_raw": row.get("interest_rate_max_raw", "").strip() or row.get("interest_rate_max", "").strip(),
             "interest_rate_type": row.get("interest_rate_type", "").strip(),
 
             "repayment_period_min_months": parse_int(row.get("repayment_period_min_months", "")),
-            "repayment_period_min_months_raw": row.get("repayment_period_min_months", "").strip(),
+            "repayment_period_min_months_raw": row.get("repayment_period_min_months_raw", "").strip() or row.get("repayment_period_min_months", "").strip() or ("UNKNOWN" if row.get("loan_available") == "YES" else "NOT_APPLICABLE"),
             "repayment_period_max_months": parse_int(row.get("repayment_period_max_months", "")),
-            "repayment_period_max_months_raw": row.get("repayment_period_max_months", "").strip(),
+            "repayment_period_max_months_raw": row.get("repayment_period_max_months_raw", "").strip() or row.get("repayment_period_max_months", "").strip() or ("UNKNOWN" if row.get("loan_available") == "YES" else "NOT_APPLICABLE"),
             "repayment_frequency": row.get("repayment_frequency", "").strip(),
 
             "moratorium_min_months": parse_int(row.get("moratorium_min_months", "")),
-            "moratorium_min_months_raw": row.get("moratorium_min_months", "").strip(),
+            "moratorium_min_months_raw": row.get("moratorium_min_months_raw", "").strip() or row.get("moratorium_min_months", "").strip() or ("CONDITIONAL" if sid in ["SIH26092-056", "SIH26092-058"] else ("NOT_APPLICABLE" if row.get("loan_available") == "NO" else "")),
             "moratorium_max_months": parse_int(row.get("moratorium_max_months", "")),
-            "moratorium_max_months_raw": row.get("moratorium_max_months", "").strip(),
-            "moratorium_interest_mode": row.get("moratorium_interest_mode", "").strip(),
+            "moratorium_max_months_raw": row.get("moratorium_max_months_raw", "").strip() or row.get("moratorium_max_months", "").strip() or ("NOT_APPLICABLE" if row.get("loan_available") == "NO" else ""),
+            "moratorium_interest_mode": row.get("moratorium_interest_mode", "").strip() or ("UNKNOWN" if sid == "SIH26092-055" else ""),
 
-            "collateral_required": row.get("collateral_required", "").strip(),
+            "collateral_required": row.get("collateral_required", "").strip() or ("UNKNOWN" if sid == "SIH26092-055" else ""),
             "security_required": row.get("security_required", "").strip(),
 
             "training_available": row.get("training_available", "").strip(),

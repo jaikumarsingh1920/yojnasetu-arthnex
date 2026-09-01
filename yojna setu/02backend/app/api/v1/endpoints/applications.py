@@ -11,6 +11,8 @@ from app.schemas.application import (
     PaginatedApplicationListResponse,
     SubmissionValidationResponse,
     DocumentUploadResponse,
+    ApplicationSubmitRequest,
+    ApplicationWithdrawRequest,
 )
 from app.services.application_service import ApplicationService
 
@@ -152,6 +154,7 @@ def validate_application_submission(
     description="Submits the application, transitions status to SUBMITTED, populates submitted_at timestamp, and records status history."
 )
 def submit_application(
+    req: ApplicationSubmitRequest,
     application_id: str = Path(..., description="Application UUID"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -162,4 +165,24 @@ def submit_application(
     3. Transitions state from READY_FOR_SUBMISSION -> SUBMITTED.
     4. Records submitted_at timestamp and appends status history atomically.
     """
-    return ApplicationService.submit_application(db, application_id, current_user)
+    return ApplicationService.submit_application(db, application_id, current_user, req.partner_id)
+
+
+@router.post(
+    "/{application_id}/withdraw",
+    response_model=ApplicationResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Withdraw application",
+    description="Allows a beneficiary to withdraw their active application."
+)
+def withdraw_application(
+    application_id: str = Path(..., description="Application UUID"),
+    req: Optional[ApplicationWithdrawRequest] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Withdraws active application, sets status to WITHDRAWN, and records history & notification.
+    """
+    reason = req.reason if req else None
+    return ApplicationService.withdraw_application(db, application_id, current_user, reason)

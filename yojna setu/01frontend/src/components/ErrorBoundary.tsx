@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { ShieldAlert, RefreshCw } from 'lucide-react';
+import i18n from '../i18n';
 
 interface Props {
   children: ReactNode;
@@ -38,9 +39,9 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-black tracking-tight text-white">Something Went Wrong</h2>
+              <h2 className="text-2xl font-black tracking-tight text-white">{i18n.t('errors.somethingWentWrong', 'Something Went Wrong')}</h2>
               <p className="text-xs text-slate-300 leading-relaxed">
-                An unexpected application error occurred while rendering this interface.
+                {i18n.t('errors.unexpectedRenderError', 'An unexpected application error occurred while rendering this interface.')}
               </p>
             </div>
 
@@ -54,7 +55,7 @@ export class ErrorBoundary extends Component<Props, State> {
               onClick={this.handleReload}
               className="w-full bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-sm py-3 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2"
             >
-              <RefreshCw className="w-4 h-4" /> Reload Application
+              <RefreshCw className="w-4 h-4" /> {i18n.t('errors.reloadApp', 'Reload Application')}
             </button>
           </div>
         </div>

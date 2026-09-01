@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const VoiceButton: React.FC<Props> = ({ onSpeechResult, lastAssistantResponse }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [isSupported, setIsSupported] = useState<boolean>(false);
@@ -23,12 +23,13 @@ export const VoiceButton: React.FC<Props> = ({ onSpeechResult, lastAssistantResp
   const handleToggleListen = () => {
     if (!isSupported) return;
 
-    const currentLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) || SUPPORTED_LANGUAGES[0];
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
+
+    const selectedLangObj = SUPPORTED_LANGUAGES.find(l => l.code === i18n.language);
+    recognition.lang = selectedLangObj ? selectedLangObj.bcp47 : 'hi-IN';
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = currentLangObj.bcp47;
 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
@@ -36,16 +37,10 @@ export const VoiceButton: React.FC<Props> = ({ onSpeechResult, lastAssistantResp
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
-      if (transcript) {
-        onSpeechResult(transcript);
-      }
+      onSpeechResult(transcript);
     };
 
-    if (isListening) {
-      recognition.stop();
-    } else {
-      recognition.start();
-    }
+    recognition.start();
   };
 
   const handleToggleSpeak = () => {
@@ -56,7 +51,8 @@ export const VoiceButton: React.FC<Props> = ({ onSpeechResult, lastAssistantResp
       setIsSpeaking(false);
     } else {
       const utterance = new SpeechSynthesisUtterance(lastAssistantResponse);
-      utterance.rate = 1.0;
+      const selectedLangObj = SUPPORTED_LANGUAGES.find(l => l.code === i18n.language);
+      utterance.lang = selectedLangObj ? selectedLangObj.bcp47 : 'hi-IN';
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
       setIsSpeaking(true);
@@ -69,7 +65,7 @@ export const VoiceButton: React.FC<Props> = ({ onSpeechResult, lastAssistantResp
       <button
         disabled
         className="p-2 text-slate-300 bg-slate-100 rounded-xl cursor-not-allowed"
-        title="Voice STT unavailable in browser"
+        title={t('voice.unavailable', 'Voice STT unavailable in browser')}
       >
         <MicOff className="w-4 h-4" />
       </button>

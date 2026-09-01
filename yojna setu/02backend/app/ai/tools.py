@@ -98,14 +98,25 @@ class CopilotTools:
             return {"error": f"Scheme '{scheme_id}' not found."}
 
         eval_res = DeterministicEligibilityEngine.evaluate_scheme(sch, profile)
+        passed_reasons = [r.reason for r in eval_res.hard_rules_passed]
+        failed_reasons = [r.reason for r in eval_res.hard_rules_failed]
+        unknown_reasons = [r.reason for r in eval_res.unknown_eligibility_rules]
+
         return {
             "scheme_id": sch.scheme_id,
             "scheme_name": sch.scheme_name,
             "status": eval_res.status.value,
             "is_eligible": eval_res.status.value == "ELIGIBLE",
+            "matched_rules": passed_reasons,
+            "failed_rules": failed_reasons,
+            "missing_information": unknown_reasons,
             "explanations": eval_res.explanations,
             "hard_passed_count": len(eval_res.hard_rules_passed),
-            "hard_failed_count": len(eval_res.hard_rules_failed)
+            "hard_failed_count": len(eval_res.hard_rules_failed),
+            "unknown_count": len(eval_res.unknown_eligibility_rules),
+            "official_source": sch.source_document or "Official Scheme Guidelines",
+            "official_source_url": sch.official_source_url,
+            "official_portal": sch.official_portal
         }
 
     @staticmethod

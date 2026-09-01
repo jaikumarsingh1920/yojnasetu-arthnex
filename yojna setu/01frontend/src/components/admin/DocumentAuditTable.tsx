@@ -7,10 +7,11 @@ export const DocumentAuditTable: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [schemeFilter, setSchemeFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
 
   useEffect(() => {
     fetchDocuments();
-  }, [schemeFilter]);
+  }, [schemeFilter, typeFilter]);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -19,8 +20,12 @@ export const DocumentAuditTable: React.FC = () => {
         scheme_id: schemeFilter || undefined,
         page_size: 100
       });
-      setDocuments(res.items);
-      setTotal(res.total);
+      let items = res.items;
+      if (typeFilter) {
+        items = items.filter((d) => d.requirement_type.toUpperCase() === typeFilter.toUpperCase());
+      }
+      setDocuments(items);
+      setTotal(typeFilter ? items.length : res.total);
     } catch (err) {
       console.error('Failed to fetch document audit list:', err);
     } finally {
@@ -36,22 +41,35 @@ export const DocumentAuditTable: React.FC = () => {
             <FileText className="w-5 h-5 text-sky-600" />
             Document Requirements Audit ({total} Documents)
           </h3>
-          <p className="text-xs text-slate-500 mt-0.5">Verified document checklists for beneficiary applications across target schemes.</p>
+          <p className="text-xs text-slate-500 mt-0.5">Verified document preparation checklists across target schemes.</p>
         </div>
 
-        <input
-          type="text"
-          placeholder="Filter by Scheme ID..."
-          value={schemeFilter}
-          onChange={(e) => setSchemeFilter(e.target.value)}
-          className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono"
-        />
+        <div className="flex flex-wrap gap-2 text-xs">
+          <input
+            type="text"
+            placeholder="Filter by Scheme ID..."
+            value={schemeFilter}
+            onChange={(e) => setSchemeFilter(e.target.value)}
+            className="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono"
+          />
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-rose-500"
+          >
+            <option value="">ALL REQUIREMENT TYPES</option>
+            <option value="MANDATORY">REQUIRED / MANDATORY</option>
+            <option value="CONDITIONAL">CONDITIONAL</option>
+            <option value="OPTIONAL">OPTIONAL</option>
+            <option value="NOT_VERIFIED">NOT VERIFIED</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (
         <div className="py-8 text-center text-xs text-slate-500">Loading document audit entries...</div>
       ) : documents.length === 0 ? (
-        <div className="py-8 text-center text-xs text-slate-500">No document requirements found.</div>
+        <div className="py-8 text-center text-xs text-slate-500">No document requirements found matching criteria.</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
@@ -63,7 +81,7 @@ export const DocumentAuditTable: React.FC = () => {
                 <th className="p-2.5">Requirement Type</th>
                 <th className="p-2.5">Applicant Category</th>
                 <th className="p-2.5">Source Guidelines</th>
-                <th className="p-2.5">Status</th>
+                <th className="p-2.5">Verification</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-slate-800">
@@ -74,11 +92,15 @@ export const DocumentAuditTable: React.FC = () => {
                   <td className="p-2.5 font-bold text-slate-900">{d.document_name}</td>
                   <td className="p-2.5">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                      d.requirement_type === 'MANDATORY'
+                      d.requirement_type === 'MANDATORY' || d.requirement_type === 'REQUIRED'
                         ? 'bg-rose-100 text-rose-800 border-rose-300'
-                        : 'bg-amber-100 text-amber-800 border-amber-300'
+                        : d.requirement_type === 'CONDITIONAL'
+                        ? 'bg-amber-100 text-amber-800 border-amber-300'
+                        : d.requirement_type === 'OPTIONAL'
+                        ? 'bg-sky-100 text-sky-800 border-sky-300'
+                        : 'bg-slate-100 text-slate-800 border-slate-300'
                     }`}>
-                      {d.requirement_type}
+                      {d.requirement_type === 'MANDATORY' ? 'REQUIRED' : d.requirement_type}
                     </span>
                   </td>
                   <td className="p-2.5 font-mono text-slate-600">{d.applicant_type || 'ALL APPLICANTS'}</td>

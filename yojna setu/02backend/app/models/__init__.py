@@ -5,6 +5,8 @@ from app.models.rule import SchemeRule
 from app.models.document import SchemeDocument
 from app.models.changelog import SchemeChangelog
 from app.models.partner import Partner
+from app.models.partner_scheme import PartnerSchemeMapping
+from app.models.partner_changelog import PartnerChangelog
 from app.models.user import User, UserRole
 from app.models.application import (
     Application,
@@ -30,6 +32,7 @@ __all__ = [
     "User",
     "UserRole",
     "Partner",
+    "PartnerSchemeMapping",
     "Application",
     "ApplicationDocument",
     "ApplicationStatusHistory",

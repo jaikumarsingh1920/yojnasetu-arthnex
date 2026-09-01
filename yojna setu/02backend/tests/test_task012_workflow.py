@@ -131,11 +131,11 @@ def test_rbac_and_partner_access_control(client: TestClient, db: Session):
     assert res.status_code == 403
 
     # Partner accessing admin route -> 403
-    res = client.get("/api/v1/admin/applications/stats", headers=partner_headers)
+    res = client.get("/api/v1/admin/dashboard", headers=partner_headers)
     assert res.status_code == 403
 
     # System Admin accessing admin route -> 200
-    res = client.get("/api/v1/admin/applications/stats", headers=admin_headers)
+    res = client.get("/api/v1/admin/dashboard", headers=admin_headers)
     assert res.status_code == 200
 
 
@@ -167,7 +167,7 @@ def test_full_end_to_end_lifecycle_with_corrections(client: TestClient, db: Sess
     assert app_data["status"] in ("READY_FOR_SUBMISSION", "DRAFT", "DOCUMENTS_PENDING")
 
     # 2. Submit Application
-    res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers)
+    res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers, json={"partner_id": "PARTNER-001"})
     assert res.status_code == 200
     assert res.json()["status"] == "SUBMITTED"
 
@@ -186,7 +186,7 @@ def test_full_end_to_end_lifecycle_with_corrections(client: TestClient, db: Sess
     assert res.json()["status"] == "CORRECTION_REQUIRED"
 
     # 5. Beneficiary Resubmits Application after correction
-    res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers)
+    res = client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers, json={"partner_id": "PARTNER-001"})
     assert res.status_code == 200
     assert res.json()["status"] == "SUBMITTED"
 
@@ -199,12 +199,11 @@ def test_full_end_to_end_lifecycle_with_corrections(client: TestClient, db: Sess
     assert res.status_code == 200
     assert res.json()["status"] == "APPROVED"
 
-    # 8. Check Admin Stats
-    res = client.get("/api/v1/admin/applications/stats", headers=admin_headers)
+    # 8. Check Partner Queue Status
+    res = client.get("/api/v1/partner/applications?status=APPROVED", headers=padmin_headers)
     assert res.status_code == 200
-    stats = res.json()
-    assert stats["approved"] >= 1
-    assert stats["total_applications"] >= 1
+    apps = res.json()["items"]
+    assert any(a["application_id"] == app_id for a in apps)
 
 
 def test_rejection_workflow(client: TestClient, db: Session):
@@ -218,7 +217,7 @@ def test_rejection_workflow(client: TestClient, db: Session):
     }, headers=ben_headers)
     app_id = res.json()["application_id"]
 
-    client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers)
+    client.post(f"/api/v1/applications/{app_id}/submit", headers=ben_headers, json={"partner_id": "PARTNER-001"})
     client.post(f"/api/v1/partner/applications/{app_id}/start-review", headers=padmin_headers)
 
     res = client.post(f"/api/v1/partner/applications/{app_id}/reject", json={"reason": "Project cost exceeds threshold."}, headers=padmin_headers)

@@ -1,0 +1,126 @@
+{
+  "home.categories.agriDesc": {
+    "en": "Kisan credit loans, livestock capital subsidies & rural enterprise development grants.",
+    "hi": "किसान क्रेडिट ऋण, पशुधन पूंजी सब्सिडी और ग्रामीण विकास अनुदान।"
+  },
+  "home.categories.artisanDesc": {
+    "en": "Collateral-free credit, toolkits & skill upgradation for 18 traditional craftsmanship trades.",
+    "hi": "18 पारंपरिक शिल्प व्यवसायों के लिए बिना गारंटी ऋण, टूलकिट और कौशल उन्नयन।"
+  },
+  "home.categories.eduDesc": {
+    "en": "Pre-matric, post-matric and top-class education financial assistance for deserving students.",
+    "hi": "योग्य छात्रों के लिए मैट्रिक-पूर्व, मैट्रिक-उपरांत और उच्च शिक्षा वित्तीय सहायता।"
+  },
+  "home.categories.healthDesc": {
+    "en": "₹5 Lakh cashless health cover, maternal benefits & specialized child welfare schemes.",
+    "hi": "₹5 लाख का कैशलेस स्वास्थ्य कवर, मातृत्व लाभ और बाल कल्याण योजनाएं।"
+  },
+  "home.categories.msmeDesc": {
+    "en": "Collateral-free business loans, working capital & capital subsidies for micro enterprises.",
+    "hi": "सूक्ष्म उद्यमों के लिए बिना गारंटी व्यापार ऋण, कार्यशील पूंजी और पूंजीगत सब्सिडी।"
+  },
+  "home.categories.socialDesc": {
+    "en": "Guaranteed monthly pensions, accident insurance & term life protection for workers.",
+    "hi": "श्रमिकों के लिए गारंटीकृत मासिक पेंशन, दुर्घटना बीमा और जीवन सुरक्षा।"
+  },
+  "home.categorySectionSub": {
+    "en": "Find schemes tailored to your specific enterprise, vocation, or social background.",
+    "hi": "अपने व्यवसाय, कार्यक्षेत्र या सामाजिक पृष्ठभूमि के अनुसार योजनाएं चुनें।"
+  },
+  "home.citizensSection.desc": {
+    "en": "Discover government welfare without paperwork confusion. Understand exact eligibility requirements and track your journey transparently.",
+    "hi": "कागजी भ्रम के बिना सरकारी योजनाओं की जानकारी प्राप्त करें और अपनी प्रगति ट्रैक करें।"
+  },
+  "home.deterministicNote": {
+    "en": "Eligibility determinations are grounded in deterministic backend rules and official data. AI assists citizens with scheme discovery and explanation.",
+    "hi": "पात्रता निर्धारण नियम-आधारित डेटा पर आधारित हैं। एआई नागरिकों को योजना खोज और मार्गदर्शन में सहायता प्रदान करता है।"
+  },
+  "home.exploreByCategorySub": {
+    "en": "Browse verified government welfare portfolios organized by sector and trade.",
+    "hi": "विभिन्न क्षेत्रों और व्यवसायों के अनुसार आयोजित सरकारी कल्याणकारी योजनाएं देखें।"
+  },
+  "home.finalCtaSubtitle": {
+    "en": "Takes less than 2 minutes. Answer a few questions to get personalized government scheme guidance.",
+    "hi": "2 मिनट से भी कम समय लगता है। व्यक्तिगत सरकारी योजना मार्गदर्शन पाने के लिए उत्तर दें।"
+  },
+  "home.heroSubtitle": {
+    "en": "AI-assisted multilingual guidance platform connecting Indian citizens with official central and state welfare schemes.",
+    "hi": "एआई-सहायक बहुभाषी मार्गदर्शन मंच जो भारतीय नागरिकों को आधिकारिक केंद्रीय व राज्य कल्याणकारी योजनाओं से जोड़ता है।"
+  },
+  "home.howItWorks.step1Desc": {
+    "en": "Provide basic parameters like your age, state, social category, income, and business stage in complete privacy.",
+    "hi": "पूरी गोपनीयता के साथ अपनी आयु, राज्य, सामाजिक श्रेणी, आय और व्यवसाय का विवरण दर्ज करें।"
+  },
+  "home.howItWorks.step2Desc": {
+    "en": "Our verified rule engine evaluates all 90 schemes with transparent passed, failed, and matched rule explanations.",
+    "hi": "हमारा नियम इंजन पारदर्शी कारणों के साथ सभी 90 योजनाओं की पात्रता का मूल्यांकन करता है।"
+  },
+  "home.howItWorks.step3Desc": {
+    "en": "Use the interactive calculator to estimate your EMI, margin money requirement, interest subsidy, and moratorium periods.",
+    "hi": "अपनी मासिक ईएमआई, मार्जिन मनी और ब्याज सब्सिडी का अनुमान लगाने के लिए कैलकुलेटर का उपयोग करें।"
+  },
+  "home.howItWorks.step4Desc": {
+    "en": "Locate authorized Public Sector Banks, District Industries Centers, and State Agencies on an interactive GPS map.",
+    "hi": "मानचित्र पर अधिकृत सार्वजनिक बैंक, जिला उद्योग केंद्र और राज्य एजेंसियां खोजें।"
+  },
+  "home.howItWorks.sub": {
+    "en": "No middle-men, no hidden fees, and no guesswork. From discovery to verified local application in minutes.",
+    "hi": "कोई बिचौलिया नहीं, कोई छिपी फीस नहीं। योजना खोज से लेकर स्थानीय आवेदन तक मिनटों में।"
+  },
+  "home.howItWorksSub": {
+    "en": "A transparent 4-step path to discover schemes you may qualify for and access official application routes.",
+    "hi": "योजनाओं को खोजने और आधिकारिक आवेदन मार्ग तक पहुंचने की 4-चरणीय पारदर्शी प्रक्रिया।"
+  },
+  "home.partnersSection.desc": {
+    "en": "Find nearby Public Sector Banks, District Industries Centers, and State Channelizing Agencies supporting official welfare schemes.",
+    "hi": "सरकारी कल्याणकारी व ऋण योजनाओं के लिए निकटतम सार्वजनिक बैंकों, जिला उद्योग केंद्रों और राज्य एजेंसियों का पता लगाएं।"
+  },
+  "home.policyBanner.desc": {
+    "en": "YojnaSetu strictly separates AI conversational guidance from decision logic. Hard eligibility boundaries, financial computations, and document checklists are computed directly in code and verified against official Gazette guidelines.",
+    "hi": "योजनासेतु निर्णय तर्क से एआई मार्गदर्शन को अलग रखता है। सभी गणनाएं और पात्रता सीमाएं सीधे गजट दिशानिर्देशों के अनुसार कोड में सत्यापित हैं।"
+  },
+  "home.smartMatchingDescription": {
+    "en": "Answer a few questions about your age, category, location, occupation and business needs. YojnaSetu checks your profile against official scheme eligibility rules.",
+    "hi": "अपनी आयु, वर्ग, स्थान, व्यवसाय और उद्यम आवश्यकताओं के बारे में कुछ सरल प्रश्नों के उत्तर दें। योजनासेतु आधिकारिक पात्रता नियमों के अनुसार आपका मिलान करता है।"
+  },
+  "home.stepCheckEligibilityDesc": {
+    "en": "Our deterministic engine evaluates official statutory scheme criteria against your profile.",
+    "hi": "हमारा नियम-आधारित इंजन आपकी जानकारी का आधिकारिक सरकारी मानदंडों से मिलान करता है।"
+  },
+  "home.stepDiscoverSchemesDesc": {
+    "en": "Receive a curated list of government schemes with transparent match reasons and financial benefits.",
+    "hi": "स्पष्ट कारणों और वित्तीय लाभों के साथ अपने लिए उपयुक्त योजनाओं की सूची प्राप्त करें।"
+  },
+  "home.stepOfficialRouteDesc": {
+    "en": "Apply directly on official ministry portals or locate verified local channel partner assistance centers.",
+    "hi": "सीधे आधिकारिक मंत्रालय पोर्टल पर आवेदन करें या अधिकृत स्थानीय चैनल भागीदार केंद्र खोजें।"
+  },
+  "home.stepTellUsDesc": {
+    "en": "Share basic profile details like your age, social category, location, and vocation in complete privacy.",
+    "hi": "बिना किसी दस्तावेज के पूर्ण गोपनीयता के साथ अपनी आयु, सामाजिक वर्ग, राज्य और व्यवसाय साझा करें।"
+  },
+  "home.trustDesc": {
+    "en": "YojnaSetu operates as an independent civic-tech portal providing deterministic eligibility guidance derived from published ministry guidelines, official portals, and authorized channel partner directories.",
+    "hi": "योजनासेतु एक स्वतंत्र नागरिक-तकनीक पोर्टल है जो आधिकारिक मंत्रालय दिशानिर्देशों और पोर्टलों से सत्यापित पात्रता मार्गदर्शन प्रदान करता है।"
+  },
+  "home.trustPillar1Desc": {
+    "en": "Every scheme mapped to published ministry notifications and official source citations.",
+    "hi": "प्रत्येक योजना आधिकारिक मंत्रालय अधिसूचनाओं और उद्धरणों से सत्यापित है।"
+  },
+  "home.trustPillar2Desc": {
+    "en": "Transparent criteria evaluations without black-box estimation or guesswork.",
+    "hi": "वैधानिक मानदंडों पर आधारित पारदर्शी पात्रता मूल्यांकन।"
+  },
+  "home.trustPillar3Desc": {
+    "en": "120+ verified state channelizing agencies, bank branches, and facilitation centers.",
+    "hi": "120+ सत्यापित राज्य एजेंसियां, बैंक शाखाएं और नागरिक सुविधा केंद्र।"
+  },
+  "home.trustPillar4Desc": {
+    "en": "Zero PII or document uploads required to discover and compare schemes.",
+    "hi": "योजनाएं खोजने के लिए किसी व्यक्तिगत दस्तावेज या आधार अपलोड की आवश्यकता नहीं।"
+  },
+  "home.voiceButton": {
+    "en": "Voice Assist",
+    "hi": "आवाज से पूछें"
+  }
+}
