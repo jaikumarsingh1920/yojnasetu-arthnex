@@ -22,7 +22,9 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     description="YojnaSetu AI-assisted Multilingual Platform API - Production Hardened",
     version="1.0.0",
-    openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
     redirect_slashes=False,
 )
 
