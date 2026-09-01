@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient, API_BASE_URL } from './client';
 import {
   NaturalLanguageExtractRequest,
   NaturalLanguageExtractResponse,
@@ -42,7 +42,10 @@ export const aiApi = {
     onError: (err: any) => void
   ): Promise<void> => {
     try {
-      const response = await fetch('/api/v1/ai/chat/stream', {
+      const streamUrl = API_BASE_URL.endsWith('/') 
+        ? `${API_BASE_URL}ai/chat/stream` 
+        : `${API_BASE_URL}/ai/chat/stream`;
+      const response = await fetch(streamUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
