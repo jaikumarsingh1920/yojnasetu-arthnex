@@ -20,10 +20,12 @@ dist/
 build/
 *.tsbuildinfo
 
-# SQLite & Databases
-*.db
+# SQLite & Databases (ignore temp/test dbs, but keep canonical yojnasetu.db)
 *.sqlite
 *.sqlite3
+!yojna setu/02backend/app/yojnasetu.db
+!yojna setu/02backend/yojnasetu.db
+
 
 # Uploads & User Files
 uploads/

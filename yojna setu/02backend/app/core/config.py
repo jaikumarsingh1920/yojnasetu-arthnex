@@ -3,7 +3,18 @@ from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_DB_FILE = os.path.join(BASE_DIR, "yojnasetu.db")
+PARENT_DIR = os.path.dirname(BASE_DIR)
+
+# Locate the canonical seeded SQLite database
+_primary_db = os.path.join(BASE_DIR, "yojnasetu.db")
+_secondary_db = os.path.join(PARENT_DIR, "yojnasetu.db")
+if os.path.exists(_primary_db):
+    DEFAULT_DB_FILE = _primary_db
+elif os.path.exists(_secondary_db):
+    DEFAULT_DB_FILE = _secondary_db
+else:
+    DEFAULT_DB_FILE = _primary_db
+
 
 
 class Settings(BaseSettings):

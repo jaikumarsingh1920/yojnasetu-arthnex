@@ -14,7 +14,8 @@ htmlcov/
 .venv/
 venv/
 
-# Database files
-*.db
+# Database files (ignore temp/test dbs, but keep canonical yojnasetu.db)
 *.sqlite3
-yojnasetu.db
+!app/yojnasetu.db
+!yojnasetu.db
+
