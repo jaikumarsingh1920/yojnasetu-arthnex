@@ -7,21 +7,18 @@ from app.core.config import settings, DEFAULT_DB_FILE
 
 db_url = settings.get_database_url()
 
-# If using a custom SQLite path (e.g. Render Persistent Disk at /data/yojnasetu.db)
+# If using a custom SQLite path, ensure directory and file initialization with fallback
 if db_url.startswith("sqlite:///"):
     target_path = db_url.replace("sqlite:///", "")
     target_dir = os.path.dirname(target_path)
-    if target_dir and not os.path.exists(target_dir):
-        try:
+    try:
+        if target_dir and not os.path.exists(target_dir):
             os.makedirs(target_dir, exist_ok=True)
-        except Exception:
-            pass
-    # If the target DB does not exist yet, copy initial canonical database
-    if not os.path.exists(target_path) and os.path.exists(DEFAULT_DB_FILE) and target_path != DEFAULT_DB_FILE:
-        try:
+        if not os.path.exists(target_path) and os.path.exists(DEFAULT_DB_FILE) and target_path != DEFAULT_DB_FILE:
             shutil.copyfile(DEFAULT_DB_FILE, target_path)
-        except Exception:
-            pass
+    except Exception as e:
+        # Fallback to bundled database file if custom path is read-only or inaccessible
+        db_url = f"sqlite:///{DEFAULT_DB_FILE}"
 
 connect_args = {"check_same_thread": False} if db_url.startswith("sqlite") else {}
 

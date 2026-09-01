@@ -2,14 +2,11 @@ services:
   - type: web
     name: yojnasetu-backend
     runtime: python
+    plan: free
     rootDir: "yojna setu/02backend"
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /health
-    disk:
-      name: yojnasetu-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
@@ -33,5 +30,3 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_ID
         value: "370546184305-2kusbrn1a3t2hd8cu5ap16vmsk2ci066.apps.googleusercontent.com"
-      - key: DATABASE_URL
-        value: "sqlite:////data/yojnasetu.db"
