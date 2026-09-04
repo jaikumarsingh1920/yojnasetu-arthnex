@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npm --prefix \"yojna setu/01frontend\" run dev",
     "dev:frontend": "npm --prefix \"yojna setu/01frontend\" run dev",
-    "build": "npm --prefix \"yojna setu/01frontend\" run build",
+    "build": "npm --prefix \"yojna setu/01frontend\" install && npm --prefix \"yojna setu/01frontend\" run build",
     "start:backend": "python -m uvicorn app.main:app --app-dir \"yojna setu/02backend\" --port 8000 --reload"
   }
 }
