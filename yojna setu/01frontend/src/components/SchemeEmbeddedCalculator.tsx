@@ -327,10 +327,10 @@ export const SchemeEmbeddedCalculator: React.FC<SchemeEmbeddedCalculatorProps> =
               className="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
             />
 
-            <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium">
+            <div className="flex flex-wrap justify-between items-center text-[10px] text-slate-400 font-medium gap-1">
               <span>{t('compare.min', 'Min')}: {scheme.min_loan_amount ? formatCurrency(officialMinLoan) : t('calculator.asPerBank', 'As per bank')}</span>
-              <span>
-                {hasFixedLoan ? t('calculator.maxLimit', 'Max Limit: {{amount}}', { amount: formatCurrency(officialMaxLoan) }) : t('calculator.maxLimitAppraisal', 'Maximum amount: As per appraisal / not specified in available official guidelines')}
+              <span className="text-right truncate max-w-[200px]">
+                {hasFixedLoan ? t('calculator.maxLimit', 'Max Limit: {{amount}}', { amount: formatCurrency(officialMaxLoan) }) : t('calculator.asPerBank', 'As per bank appraisal')}
               </span>
             </div>
 
@@ -376,12 +376,12 @@ export const SchemeEmbeddedCalculator: React.FC<SchemeEmbeddedCalculatorProps> =
               className="w-full accent-amber-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
             />
 
-            <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium">
+            <div className="flex flex-wrap justify-between items-center text-[10px] text-slate-400 font-medium gap-1">
               <span>{t('calculator.interestFree', '0% (Interest-Free)')}</span>
-              <span>
+              <span className="text-center truncate max-w-[180px]">
                 {hasFixedRate
-                  ? t('calculator.officialSchemeRate', 'Official Scheme Rate: {{rate}}% p.a.', { rate: officialRate })
-                  : t('calculator.asDeterminedLender', 'Interest rate: As determined by financing institution')}
+                  ? t('calculator.officialSchemeRate', 'Official: {{rate}}% p.a.', { rate: officialRate })
+                  : t('calculator.asDeterminedLender', 'As determined by institution')}
               </span>
               <span>18%</span>
             </div>
@@ -408,20 +408,20 @@ export const SchemeEmbeddedCalculator: React.FC<SchemeEmbeddedCalculatorProps> =
               className="w-full accent-indigo-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
             />
 
-            <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium">
-              <span>6 {t('calculator.months', 'Months')}</span>
-              <span>
+            <div className="flex flex-wrap justify-between items-center text-[10px] text-slate-400 font-medium gap-1">
+              <span>6 {t('calculator.months', 'Mo.')}</span>
+              <span className="text-center truncate max-w-[180px]">
                 {hasFixedTenure
-                  ? `Official Tenure: ${officialTenureMonths} Months`
-                  : t('calculator.asDeterminedLender', 'Repayment tenure: Not specified in available official guidelines')}
+                  ? `Official: ${officialTenureMonths} Mo.`
+                  : t('calculator.asDeterminedLender', 'As per guidelines')}
               </span>
-              <span>{Math.max(officialTenureMonths, 120)} {t('calculator.months', 'Months')}</span>
+              <span>{Math.max(officialTenureMonths, 120)} {t('calculator.months', 'Mo.')}</span>
             </div>
           </div>
         </div>
 
         {/* Right Column: Calculation Result Card */}
-        <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 via-gov-navy to-slate-900 text-white rounded-2xl p-6 shadow-xl space-y-6 flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 via-gov-navy to-slate-900 text-white rounded-2xl p-4 sm:p-6 shadow-xl space-y-5 sm:space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
             <span className="text-[10px] font-extrabold text-gov-saffron uppercase tracking-widest bg-slate-800 px-2.5 py-1 rounded">
               {t('calculator.monthlyEmi', 'ESTIMATED MONTHLY INSTALLMENT')}
@@ -511,7 +511,7 @@ export const SchemeEmbeddedCalculator: React.FC<SchemeEmbeddedCalculatorProps> =
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-slate-200 max-h-72 overflow-y-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[520px]">
               <thead className="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] sticky top-0 border-b border-slate-200">
                 <tr>
                   <th className="py-2.5 px-3">{scheduleMode === 'YEARLY' ? t('calculator.year', 'Period') : t('calculator.month', 'Period')}</th>

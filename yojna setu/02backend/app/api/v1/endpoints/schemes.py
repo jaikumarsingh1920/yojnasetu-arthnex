@@ -2,7 +2,7 @@ import json
 import math
 import re
 from typing import Optional, List, Dict, Any, Set
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Body, Path, status
 from sqlalchemy import or_, and_, asc, desc, func
 from sqlalchemy.orm import Session, selectinload
 
@@ -12,6 +12,8 @@ from app.models.scheme import Scheme
 from app.models.verification import SchemeVerification
 from app.schemas.profile import BeneficiaryProfileInput
 from app.engine.eligibility import DeterministicEligibilityEngine
+from app.core.config import settings
+from app.services.email_service import EmailService
 from app.schemas.scheme import (
     SchemeListItemResponse,
     PaginatedSchemeListResponse,
@@ -21,6 +23,8 @@ from app.schemas.scheme import (
     SchemeComparisonResponse,
     SchemeComparisonItem,
     SchemePersonalizedEligibility,
+    EmailSchemeRequest,
+    EmailSchemeResponse,
 )
 
 router = APIRouter()
@@ -835,3 +839,52 @@ def get_scheme_detail(
         )
 
     return scheme
+
+
+@router.post(
+    "/{scheme_id}/email",
+    response_model=EmailSchemeResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Email scheme details to recipient",
+    description="Sends comprehensive, authoritative scheme details to the specified email address via SMTP or development provider."
+)
+def email_scheme_details(
+    scheme_id: str = Path(..., description="Authoritative scheme ID"),
+    req: EmailSchemeRequest = Body(...),
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user)
+):
+    scheme = db.query(Scheme).options(
+        selectinload(Scheme.verifications),
+        selectinload(Scheme.rules),
+        selectinload(Scheme.documents),
+        selectinload(Scheme.partner_mappings),
+    ).filter(
+        Scheme.scheme_id == scheme_id
+    ).first()
+
+    if not scheme or scheme.scheme_status == "INACTIVE":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scheme with ID '{scheme_id}' was not found or is currently inactive.",
+        )
+
+    clean_email = str(req.recipient_email).strip().lower()
+    res = EmailService.send_scheme_email(
+        recipient_email=clean_email,
+        scheme=scheme,
+        yojnasetu_base_url=settings.YOJNASETU_BASE_URL,
+        language_code=req.language_code or "en"
+    )
+
+    if not res.get("sent", False):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=res.get("message", "Failed to deliver scheme email.")
+        )
+
+    return EmailSchemeResponse(
+        sent=True,
+        message=res.get("message", f"Scheme details sent to your email ({clean_email})."),
+        recipient_email=clean_email
+    )

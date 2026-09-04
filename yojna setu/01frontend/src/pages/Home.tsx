@@ -286,7 +286,7 @@ export const Home: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('home.searchPlaceholder')}
-                className="w-full px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-slate-900 bg-transparent outline-none placeholder:text-slate-400 font-medium"
+                className="w-full min-w-0 flex-1 px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-slate-900 bg-transparent outline-none placeholder:text-slate-400 font-medium"
               />
               <button
                 type="submit"

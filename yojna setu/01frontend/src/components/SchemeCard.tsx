@@ -141,16 +141,16 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({ scheme }) => {
       </div>
 
       {/* Action Footer */}
-      <div className="bg-slate-50 px-5 py-3 border-t border-slate-100 flex items-center justify-between gap-2">
+      <div className="bg-slate-50 px-3.5 sm:px-5 py-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
         <Link
           to={`/schemes/${scheme.scheme_id}`}
-          className="text-xs font-bold text-sky-700 hover:text-sky-900 flex items-center gap-1 group-hover:translate-x-0.5 transition"
+          className="text-xs font-bold text-sky-700 hover:text-sky-900 flex items-center gap-1 group-hover:translate-x-0.5 transition min-h-[36px]"
         >
           {t('schemeCard.viewDetails')}
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <CompareButton schemeId={scheme.scheme_id} variant="compact" />
           {scheme.is_credit_scheme !== false && (scheme.max_loan_amount || scheme.interest_rate_max !== undefined) ? (
             <Link

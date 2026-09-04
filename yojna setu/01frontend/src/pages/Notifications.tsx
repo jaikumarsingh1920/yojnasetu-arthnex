@@ -129,10 +129,10 @@ export const Notifications: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => setIsPrefModalOpen(true)}
-            className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 shadow transition flex items-center gap-1.5"
+            className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 shadow transition flex items-center justify-center gap-1.5 min-h-[44px]"
           >
             <Settings className="w-4 h-4 text-sky-400" /> {t('notifications.deliveryPreferences', 'Delivery Preferences')}
           </button>
@@ -140,7 +140,7 @@ export const Notifications: React.FC = () => {
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5"
+              className="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 min-h-[44px]"
             >
               <CheckCheck className="w-4 h-4" /> {t('notifications.markAllRead', 'Mark All as Read')}
             </button>
@@ -151,7 +151,7 @@ export const Notifications: React.FC = () => {
       {errorMsg && <Alert type="error">{errorMsg}</Alert>}
 
       {/* Main Grid */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5 sm:space-y-6">
         {/* Controls & Filter Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
           {/* Status Tabs */}

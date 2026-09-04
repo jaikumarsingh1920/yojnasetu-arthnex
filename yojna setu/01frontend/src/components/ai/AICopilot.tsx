@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Bot, Sparkles } from 'lucide-react';
@@ -22,12 +22,25 @@ export const AICopilot: React.FC = () => {
   const appMatch = location.pathname.match(/\/applications\/([^\/]+)/);
   const applicationIdContext = appMatch ? appMatch[1] : undefined;
 
+  // Automatically minimize the expanded chatbot when route changes (e.g. navigating to scheme details)
+  const prevPathnameRef = useRef(location.pathname);
+  useEffect(() => {
+    if (prevPathnameRef.current !== location.pathname) {
+      prevPathnameRef.current = location.pathname;
+      if (isOpen && !isMinimized) {
+        setIsMinimized(true);
+        setIsOpen(false);
+      }
+    }
+  }, [location.pathname, isOpen, isMinimized]);
+
   const handleToggle = () => {
-    if (isMinimized) {
+    if (isMinimized || !isOpen) {
       setIsMinimized(false);
       setIsOpen(true);
     } else {
-      setIsOpen(prev => !prev);
+      setIsMinimized(true);
+      setIsOpen(false);
     }
   };
 
@@ -38,8 +51,8 @@ export const AICopilot: React.FC = () => {
         <button
           onClick={handleToggle}
           className={`fixed ${
-            hasComparisonDock ? 'bottom-20 sm:bottom-24' : 'bottom-3 sm:bottom-5'
-          } right-3 sm:right-5 bg-gradient-to-r from-gov-navy via-sky-900 to-slate-900 text-white min-w-[48px] min-h-[48px] p-3 sm:p-3.5 rounded-full shadow-2xl hover:scale-105 border-2 border-sky-400/50 transition-all z-50 group flex items-center justify-center gap-2`}
+            hasComparisonDock ? 'bottom-28 sm:bottom-24' : 'bottom-3 sm:bottom-5'
+          } right-3 sm:right-5 bg-gradient-to-r from-gov-navy via-sky-900 to-slate-900 text-white min-w-[48px] min-h-[48px] p-3 sm:p-3.5 rounded-full shadow-2xl hover:scale-105 border-2 border-sky-400/50 transition-all z-40 group flex items-center justify-center gap-2`}
           aria-label={t('copilot.openAssistantTitle', 'Open YojnaSetu AI Assistant')}
           title={t('copilot.openAssistantTitle', 'Open YojnaSetu AI Assistant')}
         >

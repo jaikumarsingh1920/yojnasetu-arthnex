@@ -107,7 +107,7 @@ export const Applications: React.FC = () => {
             const totalDocs = app.documents.length;
 
             return (
-              <div key={app.application_id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div key={app.application_id} className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <h3 className="text-base font-bold text-slate-900">{app.scheme_name || `Scheme ${app.scheme_id}`}</h3>
@@ -125,7 +125,7 @@ export const Applications: React.FC = () => {
 
                 <Link
                   to={`/applications/${app.application_id}`}
-                  className="bg-gov-blue hover:bg-gov-navy text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 shrink-0"
+                  className="w-full sm:w-auto bg-gov-blue hover:bg-gov-navy text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 shrink-0 min-h-[44px]"
                 >
                   {t('applications.viewChecklistBtn', 'View Checklist & Official Portal Link')}
                   <ArrowRight className="w-4 h-4" />

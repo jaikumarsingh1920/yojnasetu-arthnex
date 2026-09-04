@@ -5,6 +5,7 @@ import { Bot, User, ArrowRight, ShieldCheck, Copy, Check } from 'lucide-react';
 import { SourceCitation, AICopilotAction, RichCard } from '../../types';
 import { SourceCitationCard } from './SourceCitationCard';
 import { RichCardRenderer } from './RichCardRenderer';
+import { SafeChatMarkdown } from './SafeChatMarkdown';
 
 export interface ChatMessageItem {
   id: string;
@@ -23,15 +24,17 @@ export interface ChatMessageItem {
 interface Props {
   message: ChatMessageItem;
   onSelectSuggestion?: (question: string) => void;
+  onNavigate?: () => void;
 }
 
-export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion }) => {
+export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion, onNavigate }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [copied, setCopied] = useState<boolean>(false);
   const isAssistant = message.sender === 'assistant';
 
   const handleActionClick = (action: AICopilotAction) => {
+    onNavigate?.();
     if (action.target_url) {
       navigate(action.target_url);
     }
@@ -57,7 +60,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion }) =>
       </div>
 
       {/* Message Bubble & Content */}
-      <div className={`space-y-2 max-w-[85%] ${isAssistant ? '' : 'text-right'}`}>
+      <div className={`space-y-2 max-w-[88%] min-w-0 ${isAssistant ? '' : 'text-right'}`}>
         <div
           className={`p-3.5 rounded-2xl shadow-xs leading-relaxed space-y-2 relative group ${
             isAssistant
@@ -84,15 +87,19 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion }) =>
           )}
 
           {/* Formatted Text */}
-          <div className="whitespace-pre-wrap text-[11px] sm:text-xs font-sans">
-            {message.text}
-          </div>
+          {isAssistant ? (
+            <SafeChatMarkdown content={message.text} />
+          ) : (
+            <div className="whitespace-pre-wrap text-[11px] sm:text-xs font-sans leading-relaxed break-words">
+              {message.text}
+            </div>
+          )}
 
           {/* Rich Response Cards */}
           {isAssistant && message.richCards && message.richCards.length > 0 && (
             <div className="space-y-2 pt-1">
               {message.richCards.map((rc, idx) => (
-                <RichCardRenderer key={idx} card={rc} />
+                <RichCardRenderer key={idx} card={rc} onNavigate={onNavigate} />
               ))}
             </div>
           )}
@@ -119,7 +126,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion }) =>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('copilot.verifiedSources', 'Verified Sources')}</p>
             <div className="grid grid-cols-1 gap-1.5">
               {message.citations.map((cite, idx) => (
-                <SourceCitationCard key={idx} citation={cite} />
+                <SourceCitationCard key={idx} citation={cite} onNavigate={onNavigate} />
               ))}
             </div>
           </div>

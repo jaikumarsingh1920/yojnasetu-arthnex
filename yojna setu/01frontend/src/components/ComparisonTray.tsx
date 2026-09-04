@@ -50,16 +50,16 @@ export const ComparisonTray: React.FC = () => {
         </div>
 
         {/* Right: Messages & Actions */}
-        <div className="flex flex-wrap items-center justify-end gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full md:w-auto">
           {warningMessage && (
-            <div className="flex items-center gap-1.5 text-amber-300 text-xs bg-amber-950/60 border border-amber-500/40 px-3 py-1.5 rounded-lg animate-pulse">
-              <AlertCircle className="w-3.5 h-3.5" />
-              <span>{warningMessage}</span>
+            <div className="flex items-center gap-1.5 text-amber-300 text-xs bg-amber-950/60 border border-amber-500/40 px-3 py-1.5 rounded-lg animate-pulse w-full sm:w-auto">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              <span className="text-[11px] sm:text-xs">{warningMessage}</span>
             </div>
           )}
 
           {selectedSchemeIds.length === 1 && !warningMessage && (
-            <span className="text-slate-400 text-xs italic">
+            <span className="text-slate-400 text-[11px] sm:text-xs italic w-full sm:w-auto">
               {t('compare.selectOneMore', 'Select at least one more scheme to compare.')}
             </span>
           )}
@@ -67,7 +67,7 @@ export const ComparisonTray: React.FC = () => {
           <button
             type="button"
             onClick={clearComparison}
-            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-xs font-semibold px-3 py-2.5 rounded-xl transition min-h-[44px]"
+            className="flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition min-h-[44px]"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>{t('compare.clearAll', 'Clear All')}</span>
@@ -77,10 +77,10 @@ export const ComparisonTray: React.FC = () => {
             type="button"
             disabled={selectedSchemeIds.length < 2}
             onClick={handleCompareNow}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs px-4 sm:px-5 py-2.5 rounded-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
           >
             <span>{t('compare.compareNow', 'Compare Now')}</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
       </div>

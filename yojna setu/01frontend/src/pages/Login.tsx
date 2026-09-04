@@ -59,8 +59,8 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 px-4">
-      <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-lg space-y-6">
+    <div className="max-w-md mx-auto my-6 sm:my-12 px-3 sm:px-4">
+      <div className="bg-white p-5 sm:p-8 rounded-2xl border border-slate-200 shadow-lg space-y-5 sm:space-y-6">
         <div className="text-center space-y-2">
           <img
             src="/logo.png"

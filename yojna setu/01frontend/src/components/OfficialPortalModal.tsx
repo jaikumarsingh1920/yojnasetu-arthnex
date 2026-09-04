@@ -30,7 +30,7 @@ export const OfficialPortalModal: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[110] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl max-w-[min(92vw,28rem)] max-h-[calc(100dvh-2rem)] overflow-y-auto w-full shadow-2xl border border-slate-200 text-slate-900">
         {/* Header */}
         <div className="bg-gradient-to-r from-gov-navy to-sky-900 text-white p-4 flex justify-between items-center">

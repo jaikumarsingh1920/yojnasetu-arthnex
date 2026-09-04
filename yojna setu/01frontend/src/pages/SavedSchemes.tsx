@@ -143,8 +143,8 @@ export const SavedSchemes: React.FC = () => {
                 )}
               </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+              <div className="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <Link
                     to={`/schemes/${item.scheme_id}`}
                     className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1"

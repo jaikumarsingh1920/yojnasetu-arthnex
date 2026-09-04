@@ -113,6 +113,8 @@ export const Navbar: React.FC = () => {
   const moreMenuRef = useRef<HTMLDivElement>(null);
   const citizenMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const [navHeight, setNavHeight] = useState<number>(72);
 
   const handleLogout = () => {
     logout();
@@ -182,6 +184,53 @@ export const Navbar: React.FC = () => {
     setLangMenuOpen(false);
   }, [location.pathname]);
 
+  // Keep track of header height for precise fixed drawer positioning
+  useEffect(() => {
+    const updateNavHeight = () => {
+      if (headerRef.current) {
+        setNavHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateNavHeight();
+    window.addEventListener('resize', updateNavHeight);
+    return () => window.removeEventListener('resize', updateNavHeight);
+  }, []);
+
+  // Prevent background page scrolling while mobile menu drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      if (headerRef.current) {
+        setNavHeight(headerRef.current.offsetHeight);
+      }
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+
+      // Block touchmove on background to prevent mobile rubber-band scrolling of the document
+      const handleTouchMove = (e: TouchEvent) => {
+        const drawer = document.getElementById('mobile-navigation-drawer');
+        if (!drawer || !drawer.contains(e.target as Node)) {
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+        }
+      };
+
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        document.removeEventListener('touchmove', handleTouchMove);
+      };
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  }, [mobileMenuOpen]);
+
   const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) || SUPPORTED_LANGUAGES[0];
 
   const isActive = (path: string) => location.pathname === path;
@@ -189,7 +238,7 @@ export const Navbar: React.FC = () => {
   const isSchemesPathActive = location.pathname.startsWith('/schemes');
 
   return (
-    <header className="bg-gov-blue text-white shadow-md sticky top-0 z-[100] relative select-none border-b border-slate-800/60 w-full">
+    <header ref={headerRef} className="bg-gov-blue text-white shadow-md sticky top-0 z-[100] relative select-none border-b border-slate-800/60 w-full">
       {/* Tri-color National Accent Line */}
       <div className="gov-tricolor-bar" />
 
@@ -292,7 +341,7 @@ export const Navbar: React.FC = () => {
 
             {langMenuOpen && (
               <div
-                className="absolute right-0 mt-1.5 w-52 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl py-1.5 z-[120] max-h-80 overflow-y-auto divide-y divide-slate-800/60 animate-in fade-in slide-in-from-top-1 duration-150"
+                className="absolute right-0 mt-1.5 w-52 max-w-[calc(100vw-1.5rem)] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl py-1.5 z-[120] max-h-80 overflow-y-auto divide-y divide-slate-800/60 animate-in fade-in slide-in-from-top-1 duration-150"
                 role="menu"
               >
                 <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
@@ -336,7 +385,7 @@ export const Navbar: React.FC = () => {
           {/* Brand Identity Area (Pinned completely to the Left with shrink-0) */}
           <Link
             to="/"
-            className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 group focus:outline-none focus:ring-2 focus:ring-sky-400 rounded-xl p-1 -m-1"
+            className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 group focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80 rounded-xl p-1 -m-1"
             aria-label={t('nav.homeAria', 'YojnaSetu Home')}
           >
             <img
@@ -933,7 +982,7 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 shrink-0"
+                className="p-2 rounded-xl text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center transition"
                 aria-label={t('nav.toggleMobileNav', 'Toggle mobile navigation menu')}
                 aria-expanded={mobileMenuOpen}
               >
@@ -948,7 +997,25 @@ export const Navbar: React.FC = () => {
           7. RESPONSIVE MOBILE & TABLET DRAWER
       ───────────────────────────────────────────────────────────── */}
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-slate-950/98 backdrop-blur-xl px-3 sm:px-6 pt-3 pb-8 border-t border-slate-800 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-top-2 duration-200 shadow-2xl">
+        <>
+          {/* Full viewport backdrop behind mobile drawer - fixed to viewport */}
+          <div
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[99] xl:hidden pointer-events-auto touch-none"
+            style={{ top: `${navHeight}px` }}
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Mobile navigation drawer - FIXED relative to viewport */}
+          <div
+            id="mobile-navigation-drawer"
+            className="xl:hidden fixed left-0 right-0 w-full bg-slate-950/98 backdrop-blur-xl px-3 sm:px-6 pt-3 pb-6 border-t border-slate-800/90 space-y-3.5 overflow-y-auto overscroll-contain shadow-2xl z-[100] animate-in slide-in-from-top-1 duration-150"
+            style={{
+              top: `${navHeight}px`,
+              maxHeight: `calc(100dvh - ${navHeight}px)`,
+              height: 'auto'
+            }}
+          >
           
           {/* Top Primary Smart Matching Feature Card */}
           <Link
@@ -1164,31 +1231,8 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Language Grid (12 Languages) */}
-          <div className="pt-2 border-t border-slate-800 space-y-2">
-            <span className="px-3 text-[10px] font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-sky-400" />
-              <span>Language Selection ({currentLang.nativeName})</span>
-            </span>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 px-1">
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => handleLanguageChange(lang.code)}
-                  className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold border text-center transition truncate ${
-                    i18n.language === lang.code
-                      ? 'bg-sky-700 text-white border-sky-500 font-bold shadow-xs'
-                      : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
-                  }`}
-                >
-                  {lang.nativeName}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Authentication Actions */}
-          <div className="pt-3 border-t border-slate-800">
+          <div className="pt-2 border-t border-slate-800">
             {isAuthenticated ? (
               <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-2">
                 <div className="truncate min-w-0">
@@ -1209,14 +1253,14 @@ export const Navbar: React.FC = () => {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl border border-slate-700 transition"
+                  className="w-full text-center py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl border border-slate-700 transition min-h-[44px] flex items-center justify-center"
                 >
                   {t('nav.login', 'Sign In')}
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow transition"
+                  className="w-full text-center py-2.5 bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow transition min-h-[44px] flex items-center justify-center"
                 >
                   {t('nav.register', 'Register')}
                 </Link>
@@ -1224,6 +1268,7 @@ export const Navbar: React.FC = () => {
             )}
           </div>
         </div>
+        </>
       )}
 
       {/* ─────────────────────────────────────────────────────────────

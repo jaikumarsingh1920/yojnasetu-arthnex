@@ -172,9 +172,9 @@ export const ChatWindow: React.FC<Props> = ({
     .slice(-1)[0]?.text;
 
   return (
-    <div ref={containerRef} className="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 w-[min(420px,calc(100vw-1.5rem))] h-[min(600px,calc(100dvh-1.5rem))] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-300 flex flex-col z-50 overflow-hidden text-slate-900 animate-in fade-in slide-in-from-bottom-4 duration-200">
+    <div ref={containerRef} className="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 w-[min(400px,calc(100vw-1.5rem))] h-[min(540px,calc(100dvh-4.5rem))] max-h-[85vh] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-300 flex flex-col z-40 overflow-hidden text-slate-900 animate-in fade-in slide-in-from-bottom-2 duration-150">
       {/* Header */}
-      <div className="bg-gradient-to-r from-gov-navy via-sky-900 to-slate-900 text-white p-3.5 flex justify-between items-center border-b border-sky-800 shrink-0">
+      <div className="bg-gradient-to-r from-gov-navy via-sky-900 to-slate-900 text-white px-3.5 py-2.5 sm:py-3 flex justify-between items-center border-b border-sky-800 shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-sky-500/20 rounded-lg flex items-center justify-center border border-sky-400/40">
             <Bot className="w-4 h-4 text-sky-300" />
@@ -190,21 +190,21 @@ export const ChatWindow: React.FC<Props> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={handleClearChat}
-            className="p-1 text-slate-300 hover:text-white hover:bg-sky-800 rounded transition"
+            className="p-1 text-slate-300 hover:text-white hover:bg-sky-800 rounded transition min-h-[32px] min-w-[32px] flex items-center justify-center"
             title={t('copilot.clearChat', 'Clear Conversation')}
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onMinimize}
-            className="p-1 text-slate-300 hover:text-white hover:bg-sky-800 rounded transition"
+            className="p-1 text-slate-300 hover:text-white hover:bg-sky-800 rounded transition min-h-[32px] min-w-[32px] flex items-center justify-center"
             title={t('copilot.minimize', 'Minimize')}
           >
             <Minus className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onClose}
-            className="p-1 text-slate-300 hover:text-white hover:bg-rose-900 rounded transition"
+            className="p-1 text-slate-300 hover:text-white hover:bg-rose-900 rounded transition min-h-[32px] min-w-[32px] flex items-center justify-center"
             title={t('common.close', 'Close')}
           >
             <X className="w-3.5 h-3.5" />
@@ -213,12 +213,13 @@ export const ChatWindow: React.FC<Props> = ({
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 p-3.5 overflow-y-auto space-y-4 bg-slate-50/50">
+      <div className="flex-1 p-3 sm:p-3.5 overflow-y-auto overscroll-contain space-y-3.5 bg-slate-50/50">
         {messages.map(msg => (
           <ChatMessage
             key={msg.id}
             message={msg}
             onSelectSuggestion={(q) => handleSendMessage(q)}
+            onNavigate={onMinimize}
           />
         ))}
 
@@ -241,7 +242,7 @@ export const ChatWindow: React.FC<Props> = ({
       </div>
 
       {/* Input Bar */}
-      <div className="p-3 bg-white border-t border-slate-200 shrink-0 space-y-2">
+      <div className="p-2.5 sm:p-3 bg-white border-t border-slate-200 shrink-0 space-y-2">
         <div className="flex items-center gap-2">
           <VoiceButton
             onSpeechResult={(transcript) => {
@@ -258,7 +259,7 @@ export const ChatWindow: React.FC<Props> = ({
             onChange={(e) => setInputQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('copilot.placeholder', 'Ask about schemes, eligibility, loan EMIs, or documents...')}
-            className="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+            className="flex-1 min-w-0 px-3 py-2 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-sky-500 bg-white"
           />
 
           <button

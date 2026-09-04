@@ -125,7 +125,9 @@ export const Dashboard: React.FC = () => {
                       : 'bg-slate-100 text-slate-700 border-slate-200'
                   }`}
                 >
-                  {completionPct}% {t('dashboard.profileComplete', 'Complete')}
+                  {completionPct >= 100
+                    ? t('dashboard.profile100Complete', '100% Profile Complete')
+                    : `${completionPct}% ${t('dashboard.profileComplete', 'Profile Complete')}`}
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">

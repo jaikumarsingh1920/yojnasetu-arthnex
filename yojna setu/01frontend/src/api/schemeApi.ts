@@ -46,4 +46,19 @@ export const schemeApi = {
     });
     return response.data;
   },
+
+  emailScheme: async (
+    schemeId: string,
+    recipientEmail: string,
+    languageCode?: string
+  ): Promise<{ sent: boolean; message: string; recipient_email?: string }> => {
+    const response = await apiClient.post<{ sent: boolean; message: string; recipient_email?: string }>(
+      `/schemes/${schemeId}/email`,
+      {
+        recipient_email: recipientEmail,
+        language_code: languageCode || 'en',
+      }
+    );
+    return response.data;
+  },
 };

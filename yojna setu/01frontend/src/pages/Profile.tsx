@@ -745,21 +745,21 @@ export const Profile: React.FC = () => {
         </div>
 
         {/* ── Save and Action Buttons ── */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-4 border-t border-slate-200">
           <button
             type="button"
             onClick={() => loadProfile()}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm transition"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm transition min-h-[44px]"
           >
             <RefreshCw className="w-4 h-4 text-slate-500" />
             {t('profile.resetBtn', 'Reset to Stored Values')}
           </button>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition shadow"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition shadow min-h-[44px]"
             >
               <Save className="w-4 h-4 text-slate-300" />
               {isSaving ? t('profile.saving', 'Saving...') : t('profile.saveBtn', 'Save Profile')}
@@ -769,7 +769,7 @@ export const Profile: React.FC = () => {
               type="button"
               onClick={handleSaveAndMatch}
               disabled={isSaving}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gov-saffron hover:bg-orange-600 text-white font-bold text-sm shadow-md transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gov-saffron hover:bg-orange-600 text-white font-bold text-sm shadow-md transition min-h-[44px]"
             >
               <Sparkles className="w-4 h-4 text-amber-200" />
               {t('profile.saveAndSmartMatch', 'Save & Find Schemes →')}

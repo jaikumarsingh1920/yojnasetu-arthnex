@@ -7,9 +7,10 @@ import { formatCurrency } from '../../utils/formatters';
 
 interface Props {
   card: RichCard;
+  onNavigate?: () => void;
 }
 
-export const RichCardRenderer: React.FC<Props> = ({ card }) => {
+export const RichCardRenderer: React.FC<Props> = ({ card, onNavigate }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -34,7 +35,10 @@ export const RichCardRenderer: React.FC<Props> = ({ card }) => {
         <p className="text-xs text-slate-700 line-clamp-2">{scheme.objective}</p>
 
         <button
-          onClick={() => navigate(`/schemes/${scheme.scheme_id}`)}
+          onClick={() => {
+            onNavigate?.();
+            navigate(`/schemes/${scheme.scheme_id}`);
+          }}
           className="w-full bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs py-1.5 px-3 rounded-lg flex items-center justify-center gap-1 shadow-xs transition"
         >
           {t('copilot.viewDetails', 'View Details')} <ArrowRight className="w-3 h-3" />
@@ -93,7 +97,10 @@ export const RichCardRenderer: React.FC<Props> = ({ card }) => {
         </div>
         <p className="text-xs font-bold text-slate-800">{app.scheme_name || 'Scheme Application'}</p>
         <button
-          onClick={() => navigate(`/applications/${app.application_id}`)}
+          onClick={() => {
+            onNavigate?.();
+            navigate(`/applications/${app.application_id}`);
+          }}
           className="text-xs font-bold text-sky-700 hover:underline flex items-center gap-1"
         >
           {t('nav.applications', 'Track Application')} <ArrowRight className="w-3 h-3" />

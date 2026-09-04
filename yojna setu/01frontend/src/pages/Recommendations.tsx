@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api/profileApi';
 import { recommendationApi } from '../api/recommendationApi';
@@ -39,14 +40,63 @@ import {
   User,
   Sliders,
   RefreshCw,
-  ArrowRight
+  ArrowRight,
+  Mic,
+  MicOff,
+  Square,
+  Globe
 } from 'lucide-react';
 
 type InputMode = 'PROFILE' | 'TYPE' | 'FORM';
 type TabFilter = 'ELIGIBLE' | 'INSUFFICIENT' | 'INELIGIBLE' | 'ALL';
 
+const cleanReasonText = (text?: string): string => {
+  if (!text) return '';
+  let clean = text;
+  clean = clean.replace(/^(?:Rule\s+[A-Z0-9_-]+:?\s*)/i, '');
+  clean = clean.replace(/^(?:Condition satisfied(?:\s+for)?:?\s*)/i, '');
+  clean = clean.replace(/^(?:Condition failed(?:\s+for)?:?\s*)/i, '');
+  clean = clean.replace(/^(?:Exact\s+(?:sector|category|income|state|age)\s+match(?:\s+for)?:?\s*)/i, '');
+  clean = clean.replace(/^(?:Passed\s+(?:rule|criteria):?\s*)/i, '');
+  clean = clean.replace(/^(?:Failed\s+(?:rule|criteria):?\s*)/i, '');
+  clean = clean.replace(/^(?:Requirement\s+(?:Field|satisfied|failed):?\s*)/i, '');
+  clean = clean.replace(/^(?:Missing\s+(?:parameter|requirement|field|information):?\s*)/i, '');
+  clean = clean.replace(/Field:\s*[\w_]+\s*(?:==|!=|<=|>=|<|>|IN)\s*[^;]+;/gi, '');
+  clean = clean.replace(/\b(?:PM_SURAJ|AUTHORISED_SCA|AUTHORISED_CA)\b/g, 'Authorized Partner Portal');
+  clean = clean.replace(/\bTRADITIONAL_TRADE_\d+\b/g, 'Traditional Trade');
+  clean = clean.replace(/\bSMALL_MICRO_BUSINESS\b/g, 'Small & Micro Business');
+  clean = clean.replace(/\bAPPLICATION_ROUTE\b/g, 'Application Route');
+  clean = clean.replace(/\s{2,}/g, ' ').trim();
+  if (!clean) return '';
+  return clean.charAt(0).toUpperCase() + clean.slice(1);
+};
+
+const calculateClientProfileCompletion = (profile: BeneficiaryProfileInput | null): number => {
+  if (!profile) return 0;
+  const coreFields = [
+    'age',
+    'gender',
+    'state',
+    'social_category',
+    'annual_income',
+    'applicant_type',
+    'education_level',
+    'sector',
+    'business_stage',
+    'project_cost',
+  ];
+  let count = 0;
+  for (const f of coreFields) {
+    const val = (profile as any)[f];
+    if (val !== undefined && val !== null && val !== '' && val !== 'UNKNOWN' && val !== 'NOT_SPECIFIED') {
+      count++;
+    }
+  }
+  return Math.min(100, Math.round((count / coreFields.length) * 100));
+};
+
 export const Recommendations: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, isAuthenticated } = useAuth();
 
   // Canonical Citizen Profile State
@@ -61,6 +111,170 @@ export const Recommendations: React.FC = () => {
   const [userText, setUserText] = useState(
     'I am a 28 year old woman from Uttar Pradesh. I belong to SC category. My annual income is around 1.8 lakh. I want to start a small tailoring business with a project cost of 1 lakh.'
   );
+
+  // Speech Recognition State for Natural Language / Voice Input
+  const [speechLangCode, setSpeechLangCode] = useState<string>(() => i18n.language || 'en');
+  const userManuallyChangedSpeechLangRef = useRef<boolean>(false);
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const [isSpeechSupported, setIsSpeechSupported] = useState<boolean>(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const baseTextRef = useRef<string>('');
+
+  // Default to currently selected application language unless user manually chose a different speech language
+  useEffect(() => {
+    if (!userManuallyChangedSpeechLangRef.current && i18n.language) {
+      if (SUPPORTED_LANGUAGES.some((l) => l.code === i18n.language)) {
+        setSpeechLangCode(i18n.language);
+      }
+    }
+  }, [i18n.language]);
+
+  const activeSpeechLang = SUPPORTED_LANGUAGES.find((l) => l.code === speechLangCode) || SUPPORTED_LANGUAGES[0];
+
+  // Languages with experimental/limited browser speech model availability in Web Speech API
+  const LIMITED_SPEECH_LANG_CODES = ['or', 'as'];
+  const isLimitedBrowserSpeechLang = LIMITED_SPEECH_LANG_CODES.includes(activeSpeechLang.code);
+
+  const handleSpeechLangChange = (newCode: string) => {
+    userManuallyChangedSpeechLangRef.current = true;
+    setSpeechLangCode(newCode);
+    setVoiceError(null);
+    if (isListening) {
+      stopListening();
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      setIsSpeechSupported(true);
+    }
+  }, []);
+
+  // Clean up speech recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, []);
+
+  // Stop listening if user switches input mode away from 'TYPE'
+  useEffect(() => {
+    if (inputMode !== 'TYPE' && isListening) {
+      stopListening();
+    }
+  }, [inputMode]);
+
+  const startListening = () => {
+    setVoiceError(null);
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setVoiceError(t('voice.unavailable', 'Voice recognition is not supported in this browser.'));
+      return;
+    }
+
+    try {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = activeSpeechLang.bcp47 || 'hi-IN';
+
+      // Capture initial text snapshot so spoken speech smoothly appends without duplication
+      baseTextRef.current = userText;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        let sessionTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          sessionTranscript += event.results[i][0].transcript;
+        }
+        const base = baseTextRef.current.trim();
+        const cleanSession = sessionTranscript.trim();
+        if (cleanSession) {
+          setUserText(base ? `${base} ${cleanSession}` : cleanSession);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.warn('Speech recognition error:', event.error);
+        if (event.error === 'language-not-supported') {
+          setVoiceError(
+            t(
+              'voice.langNotSupported',
+              'Voice input may not be supported in this browser for {{language}} ({{bcp47}}). Please type your details or select another language.',
+              { language: activeSpeechLang.name, bcp47: activeSpeechLang.bcp47 }
+            )
+          );
+        } else if (event.error === 'not-allowed') {
+          setVoiceError(t('voice.permissionDenied', 'Microphone access was denied. Please allow microphone permissions in your browser.'));
+        } else if (event.error === 'service-not-allowed') {
+          setVoiceError(
+            t(
+              'voice.serviceNotAllowed',
+              'Speech recognition service is not available for {{language}} in this browser. Please type or choose another language.',
+              { language: activeSpeechLang.name }
+            )
+          );
+        } else if (event.error !== 'no-speech') {
+          setVoiceError(t('voice.recognitionError', `Speech recognition notice: ${event.error}`));
+        }
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err: any) {
+      console.error('Failed to start speech recognition:', err);
+      setVoiceError(
+        t(
+          'voice.startFailed',
+          'Voice input could not be started for {{language}} ({{bcp47}}). Voice input may not be supported in this browser for this language.',
+          { language: activeSpeechLang.name, bcp47: activeSpeechLang.bcp47 }
+        )
+      );
+      setIsListening(false);
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // ignore
+      }
+    }
+    setIsListening(false);
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   // Quick Form State
   const [formAge, setFormAge] = useState<number>(28);
@@ -90,6 +304,28 @@ export const Recommendations: React.FC = () => {
   // Track expanded transparency details per scheme
   const [expandedDetails, setExpandedDetails] = useState<Record<string, boolean>>({});
 
+  // Refs for dynamic auto-scrolling to results
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const searchTriggeredRef = useRef<boolean>(false);
+
+  // When search or evaluation results arrive after a user action, scroll smoothly to the results section
+  useEffect(() => {
+    if (searchTriggeredRef.current && standardResult && resultsRef.current) {
+      searchTriggeredRef.current = false;
+      requestAnimationFrame(() => {
+        if (!resultsRef.current) return;
+        const navOffset = 85;
+        const elementPosition = resultsRef.current.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: 'smooth'
+        });
+      });
+    }
+  }, [standardResult]);
+
   // On mount, auto-load canonical citizen profile and trigger recommendation evaluation
   useEffect(() => {
     loadAndEvaluateProfile();
@@ -104,8 +340,11 @@ export const Recommendations: React.FC = () => {
       if (isAuthenticated) {
         const pRes = await profileApi.getProfile();
         setCanonicalProfile(pRes.profile);
-        setProfileCompletion(pRes.completion_percentage);
-        setMissingProfileFields(pRes.missing_fields);
+        const compPct = pRes.completion_percentage !== undefined && pRes.completion_percentage !== null
+          ? pRes.completion_percentage
+          : calculateClientProfileCompletion(pRes.profile);
+        setProfileCompletion(compPct);
+        setMissingProfileFields(pRes.missing_fields || []);
         activeProf = pRes.profile;
       } else {
         const cached = localStorage.getItem('yojnasetu_citizen_profile');
@@ -113,6 +352,7 @@ export const Recommendations: React.FC = () => {
           try {
             const parsed = JSON.parse(cached);
             setCanonicalProfile(parsed);
+            setProfileCompletion(calculateClientProfileCompletion(parsed));
             activeProf = parsed;
           } catch (e) {
             console.warn('Failed parsing cached profile', e);
@@ -161,11 +401,15 @@ export const Recommendations: React.FC = () => {
       if (isAuthenticated) {
         const res = await profileApi.updateProfile(formProfile);
         setCanonicalProfile(res.profile);
-        setProfileCompletion(res.completion_percentage);
-        setMissingProfileFields(res.missing_fields);
+        const compPct = res.completion_percentage !== undefined && res.completion_percentage !== null
+          ? res.completion_percentage
+          : calculateClientProfileCompletion(res.profile);
+        setProfileCompletion(compPct);
+        setMissingProfileFields(res.missing_fields || []);
       } else {
         localStorage.setItem('yojnasetu_citizen_profile', JSON.stringify(formProfile));
         setCanonicalProfile(formProfile);
+        setProfileCompletion(calculateClientProfileCompletion(formProfile));
       }
       setSaveSuccessMsg(t('recommendations.profileUpdatedSuccess', 'Your Citizen Profile has been updated with these parameters!'));
       setTimeout(() => setSaveSuccessMsg(null), 5000);
@@ -223,6 +467,7 @@ export const Recommendations: React.FC = () => {
 
   const handleFindSchemes = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    searchTriggeredRef.current = true;
     setIsLoading(true);
     setErrorMsg(null);
     setAiResult(null);
@@ -303,7 +548,7 @@ export const Recommendations: React.FC = () => {
   const { items: displayedItems, emptyMessage } = getDisplayedItems();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 sm:pb-16 space-y-8">
       {/* ── Page Header ── */}
       <div className="bg-gradient-to-r from-gov-navy via-gov-blue to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border-b-4 border-gov-saffron relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="relative z-10 max-w-3xl space-y-3">
@@ -383,8 +628,18 @@ export const Recommendations: React.FC = () => {
                 <span className="text-xs font-bold text-slate-900">
                   {t('recommendations.activeProfileTitle', 'Prefilled from your Citizen Profile')}:
                 </span>
-                <span className="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">
-                  {profileCompletion}% {t('recommendations.profileComplete', 'Complete')}
+                <span
+                  className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${
+                    profileCompletion >= 100
+                      ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                      : profileCompletion >= 50
+                      ? 'bg-amber-100 text-amber-800 border-amber-300'
+                      : 'bg-slate-100 text-slate-700 border-slate-300'
+                  }`}
+                >
+                  {profileCompletion >= 100
+                    ? t('recommendations.profile100Complete', '100% Profile Complete')
+                    : `${profileCompletion}% ${t('recommendations.profileComplete', 'Profile Complete')}`}
                 </span>
               </div>
               <p className="text-xs text-slate-600 mt-0.5">
@@ -400,18 +655,18 @@ export const Recommendations: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
             <button
               onClick={() => handleFindSchemes()}
               disabled={isLoading}
-              className="bg-gov-saffron hover:bg-orange-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 disabled:opacity-50"
+              className="bg-gov-saffron hover:bg-orange-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
               {t('recommendations.recalcBtn', 'Recalculate Smart Match')}
             </button>
             <Link
               to="/profile"
-              className="text-xs font-bold text-gov-blue hover:underline px-2 py-1"
+              className="text-xs font-bold text-gov-blue hover:underline px-2 py-1 text-center flex items-center justify-center min-h-[44px]"
             >
               {t('recommendations.updateProfileLink', 'Update Profile →')}
             </Link>
@@ -495,16 +750,156 @@ export const Recommendations: React.FC = () => {
       {inputMode === 'TYPE' && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-6">
           <form onSubmit={handleFindSchemes} className="space-y-4">
-            <label className="block font-extrabold text-slate-900 text-xs uppercase tracking-wider">
-              {t('recommendations.describeLabel', 'Describe your background and project requirements:')}
-            </label>
-            <textarea
-              value={userText}
-              onChange={(e) => setUserText(e.target.value)}
-              rows={4}
-              placeholder={t('recommendations.typePlaceholder', 'e.g. I am a 28 year old woman from Uttar Pradesh belonging to SC category. My annual family income is ₹1.8 lakh. I want to start a small tailoring unit with a project cost of ₹1 lakh...')}
-              className="w-full rounded-xl border-slate-300 shadow-sm focus:border-gov-blue focus:ring-gov-blue text-xs p-4 border outline-none leading-relaxed"
-            />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <label htmlFor="user-text-input" className="block font-extrabold text-slate-900 text-xs uppercase tracking-wider">
+                {t('recommendations.describeLabel', 'Describe your background and project requirements:')}
+              </label>
+
+              {/* Speech Language Selector */}
+              <div className="flex items-center gap-2">
+                <label htmlFor="speech-lang-select" className="text-[11px] font-bold text-slate-700 flex items-center gap-1 shrink-0">
+                  <Globe className="w-3.5 h-3.5 text-gov-blue" />
+                  <span>{t('voice.speechLanguage', 'Speech Language')}:</span>
+                </label>
+                <div className="relative inline-block">
+                  <select
+                    id="speech-lang-select"
+                    value={speechLangCode}
+                    onChange={(e) => handleSpeechLangChange(e.target.value)}
+                    disabled={isListening}
+                    className="bg-sky-50 hover:bg-sky-100/70 border border-sky-300 text-gov-blue font-bold text-xs rounded-lg pl-2.5 pr-7 py-1 outline-none focus:ring-2 focus:ring-gov-blue transition cursor-pointer appearance-none disabled:opacity-60 disabled:cursor-not-allowed shadow-2xs"
+                    title={t('voice.selectSpeechLanguage', 'Select Speech Recognition Language')}
+                    aria-label="Select Speech Recognition Language"
+                  >
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <option key={lang.code} value={lang.code} className="text-slate-900 bg-white font-medium">
+                        {lang.name} ({lang.nativeName}) — {lang.bcp47}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-gov-blue absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {/* Advisory note if selected language has limited or experimental browser speech support */}
+            {isLimitedBrowserSpeechLang && (
+              <div className="flex items-start gap-2 text-[11px] text-amber-800 bg-amber-50/90 border border-amber-200 rounded-xl p-2.5 animate-in fade-in duration-150">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  {t(
+                    'voice.limitedSupportNotice',
+                    'Voice input may not be supported in this browser for {{language}} ({{bcp47}}). If recognition does not start, you can type your query directly or choose Hindi / English.',
+                    { language: activeSpeechLang.name, bcp47: activeSpeechLang.bcp47 }
+                  )}
+                </span>
+              </div>
+            )}
+
+            <div className="relative">
+              <textarea
+                id="user-text-input"
+                value={userText}
+                onChange={(e) => setUserText(e.target.value)}
+                rows={4}
+                placeholder={t('recommendations.typePlaceholder', 'e.g. I am a 28 year old woman from Uttar Pradesh belonging to SC category. My annual family income is ₹1.8 lakh. I want to start a small tailoring unit with a project cost of ₹1 lakh...')}
+                className={`w-full rounded-xl border text-xs p-4 pb-14 sm:pb-4 sm:pr-36 border-slate-300 shadow-sm focus:border-gov-blue focus:ring-gov-blue outline-none leading-relaxed transition ${
+                  isListening ? 'border-rose-400 ring-2 ring-rose-300/60 bg-rose-50/20' : ''
+                }`}
+              />
+
+              {/* Intuitive Voice-to-Text Microphone Button inside bottom-right corner of textarea */}
+              <div className="absolute right-3 bottom-3 z-10 flex items-center gap-1.5">
+                {isSpeechSupported ? (
+                  <button
+                    type="button"
+                    onClick={toggleListening}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 ${
+                      isListening
+                        ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse ring-2 ring-rose-300'
+                        : 'bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-gov-blue border border-slate-200 hover:border-sky-300'
+                    }`}
+                    title={
+                      isListening
+                        ? t('voice.clickToStop', 'Listening in {{lang}}... Click to stop', { lang: activeSpeechLang.name })
+                        : t('voice.clickToStart', 'Click to speak in {{lang}} ({{bcp47}})', { lang: activeSpeechLang.name, bcp47: activeSpeechLang.bcp47 })
+                    }
+                    aria-label={isListening ? 'Stop voice recognition' : 'Start voice recognition'}
+                  >
+                    {isListening ? (
+                      <>
+                        <MicOff className="w-3.5 h-3.5 text-white" />
+                        <span>{t('voice.listeningBtn', 'Listening...')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="w-3.5 h-3.5 text-gov-blue" />
+                        <span className="hidden sm:inline">{t('voice.voiceBtn', 'Voice Input')}</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center gap-1.5"
+                    title={t('voice.unavailable', 'Voice STT unavailable in browser')}
+                    aria-label="Voice input unsupported"
+                  >
+                    <MicOff className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{t('voice.unavailableShort', 'Voice N/A')}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Clear Listening Status Banner */}
+            {isListening && (
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center justify-between gap-3 text-xs text-rose-800 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-3 w-3 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
+                  </span>
+                  <div>
+                    <span className="font-bold">
+                      {t('voice.listeningInLang', 'Listening in {{language}} ({{bcp47}})...', {
+                        language: activeSpeechLang.name,
+                        bcp47: activeSpeechLang.bcp47
+                      })}
+                    </span>
+                    <p className="text-[11px] text-rose-600 mt-0.5">
+                      {t('voice.speakInSelectedLang', 'Speak naturally in {{language}} to describe your background and project requirements.', {
+                        language: activeSpeechLang.name
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={stopListening}
+                  className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-xs"
+                >
+                  <Square className="w-3 h-3 fill-current" />
+                  <span>{t('common.stop', 'Stop')}</span>
+                </button>
+              </div>
+            )}
+
+            {/* Graceful Microphone Error Banner */}
+            {voiceError && (
+              <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center justify-between gap-2">
+                <span>{voiceError}</span>
+                <button
+                  type="button"
+                  onClick={() => setVoiceError(null)}
+                  className="text-slate-400 hover:text-slate-600 font-bold px-1"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -681,7 +1076,7 @@ export const Recommendations: React.FC = () => {
 
       {/* RESULTS LIST SECTION */}
       {standardResult && (
-        <div className="space-y-6 pt-4">
+        <div ref={resultsRef} id="scheme-results" className="space-y-6 pt-4 scroll-mt-24">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
             <div>
               <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
@@ -694,7 +1089,7 @@ export const Recommendations: React.FC = () => {
             </div>
 
             {/* Scheme Evaluation Summary Counters */}
-            <div className="flex items-center gap-2 text-xs font-bold">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold">
               <span className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 {standardResult.eligible_scheme_count} {t('recommendations.tabEligible', 'Eligible')}
@@ -782,257 +1177,443 @@ export const Recommendations: React.FC = () => {
                 // Pre-fill amount for calculator
                 const requestedAmount = canonicalProfile?.requested_loan_amount || canonicalProfile?.project_cost || formProjectCostSlab || '';
 
+                // Prepared clean reason lists
+                const allEligibleReasons = [
+                  ...(rec.matched_rules && rec.matched_rules.length > 0 ? rec.matched_rules : rec.eligibility_reasons || []),
+                  ...(rec.recommendation_reasons || [])
+                ].map(cleanReasonText).filter(Boolean);
+                const defaultEligible = allEligibleReasons.slice(0, 3);
+                const remainingEligible = allEligibleReasons.slice(3);
+
+                const allFailedReasons = (rec.failed_rules && rec.failed_rules.length > 0 ? rec.failed_rules : rec.eligibility_reasons || [])
+                  .map(cleanReasonText).filter(Boolean);
+                const defaultFailed = allFailedReasons.slice(0, 3);
+                const remainingFailed = allFailedReasons.slice(3);
+
+                const allMissingReasons = (rec.missing_information && rec.missing_information.length > 0
+                  ? rec.missing_information
+                  : ['Additional demographic or financial parameters required.']
+                ).map(cleanReasonText).filter(Boolean);
+                const defaultMissing = allMissingReasons.slice(0, 3);
+                const remainingMissing = allMissingReasons.slice(3);
+
                 return (
                   <div
                     key={rec.scheme_id || idx}
-                    className={`bg-white rounded-2xl border shadow-sm p-6 hover:shadow-md transition space-y-4 ${
+                    className={`bg-white rounded-2xl border shadow-sm p-4 sm:p-5 hover:shadow-md transition space-y-4 ${
                       isEligible
                         ? 'border-emerald-200 ring-1 ring-emerald-100'
                         : isInsufficient
                         ? 'border-amber-200 ring-1 ring-amber-100'
-                        : 'border-slate-200 opacity-90'
+                        : 'border-slate-200 opacity-95'
                     }`}
                   >
-                    {/* Header: Rank, Scheme Name, Status Badge, Score */}
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="flex items-start gap-3.5">
-                        <div
-                          className={`w-10 h-10 rounded-xl font-extrabold text-base flex items-center justify-center shrink-0 shadow ${
-                            isEligible
-                              ? 'bg-emerald-600 text-white'
-                              : isInsufficient
-                              ? 'bg-amber-500 text-white'
-                              : 'bg-slate-400 text-white'
-                          }`}
-                        >
-                          #{rec.rank || idx + 1}
-                        </div>
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-lg font-bold text-slate-900 hover:text-gov-blue transition">
-                              <Link to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}>{rec.scheme_name}</Link>
-                            </h3>
-                            <span className="text-[11px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                              {rec.scheme_id}
-                            </span>
-                            {rec.is_direct_portal_scheme && (
-                              <span className="text-[10px] font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">
-                                Direct Govt Portal Scheme
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2 mt-1.5">
-                            {isEligible && (
-                              <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1 border border-emerald-300">
-                                <CheckCircle2 className="w-3.5 h-3.5" /> ✓ Eligible
-                              </span>
-                            )}
-                            {isInsufficient && (
-                              <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 flex items-center gap-1 border border-amber-300">
-                                <AlertTriangle className="w-3.5 h-3.5" /> ⚠ More information required
-                              </span>
-                            )}
-                            {isIneligible && (
-                              <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800 flex items-center gap-1 border border-rose-300">
-                                <XCircle className="w-3.5 h-3.5" /> ✕ Not eligible
-                              </span>
-                            )}
-                            {rec.ministry && (
-                              <span className="text-[11px] text-slate-500 hidden sm:inline">
-                                • {rec.ministry}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                    {/* ── 1. SCHEME HEADER & COMPACT FIT SCORE ── */}
+                    <div className="flex items-start gap-3">
+                      {/* Rank Badge on Left */}
+                      <div
+                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-xs ${
+                          isEligible
+                            ? 'bg-emerald-600 text-white'
+                            : isInsufficient
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-slate-500 text-white'
+                        }`}
+                      >
+                        #{rec.rank || idx + 1}
                       </div>
 
-                      {/* Soft Fit Score Box */}
-                      <div className="text-right bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
-                        <div className="text-xl font-extrabold text-gov-navy">
-                          {matchPct}% Fit
+                      {/* Main Header Info Area */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
+                          <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug hover:text-gov-blue transition">
+                            <Link to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}>
+                              {rec.scheme_name}
+                            </Link>
+                          </h3>
                         </div>
-                        <span className="text-[11px] text-slate-600 font-bold">{matchLabel}</span>
+
+                        {/* Secondary Details: Scheme ID & Ministry */}
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
+                          <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-slate-600">
+                            {rec.scheme_id}
+                          </span>
+                          {rec.is_direct_portal_scheme && (
+                            <span className="text-[10px] font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">
+                              Direct Govt Portal
+                            </span>
+                          )}
+                          {rec.ministry && (
+                            <span className="hidden sm:inline text-slate-400 truncate max-w-xs">
+                              • {rec.ministry}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Eligibility + Compact Fit Badges directly alongside */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          {isEligible && (
+                            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>✓ {t('recommendations.tabEligible', 'Eligible')}</span>
+                            </span>
+                          )}
+                          {isInsufficient && (
+                            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                              <span>⚠ {t('recommendations.moreInfoRequired', 'More Info Needed')}</span>
+                            </span>
+                          )}
+                          {isIneligible && (
+                            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                              <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                              <span>✕ {t('recommendations.notEligible', 'Not Eligible')}</span>
+                            </span>
+                          )}
+
+                          {/* Compact Fit Score Badge */}
+                          <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-extrabold bg-sky-50 text-sky-900 border border-sky-200">
+                            <span className="font-mono text-sky-700 font-black">{matchPct}% Fit</span>
+                            <span className="text-[10px] font-semibold text-slate-500">• {matchLabel}</span>
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* SECTION 1: WHY YOU QUALIFY (For Eligible Schemes) */}
+                    {/* ── 2. WHY YOU QUALIFY / CRITERIA SUMMARY ── */}
                     {isEligible && (
-                      <div className="bg-emerald-50/70 rounded-xl p-4 border border-emerald-200 text-xs leading-relaxed space-y-2 text-slate-800">
-                        <div className="font-extrabold text-emerald-950 flex items-center gap-1.5 text-sm">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" /> {t('recommendations.whyQualifyTitle', 'Why you qualify')}
-                        </div>
-                        <ul className="space-y-1.5 pl-1">
-                          {(rec.matched_rules && rec.matched_rules.length > 0
-                            ? rec.matched_rules
-                            : rec.eligibility_reasons
-                          ).map((reason: string, rIdx: number) => (
-                            <li key={rIdx} className="flex items-start gap-2">
-                              <span className="text-emerald-700 font-bold shrink-0">✓</span>
-                              <span className="text-slate-800">{reason}</span>
-                            </li>
-                          ))}
-                          {rec.recommendation_reasons?.map((reason: string, rIdx: number) => (
-                            <li key={`rec-${rIdx}`} className="flex items-start gap-2">
-                              <span className="text-emerald-700 font-bold shrink-0">✓</span>
-                              <span className="text-slate-800 font-medium">{reason}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* SECTION 2: WHY YOU DON'T QUALIFY (For Ineligible Schemes) */}
-                    {isIneligible && (
-                      <div className="bg-rose-50/80 rounded-xl p-4 border border-rose-200 text-xs leading-relaxed space-y-2 text-slate-800">
-                        <div className="font-extrabold text-rose-950 flex items-center gap-1.5 text-sm">
-                          <XCircle className="w-4 h-4 text-rose-600" /> {t('recommendations.whyNotQualifyTitle', "Why you don't qualify")}
-                        </div>
-                        <ul className="space-y-1.5 pl-1">
-                          {(rec.failed_rules && rec.failed_rules.length > 0
-                            ? rec.failed_rules
-                            : rec.eligibility_reasons
-                          ).map((reason: string, rIdx: number) => (
-                            <li key={rIdx} className="flex items-start gap-2">
-                              <span className="text-rose-700 font-bold shrink-0">✕</span>
-                              <span className="text-slate-800 font-medium">{reason}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <div className="pt-2 border-t border-rose-200/80 text-[11px] text-rose-800 flex items-center gap-1">
-                          <Info className="w-3.5 h-3.5 text-rose-600" />
-                          <span>{t('recommendations.deterministicNote', 'Evaluated deterministically from official scheme eligibility rules.')}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* SECTION 3: MISSING INFORMATION (For Incomplete Schemes) */}
-                    {isInsufficient && (
-                      <div className="bg-amber-50/80 rounded-xl p-4 border border-amber-200 text-xs leading-relaxed space-y-3 text-slate-800">
+                      <div className="bg-emerald-50/70 rounded-xl p-3 sm:p-4 border border-emerald-200/80 text-xs space-y-2">
                         <div className="flex items-center justify-between">
-                          <div className="font-extrabold text-amber-950 flex items-center gap-1.5 text-sm">
-                            <AlertTriangle className="w-4 h-4 text-amber-600" /> {t('recommendations.missingInfoTitle', 'Missing Information Required')}
+                          <div className="font-extrabold text-emerald-950 flex items-center gap-1.5 text-xs sm:text-sm">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>{t('recommendations.whyQualifyTitle', 'Why You Qualify For This Scheme')}</span>
+                          </div>
+                          {allEligibleReasons.length > 0 && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-200">
+                              {allEligibleReasons.length} Criteria Passed
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Top 3 concise reasons */}
+                        <ul className="space-y-1.5 pt-0.5">
+                          {defaultEligible.map((reason, rIdx) => (
+                            <li key={rIdx} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
+                              <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+                              <span>{reason}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        {/* Expanded remaining reasons */}
+                        {isExpanded && remainingEligible.length > 0 && (
+                          <ul className="space-y-1.5 pt-1 border-t border-emerald-200/60">
+                            {remainingEligible.map((reason, rIdx) => (
+                              <li key={`rem-${rIdx}`} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
+                                <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+                                <span>{reason}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {/* Toggle button */}
+                        {(remainingEligible.length > 0 || (rec.score_breakdown && rec.score_breakdown.length > 0)) && (
+                          <button
+                            type="button"
+                            onClick={() => toggleDetails(rec.scheme_id)}
+                            className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1 pt-1 transition"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="w-3.5 h-3.5" />
+                                <span>{t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')}</span>
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-3.5 h-3.5" />
+                                <span>
+                                  {t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
+                                  {remainingEligible.length > 0 ? ` (+${remainingEligible.length} more)` : ''}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {isIneligible && (
+                      <div className="bg-rose-50/70 rounded-xl p-3 sm:p-4 border border-rose-200/80 text-xs space-y-2 text-slate-800">
+                        <div className="flex items-center justify-between">
+                          <div className="font-extrabold text-rose-950 flex items-center gap-1.5 text-xs sm:text-sm">
+                            <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                            <span>{t('recommendations.whyNotQualifyTitle', "Why You Don't Qualify")}</span>
+                          </div>
+                          {allFailedReasons.length > 0 && (
+                            <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full border border-rose-200">
+                              {allFailedReasons.length} Unmet Criteria
+                            </span>
+                          )}
+                        </div>
+
+                        <ul className="space-y-1.5 pt-0.5">
+                          {defaultFailed.map((reason, rIdx) => (
+                            <li key={rIdx} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
+                              <span className="text-rose-600 font-bold shrink-0 mt-0.5">✕</span>
+                              <span>{reason}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        {isExpanded && remainingFailed.length > 0 && (
+                          <ul className="space-y-1.5 pt-1 border-t border-rose-200/60">
+                            {remainingFailed.map((reason, rIdx) => (
+                              <li key={`rem-f-${rIdx}`} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
+                                <span className="text-rose-600 font-bold shrink-0 mt-0.5">✕</span>
+                                <span>{reason}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {(remainingFailed.length > 0 || (rec.score_breakdown && rec.score_breakdown.length > 0)) && (
+                          <button
+                            type="button"
+                            onClick={() => toggleDetails(rec.scheme_id)}
+                            className="text-[11px] font-bold text-rose-800 hover:text-rose-950 flex items-center gap-1 pt-1 transition"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="w-3.5 h-3.5" />
+                                <span>{t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')}</span>
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-3.5 h-3.5" />
+                                <span>
+                                  {t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
+                                  {remainingFailed.length > 0 ? ` (+${remainingFailed.length} more)` : ''}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {isInsufficient && (
+                      <div className="bg-amber-50/70 rounded-xl p-3 sm:p-4 border border-amber-200/80 text-xs space-y-2 text-slate-800">
+                        <div className="flex items-center justify-between">
+                          <div className="font-extrabold text-amber-950 flex items-center gap-1.5 text-xs sm:text-sm">
+                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                            <span>{t('recommendations.missingInfoTitle', 'Missing Information Required')}</span>
                           </div>
                           <Link
                             to="/profile"
-                            className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg shadow-xs transition flex items-center gap-1"
+                            className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] sm:text-[11px] px-2.5 py-1 rounded-lg shadow-xs transition flex items-center gap-1"
                           >
-                            <User className="w-3.5 h-3.5" /> {t('recommendations.completeProfileBtn', 'Complete Profile →')}
+                            <User className="w-3 h-3" />
+                            <span>{t('recommendations.completeProfileBtn', 'Complete Profile →')}</span>
                           </Link>
                         </div>
-                        <p className="text-slate-700 text-xs">
+
+                        <p className="text-[11px] sm:text-xs text-slate-600 leading-snug">
                           {t('recommendations.missingInfoDesc', 'The following required eligibility attributes were not provided on your profile:')}
                         </p>
-                        <ul className="space-y-1.5 pl-1">
-                          {(rec.missing_information && rec.missing_information.length > 0
-                            ? rec.missing_information
-                            : ["Additional demographic or financial parameters required."]
-                          ).map((msg: string, rIdx: number) => (
-                            <li key={rIdx} className="flex items-start gap-2">
-                              <span className="text-amber-700 font-bold shrink-0">⚠</span>
-                              <span className="text-slate-800">{msg}</span>
+
+                        <ul className="space-y-1.5 pt-0.5">
+                          {defaultMissing.map((msg, rIdx) => (
+                            <li key={rIdx} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
+                              <span className="text-amber-600 font-bold shrink-0 mt-0.5">⚠</span>
+                              <span>{msg}</span>
                             </li>
                           ))}
                         </ul>
+
+                        {isExpanded && remainingMissing.length > 0 && (
+                          <ul className="space-y-1.5 pt-1 border-t border-amber-200/60">
+                            {remainingMissing.map((msg, rIdx) => (
+                              <li key={`rem-i-${rIdx}`} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
+                                <span className="text-amber-600 font-bold shrink-0 mt-0.5">⚠</span>
+                                <span>{msg}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {(remainingMissing.length > 0 || (rec.score_breakdown && rec.score_breakdown.length > 0)) && (
+                          <button
+                            type="button"
+                            onClick={() => toggleDetails(rec.scheme_id)}
+                            className="text-[11px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 pt-1 transition"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="w-3.5 h-3.5" />
+                                <span>{t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')}</span>
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-3.5 h-3.5" />
+                                <span>
+                                  {t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
+                                  {remainingMissing.length > 0 ? ` (+${remainingMissing.length} more)` : ''}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     )}
 
-                    {/* Expandable Transparency / Scoring Audit Section */}
-                    <div>
-                      <button
-                        onClick={() => toggleDetails(rec.scheme_id)}
-                        className="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 focus:outline-none"
-                      >
-                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                        {isExpanded ? t('recommendations.hideBreakdown', 'Hide Matching Breakdown') : t('recommendations.viewBreakdown', 'View Matching Factor Breakdown')}
-                      </button>
+                    {/* ── 3. COLLAPSIBLE CRITERIA BREAKDOWN ── */}
+                    {isExpanded && rec.score_breakdown && rec.score_breakdown.length > 0 && (
+                      <div className="p-3 sm:p-4 bg-slate-50/90 rounded-xl border border-slate-200 text-xs space-y-3">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                          <span className="font-extrabold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                            <ShieldCheck className="w-4 h-4 text-gov-blue" />
+                            <span>Full Eligibility & Scoring Breakdown</span>
+                          </span>
+                          <span className="font-mono font-bold text-slate-600 text-[11px]">
+                            Total: {rec.score.toFixed(1)} / 100
+                          </span>
+                        </div>
 
-                      {isExpanded && rec.score_breakdown && (
-                        <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-3">
-                          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                            <span className="font-extrabold text-slate-900">Deterministic Scoring Dimensions (Sum = 100)</span>
-                            <span className="font-mono text-slate-600">Total Score: {rec.score.toFixed(1)} / 100</span>
-                          </div>
+                        <div className="grid grid-cols-1 gap-2">
+                          {rec.score_breakdown.map((b, bIdx) => {
+                            const isMatch = b.result === 'MATCH';
+                            const isUnmet = b.result === 'NO_MATCH';
+                            const isPending = b.result === 'PARTIAL_MATCH' || b.result === 'NOT_EVALUATED';
+                            const cleanReason = cleanReasonText(b.reason);
 
-                          <div className="space-y-2">
-                            {rec.score_breakdown.map((b, bIdx) => (
-                              <div key={bIdx} className="flex items-start justify-between gap-3 text-slate-700">
-                                <div className="space-y-0.5">
-                                  <div className="flex items-center gap-1.5">
-                                    {b.result === 'MATCH' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
-                                    {b.result === 'PARTIAL_MATCH' && <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
-                                    {b.result === 'NO_MATCH' && <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />}
-                                    {b.result === 'NOT_EVALUATED' && <HelpCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                                    <span className="font-bold capitalize">{b.dimension.replace(/_/g, ' ')}</span>
+                            return (
+                              <div
+                                key={bIdx}
+                                className={`p-2.5 rounded-lg border flex items-start justify-between gap-2.5 text-xs transition ${
+                                  isMatch
+                                    ? 'bg-emerald-50/50 border-emerald-200 text-slate-800'
+                                    : isUnmet
+                                    ? 'bg-rose-50/50 border-rose-200 text-slate-800'
+                                    : 'bg-amber-50/50 border-amber-200 text-slate-800'
+                                }`}
+                              >
+                                <div className="space-y-0.5 min-w-0">
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    {isMatch && (
+                                      <span className="inline-flex items-center text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded">
+                                        ✓ Matched
+                                      </span>
+                                    )}
+                                    {isUnmet && (
+                                      <span className="inline-flex items-center text-[10px] font-extrabold text-rose-800 bg-rose-100 px-1.5 py-0.2 rounded">
+                                        ! Unmet
+                                      </span>
+                                    )}
+                                    {isPending && (
+                                      <span className="inline-flex items-center text-[10px] font-extrabold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded">
+                                        ○ Verification Needed
+                                      </span>
+                                    )}
+                                    <span className="text-slate-900 text-xs font-bold capitalize">
+                                      {b.dimension.replace(/_/g, ' ')}
+                                    </span>
                                   </div>
-                                  <p className="text-[11px] text-slate-500 pl-5">{b.reason}</p>
+                                  <p className="text-[11px] text-slate-600 pl-0.5 leading-snug">{cleanReason}</p>
                                 </div>
-                                <div className="text-right shrink-0 font-mono text-[11px]">
-                                  <span className="font-bold text-slate-900">+{b.score.toFixed(1)}</span>
+
+                                <div className="text-right shrink-0 font-mono text-[11px] pt-0.5">
+                                  <span className={`font-bold ${isMatch ? 'text-emerald-700' : isUnmet ? 'text-rose-600' : 'text-amber-700'}`}>
+                                    +{b.score.toFixed(1)}
+                                  </span>
                                   <span className="text-slate-400"> / {b.max_weight.toFixed(1)}</span>
                                 </div>
                               </div>
-                            ))}
-                          </div>
-
-                          {rec.source_document && (
-                            <div className="pt-2 border-t border-slate-200 text-[11px] text-slate-500 flex items-center gap-1">
-                              <FileText className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Official Source: {rec.source_document}</span>
-                            </div>
-                          )}
+                            );
+                          })}
                         </div>
-                      )}
-                    </div>
+
+                        {rec.source_document && (
+                          <div className="pt-2 border-t border-slate-200 text-[10px] text-slate-500 flex items-center gap-1">
+                            <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">Official Rules Source: {rec.source_document}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Advisory notice */}
-                    <div className="bg-slate-100/90 rounded-xl p-3 text-[11px] text-slate-600 border border-slate-200 flex items-start gap-2">
+                    <div className="bg-slate-50 rounded-xl p-2.5 text-[11px] text-slate-500 border border-slate-200/80 flex items-start gap-2">
                       <Info className="w-3.5 h-3.5 text-sky-600 shrink-0 mt-0.5" />
                       <span>{t('howToApply.disclaimer', 'Eligibility guidance only. Final eligibility and approval are determined by the concerned government authority.')}</span>
                     </div>
 
-                    {/* Action Buttons & Navigation Continuity */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
-                      <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-                        <SaveSchemeButton schemeId={rec.scheme_id} size="sm" />
-                        <CompareButton schemeId={rec.scheme_id} variant="compact" />
-                        <Link
-                          to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-2 rounded-xl transition flex items-center gap-1"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-sky-700" /> {t('recommendations.viewScheme', 'View Scheme Details')}
-                        </Link>
+                    {/* ── 4. ORGANIZED ACTION BUTTONS AREA ── */}
+                    <div className="pt-3 border-t border-slate-100 space-y-2">
+                      {/* Primary Action: View Scheme */}
+                      <Link
+                        to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}
+                        className="w-full bg-gov-blue hover:bg-sky-900 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-2 min-h-[42px]"
+                      >
+                        <FileText className="w-4 h-4 text-sky-200" />
+                        <span>{t('recommendations.viewScheme', 'View Scheme')}</span>
+                      </Link>
 
-                        {/* Scheme-Aware Financial CTA: Calculate EMI ONLY if Loan/Credit Scheme */}
+                      {/* Secondary Actions: Calculate EMI & Compare */}
+                      <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2">
                         {rec.is_credit_scheme !== false && (rec.max_loan_amount || rec.interest_rate !== undefined) ? (
                           <Link
                             to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}#calculator`}
-                            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 px-3 py-2 rounded-xl transition flex items-center gap-1 border border-emerald-300 shadow-xs"
+                            className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs py-2.5 px-3 rounded-xl border border-emerald-300 shadow-xs transition flex items-center justify-center gap-1.5 min-h-[42px]"
                           >
-                            <CalcIcon className="w-3.5 h-3.5 text-emerald-600" /> {t('recommendations.calculateEmi', 'Calculate EMI')}
+                            <CalcIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="truncate">{t('recommendations.calculateEmi', 'Calculate EMI')}</span>
                           </Link>
                         ) : (
-                          <span className="bg-slate-100 text-slate-600 px-3 py-2 rounded-xl text-xs font-medium border border-slate-200">
-                            {rec.financial_category === 'GRANT_SUBSIDY' ? 'Capital Subsidy / Grant' : rec.financial_category === 'SCHOLARSHIP' ? 'Scholarship Assistance' : rec.financial_category === 'TRAINING_SKILL' ? 'Skill Training / Kit' : rec.financial_category === 'DIRECT_BENEFIT' ? 'Direct Benefit / DBT' : 'Welfare Guidance'}
-                          </span>
+                          <div className="flex items-center justify-center text-[11px] font-semibold text-slate-500 bg-slate-50 rounded-xl px-2 py-2 border border-slate-200 min-h-[42px] text-center">
+                            <span className="truncate">{rec.financial_category === 'GRANT_SUBSIDY' ? 'Direct Subsidy' : rec.financial_category === 'SCHOLARSHIP' ? 'Scholarship' : 'Welfare Grant'}</span>
+                          </div>
                         )}
 
-                        {isEligible && (
+                        <div className="w-full flex">
+                          <CompareButton
+                            schemeId={rec.scheme_id}
+                            variant="compact"
+                            className="w-full justify-center min-h-[42px] py-2.5 px-3 rounded-xl text-xs font-bold"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Utility Actions: Save Scheme & Find Channel Partner */}
+                      <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2">
+                        <div className="w-full flex [&>button]:w-full [&>button]:justify-center [&>button]:min-h-[42px] [&>button]:rounded-xl [&>button]:text-xs [&>button]:font-bold [&>button]:border [&>button]:border-slate-300">
+                          <SaveSchemeButton schemeId={rec.scheme_id} size="sm" />
+                        </div>
+
+                        {isEligible ? (
                           <Link
                             to={`/channel-partners?scheme_id=${rec.scheme_id}&state=${canonicalProfile?.state || ''}`}
-                            className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-2 rounded-xl transition flex items-center gap-1 border border-indigo-200 shadow-xs"
+                            className="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs py-2.5 px-3 rounded-xl border border-indigo-200 shadow-xs transition flex items-center justify-center gap-1.5 min-h-[42px]"
                           >
-                            <MapPin className="w-3.5 h-3.5 text-indigo-600" /> {t('howToApply.ctaPartner', 'Find Authorized Channel Partners')}
+                            <MapPin className="w-4 h-4 text-indigo-600 shrink-0" />
+                            <span className="truncate">{t('howToApply.ctaPartner', 'Find Partner')}</span>
                           </Link>
+                        ) : (
+                          <div className="flex items-center justify-center text-[11px] text-slate-400 bg-slate-50/50 rounded-xl px-2 border border-dashed border-slate-200 min-h-[42px] text-center">
+                            <span className="truncate">Direct Application Only</span>
+                          </div>
                         )}
                       </div>
 
+                      {/* Official Application Action */}
                       {officialUrl && (
                         <button
+                          type="button"
                           onClick={() => openPortalModal(rec.scheme_name, officialUrl)}
-                          className="bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5"
+                          className="w-full bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-2 min-h-[42px]"
                         >
-                          {t('howToApply.ctaPortal', 'Apply on Official Portal')} <ExternalLink className="w-3.5 h-3.5" />
+                          <span>{t('howToApply.ctaPortal', 'Apply on Official Portal →')}</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>

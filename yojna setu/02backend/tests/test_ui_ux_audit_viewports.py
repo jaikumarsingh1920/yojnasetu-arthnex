@@ -140,3 +140,68 @@ def test_responsive_grid_and_container_conventions():
         # Check standard container padding convention (px-4 sm:px-6 lg:px-8 or max-w-md / max-w-2xl / max-w-7xl)
         has_responsive_padding = 'px-4' in content or 'p-4' in content or 'p-6' in content
         assert has_responsive_padding, f"{rel} must have responsive container padding"
+
+
+def test_profile_completion_no_contradictory_text():
+    """Verify profile completion display doesn't show contradictory strings like '0% Profile 100% Complete'."""
+    recom_file = os.path.join(FRONTEND_SRC, 'pages', 'Recommendations.tsx')
+    with open(recom_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    assert 'calculateClientProfileCompletion' in content, "Recommendations must define client-side profile completion calculator"
+    assert 'profile100Complete' in content, "Must handle 100% profile complete state separately"
+    assert "{profileCompletion}% {t('recommendations.profileComplete', 'Complete')}" not in content, "Must not combine raw % with untranslated complete"
+
+    # Verify en.json locale has no hardcoded 100% in profileComplete
+    en_file = os.path.join(FRONTEND_SRC, 'i18n', 'locales', 'en.json')
+    with open(en_file, 'r', encoding='utf-8') as f:
+        en_content = f.read()
+
+    assert '"profileComplete": "Profile Complete"' in en_content, "en.json must not have hardcoded 100% in profileComplete"
+
+
+def test_mobile_drawer_position_fixed_and_body_scroll_lock():
+    """Verify mobile navigation drawer is position: fixed, locks body & html scrolling, and prevents touch gestures."""
+    navbar_file = os.path.join(FRONTEND_SRC, 'components', 'Navbar.tsx')
+    with open(navbar_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # Fixed positioning verification
+    assert 'fixed left-0 right-0 w-full' in content, "Mobile drawer must be position: fixed"
+    assert 'id="mobile-navigation-drawer"' in content, "Mobile drawer must have id for touch event targeting"
+
+    # Body and HTML scroll locking
+    assert "document.body.style.overflow = 'hidden'" in content, "Must lock body scrolling when open"
+    assert "document.documentElement.style.overflow = 'hidden'" in content, "Must lock html scrolling when open"
+    assert "handleTouchMove" in content, "Must handle touchmove events to prevent background rubber-banding"
+    assert "drawer.contains(e.target as Node)" in content, "Must permit internal drawer scrolling while blocking outside touches"
+    assert "document.removeEventListener('touchmove', handleTouchMove)" in content, "Must clean up touch listener on close"
+
+
+def test_ai_chatbot_safe_markdown_rendering():
+    """Verify ChatMessage.tsx uses SafeChatMarkdown without dangerouslySetInnerHTML and handles bold, lists, and line breaks."""
+    chat_msg_file = os.path.join(FRONTEND_SRC, 'components', 'ai', 'ChatMessage.tsx')
+    with open(chat_msg_file, 'r', encoding='utf-8') as f:
+        msg_content = f.read()
+
+    assert 'SafeChatMarkdown' in msg_content, "ChatMessage must import and render SafeChatMarkdown"
+    assert '<SafeChatMarkdown content={message.text}' in msg_content, "Assistant messages must use SafeChatMarkdown"
+
+    safe_md_file = os.path.join(FRONTEND_SRC, 'components', 'ai', 'SafeChatMarkdown.tsx')
+    assert os.path.exists(safe_md_file), "SafeChatMarkdown.tsx must exist"
+
+    with open(safe_md_file, 'r', encoding='utf-8') as f:
+        md_content = f.read()
+
+    # Security check: No dangerouslySetInnerHTML
+    assert 'dangerouslySetInnerHTML' not in md_content, "Must NEVER use dangerouslySetInnerHTML on AI output"
+
+    # Core Markdown feature support
+    assert 'bullet-list' in md_content, "Must support bullet lists"
+    assert 'numbered-list' in md_content, "Must support numbered lists"
+    assert 'paragraph' in md_content, "Must support paragraphs and line breaks"
+    assert 'strong' in md_content, "Must render bold as <strong> tags"
+    assert 'em' in md_content, "Must render italic as <em> tags"
+    assert 'break-words' in md_content, "Must wrap long responses to maintain readability on mobile viewports"
+
+

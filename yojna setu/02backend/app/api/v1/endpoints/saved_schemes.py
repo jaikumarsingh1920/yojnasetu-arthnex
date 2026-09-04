@@ -1,6 +1,6 @@
 import logging
-from typing import Any
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Any, Optional
+from fastapi import APIRouter, Depends, HTTPException, Body, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -14,6 +14,7 @@ from app.schemas.saved_scheme import (
     SavedSchemeListResponse,
     EmailSchemeResponse,
 )
+from app.schemas.scheme import EmailSchemeRequest
 from app.services.email_service import EmailService
 
 logger = logging.getLogger("yojnasetu.api.saved_schemes")
@@ -123,10 +124,10 @@ def email_scheme(
     scheme_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
+    req: Optional[EmailSchemeRequest] = Body(None),
 ) -> Any:
     """
-    Emails scheme details to the current authenticated user's registered email address.
-    Recipient email is strictly locked to current_user.email (no arbitrary target overrides).
+    Emails scheme details to the recipient email address (defaults to current_user.email).
     """
     scheme = db.query(Scheme).filter(Scheme.scheme_id == scheme_id).first()
     if not scheme:
@@ -135,17 +136,18 @@ def email_scheme(
             detail=f"Scheme with ID '{scheme_id}' does not exist."
         )
 
-    recipient_email = current_user.email or current_user.phone
+    recipient_email = (str(req.recipient_email).strip() if req and req.recipient_email else (current_user.email or current_user.phone))
     if not recipient_email or "@" not in recipient_email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="You do not have a valid registered email address associated with your account. Please update your email profile."
         )
 
+    lang = (req.language_code if req and req.language_code else getattr(current_user, "preferred_language", "en")) or "en"
     result = EmailService.send_scheme_email(
         recipient_email=recipient_email,
         scheme=scheme,
-        language_code=getattr(current_user, "preferred_language", "en") or "en"
+        language_code=lang
     )
     return EmailSchemeResponse(
         sent=result["sent"],

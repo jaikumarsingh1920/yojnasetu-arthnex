@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional, Any
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, EmailStr
 
 
 # ─────────────────────────────────────────────────────────────
@@ -336,5 +336,21 @@ class SchemeComparisonItem(BaseModel):
 class SchemeComparisonResponse(BaseModel):
     compared_schemes: List[SchemeComparisonItem]
     invalid_ids: List[str] = Field(default_factory=list, description="IDs requested that were invalid or not found")
+
+
+# ─────────────────────────────────────────────────────────────
+# Email Scheme Request Schema
+# ─────────────────────────────────────────────────────────────
+
+class EmailSchemeRequest(BaseModel):
+    recipient_email: EmailStr = Field(..., description="Valid recipient email address")
+    language_code: Optional[str] = Field("en", description="Preferred language code for email content (e.g. en, hi)")
+
+
+class EmailSchemeResponse(BaseModel):
+    sent: bool
+    message: str
+    recipient_email: Optional[str] = None
+
 
 

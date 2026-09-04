@@ -183,23 +183,23 @@ export const ApplicationDetail: React.FC = () => {
       </div>
 
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ApplicationStatusBadge status={appData.status} />
             <span className="text-xs font-mono text-slate-500 font-bold">{t('applications.guidanceId', 'Guidance ID: {{id}}', { id: appData.application_id, date: '' })}</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900">{appData.scheme_name || `Scheme ${appData.scheme_id}`}</h1>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">{appData.scheme_name || `Scheme ${appData.scheme_id}`}</h1>
           <p className="text-xs text-slate-500 mt-1">
             {t('common.createdOn', 'Created On')}: {new Date(appData.created_at).toLocaleDateString()} | {t('common.lastUpdated', 'Last Updated')}: {new Date(appData.updated_at).toLocaleDateString()}
           </p>
         </div>
 
         {/* Primary CTA: Apply on Official Portal */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2 shrink-0"
+            className="w-full md:w-auto bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 shrink-0 min-h-[44px]"
           >
             {t('channelPartners.applyOfficialPortal', 'Apply on Official Portal')} <ExternalLink className="w-4 h-4" />
           </button>

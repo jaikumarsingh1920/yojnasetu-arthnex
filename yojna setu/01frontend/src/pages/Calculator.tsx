@@ -299,7 +299,7 @@ export const CalculatorPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* LEFT COLUMN: Input Form Controls (5 cols) */}
-        <div className="lg:col-span-5 bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div className="lg:col-span-5 bg-white p-4 sm:p-6 lg:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-5 sm:space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
               <IndianRupee className="w-4 h-4 text-sky-600" />
@@ -556,10 +556,10 @@ export const CalculatorPage: React.FC = () => {
                   step="1"
                   value={tenureValue}
                   onChange={(e) => handleTenureChange(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 outline-none"
+                  className="w-full min-w-0 flex-1 px-3.5 py-2.5 text-xs font-bold rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 outline-none"
                   aria-label={t('calculator.loanTenure', 'Loan Tenure')}
                 />
-                <span className="text-xs font-bold text-slate-600 whitespace-nowrap bg-slate-100 px-3 py-2.5 rounded-xl border border-slate-200">
+                <span className="text-xs font-bold text-slate-600 whitespace-nowrap bg-slate-100 px-3 py-2.5 rounded-xl border border-slate-200 shrink-0">
                   {tenureUnit === 'YEARS' ? `${tenureValue * 12} ${t('calculator.months', 'Months')}` : `${(tenureValue / 12).toFixed(1)} ${t('calculator.years', 'Years')}`}
                 </span>
               </div>
@@ -612,10 +612,28 @@ export const CalculatorPage: React.FC = () => {
               {t('calculator.formulaDesc', 'Where P = Principal, r = Monthly Rate (Annual% / 1200), and n = Total Months.')}
             </p>
           </div>
+
+          {/* Mobile Quick Jump to Results */}
+          <div className="lg:hidden pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('calculator-results');
+                if (el) {
+                  const navOffset = 85;
+                  const pos = el.getBoundingClientRect().top + window.pageYOffset - navOffset;
+                  window.scrollTo({ top: Math.max(0, pos), behavior: 'smooth' });
+                }
+              }}
+              className="w-full bg-gov-blue hover:bg-gov-navy text-white font-bold py-3 px-4 rounded-2xl text-xs shadow-sm transition flex items-center justify-center gap-2 min-h-[44px]"
+            >
+              <span>{t('calculator.viewResultsBtn', 'View Calculation Results & Schedule ↓')}</span>
+            </button>
+          </div>
         </div>
 
         {/* RIGHT COLUMN: Results Dashboard & Amortization (7 cols) */}
-        <div className="lg:col-span-7 space-y-6">
+        <div id="calculator-results" className="lg:col-span-7 space-y-6 scroll-mt-24">
           {/* Main Output KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Monthly EMI */}
@@ -660,10 +678,10 @@ export const CalculatorPage: React.FC = () => {
           </div>
 
           {/* Breakdown Segmented Bar */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4">
               <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <PieChart className="w-4 h-4 text-sky-600" />
+                <PieChart className="w-4 h-4 text-sky-600 shrink-0" />
                 {t('calculator.breakdownTitle', 'Principal vs Interest Breakdown')}
               </h3>
               <span className="text-xs font-bold text-slate-600 font-mono">
@@ -686,7 +704,7 @@ export const CalculatorPage: React.FC = () => {
             </div>
 
             {/* Legend */}
-            <div className="grid grid-cols-2 gap-4 text-xs pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
               <div className="flex items-center gap-2 bg-sky-50/70 p-3 rounded-2xl border border-sky-100">
                 <div className="w-3.5 h-3.5 bg-sky-600 rounded-md shrink-0" />
                 <div>

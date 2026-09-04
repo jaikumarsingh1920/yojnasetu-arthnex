@@ -301,7 +301,8 @@
     "emiPerMonth": "Per Month",
     "monthlyBreakdownTab": "Monthly Breakdown",
     "annualSummaryTab": "Annual Summary",
-    "repaymentAssistanceSubtitle": "Calculate your estimated monthly payments, interest savings, and government subsidy support under official scheme rules."
+    "repaymentAssistanceSubtitle": "Calculate your estimated monthly payments, interest savings, and government subsidy support under official scheme rules.",
+    "viewResultsBtn": "View Calculation Results"
   },
   "category": {
     "general": "General / Unreserved",
@@ -653,7 +654,7 @@
     "findSchemesBtn": "Find Matching Schemes",
     "myProfile": "My Profile Details",
     "profileCardTitle": "Your Citizen Profile",
-    "profileComplete": "Profile 100% Complete",
+    "profileComplete": "Profile Complete",
     "activeApplicationsSub": "Review current status, required document checklists, and assigned partner offices.",
     "startNewCheck": "Start New Check",
     "continueApplication": "Continue Application",
@@ -668,7 +669,8 @@
     "recentActivity": "Recent Activity Log",
     "rejected": "Ineligible / Rejected",
     "resumeDraft": "Resume Draft",
-    "submitted": "Formally Submitted"
+    "submitted": "Formally Submitted",
+    "profile100Complete": "100% Profile Complete"
   },
   "documents": {
     "carryOriginals": "Please carry original documents along with self-attested photocopies when visiting the official partner center.",
@@ -1385,7 +1387,7 @@
     "noInsufficient": "No schemes with missing criteria. All evaluated schemes had complete data matching.",
     "noSchemesFound": "No Schemes Found",
     "noStorageGuarantee": "Your profile information is processed securely in-memory for evaluation purposes only.",
-    "profileComplete": "Profile 100% Complete",
+    "profileComplete": "Profile Complete",
     "profileUpdatedSuccess": "Profile snapshot updated successfully.",
     "recalcBtn": "Re-evaluate Schemes",
     "resetSuccess": "Form reset to saved profile data.",
@@ -1425,7 +1427,11 @@
     "ruleEngineTag": "100% Deterministic Rule Engine",
     "savingPreferences": "Saving citizen evaluation criteria...",
     "voiceListening": "Listening in your selected regional language...",
-    "voicePrompt": "Speak naturally in Hindi or your preferred regional language to describe your background."
+    "voicePrompt": "Speak naturally in Hindi or your preferred regional language to describe your background.",
+    "profile100Complete": "100% Profile Complete",
+    "moreInfoRequired": "More Info Needed",
+    "notEligible": "Not Eligible",
+    "viewAllCriteria": "View Criteria Breakdown"
   },
   "route": {
     "partner": "Authorized Channel Partner Assistance (Bank/SCA)",
@@ -1642,7 +1648,9 @@
     "stateApplicabilityAllIndia": "All India (National)",
     "sponsoredCentral": "Centrally Sponsored Scheme",
     "sponsoredSector": "Central Sector Scheme",
-    "sponsoredState": "State Government Scheme"
+    "sponsoredState": "State Government Scheme",
+    "filterTitle": "Filters",
+    "resetAllFilters": "Reset All Filters"
   },
   "scoreBreakdown": {
     "matchedDimensions": "Matched Dimensions ({{count}})",
@@ -1753,5 +1761,24 @@
     "decreaseText": "Decrease text size",
     "defaultText": "Default text size",
     "increaseText": "Increase text size"
+  },
+  "emailModal": {
+    "title": "Email Scheme Details",
+    "subtitle": "Receive official scheme overview in your inbox",
+    "selectedScheme": "Selected Scheme",
+    "emailLabel": "Recipient Email Address",
+    "privacyNote": "Your email is only used to send this official scheme brief. We never share your data or request passwords/Aadhaar.",
+    "cancelBtn": "Cancel",
+    "sendBtn": "Send Scheme",
+    "sending": "Sending...",
+    "sentSuccessTitle": "Scheme Details Sent!",
+    "success": "Scheme details sent to your email.",
+    "checkInboxNote": "Please check your inbox or spam folder in a few moments.",
+    "closeBtn": "Done",
+    "errors": {
+      "required": "Please enter your email address.",
+      "invalid": "Please enter a valid email address.",
+      "failed": "Failed to send scheme details. Please try again."
+    }
   }
 }

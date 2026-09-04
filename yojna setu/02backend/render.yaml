@@ -29,3 +29,17 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_ID
         value: "370546184305-2kusbrn1a3t2hd8cu5ap16vmsk2ci066.apps.googleusercontent.com"
+      - key: EMAIL_PROVIDER
+        value: "smtp"
+      - key: SMTP_HOST
+        value: "smtp.gmail.com"
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: YOJNASETU_BASE_URL
+        sync: false

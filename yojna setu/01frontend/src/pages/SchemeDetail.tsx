@@ -7,6 +7,8 @@ import { Scheme, AIChatResponse } from '../types';
 import { VerificationBadge } from '../components/Badge';
 import { Alert } from '../components/Alert';
 import { OfficialPortalModal } from '../components/OfficialPortalModal';
+import { EmailSchemeModal } from '../components/EmailSchemeModal';
+import { useAuth } from '../context/AuthContext';
 import { savedSchemesApi } from '../api/savedSchemesApi';
 import { SaveSchemeButton } from '../components/SaveSchemeButton';
 import { CompareButton } from '../components/CompareButton';
@@ -40,8 +42,10 @@ export const SchemeDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailFeedback, setEmailFeedback] = useState<{ message: string; success: boolean } | null>(null);
+  const { user } = useAuth();
 
   // Scheme-specific AI Chat State
   const [chatMessage, setChatMessage] = useState('');
@@ -64,6 +68,9 @@ export const SchemeDetail: React.FC = () => {
       setErrorMsg(t('errors.networkError') + ' ' + (err.response?.data?.detail || err.message));
     } finally {
       setIsLoading(false);
+      if (!window.location.hash) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
     }
   };
 
@@ -165,33 +172,32 @@ export const SchemeDetail: React.FC = () => {
               <SaveSchemeButton schemeId={scheme.scheme_id} size="md" />
               <CompareButton schemeId={scheme.scheme_id} variant="button" />
             
-            <button
-              onClick={handleEmailScheme}
-              disabled={emailLoading}
-              className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3.5 sm:px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5 shadow-sm"
-              title={t('schemeDetail.emailTooltip', 'Send scheme details to registered email')}
-            >
-              <Mail className="w-4 h-4 text-sky-400" />
-              {emailLoading ? t('schemeDetail.emailSending', 'Sending...') : t('schemeDetail.emailMe', 'Email Me Details')}
-            </button>
-
-            {scheme.application_route === 'CHANNEL_PARTNER' || (scheme.partner_count && scheme.partner_count > 0) ? (
-              <Link
-                to={`/channel-partners?scheme_id=${scheme.scheme_id}`}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2"
-              >
-                <MapPin className="w-4 h-4 text-sky-300" />
-                {t('howToApply.ctaPartner', 'Find Authorized Channel Partners')}
-              </Link>
-            ) : officialUrl ? (
               <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2"
+                onClick={() => setIsEmailModalOpen(true)}
+                className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3.5 sm:px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5 shadow-sm min-h-[44px] cursor-pointer"
+                title={t('schemeDetail.emailTooltip', 'Email official scheme details')}
               >
-                {scheme.application_route === 'DIRECT_PORTAL' ? t('howToApply.ctaPortal', 'Apply on Official Portal') : t('howToApply.ctaOfficialGuidelines', 'View Official Guidelines')} <ExternalLink className="w-4 h-4" />
+                <Mail className="w-4 h-4 text-sky-400" />
+                {t('schemeDetail.emailMe', 'Email Me This Scheme')}
               </button>
-            ) : null}
-          </div>
+
+              {scheme.application_route === 'CHANNEL_PARTNER' || (scheme.partner_count && scheme.partner_count > 0) ? (
+                <Link
+                  to={`/channel-partners?scheme_id=${scheme.scheme_id}`}
+                  className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 min-h-[44px]"
+                >
+                  <MapPin className="w-4 h-4 text-sky-300" />
+                  {t('howToApply.ctaPartner', 'Find Authorized Channel Partners')}
+                </Link>
+              ) : officialUrl ? (
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full sm:w-auto bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 min-h-[44px]"
+                >
+                  {scheme.application_route === 'DIRECT_PORTAL' ? t('howToApply.ctaPortal', 'Apply on Official Portal') : t('howToApply.ctaOfficialGuidelines', 'View Official Guidelines')} <ExternalLink className="w-4 h-4" />
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
@@ -235,9 +241,9 @@ export const SchemeDetail: React.FC = () => {
                     href={officialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sky-700 font-bold hover:underline flex items-center gap-1 truncate"
+                    className="text-sky-700 font-bold hover:underline flex items-center gap-1 truncate max-w-full break-all"
                   >
-                    {officialUrl} <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{officialUrl}</span> <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                   </a>
                 ) : (
                   <span className="italic text-slate-400">{t('schemeDetail.notSpecifiedOfficial', 'Not specified in available official data')}</span>
@@ -262,7 +268,9 @@ export const SchemeDetail: React.FC = () => {
           </div>
 
           {/* Scheme-Aware Embedded Financial Calculator & Assistance Section */}
-          <SchemeEmbeddedCalculator scheme={scheme} initialLoanAmount={initialLoanAmount} />
+          <div id="calculator" className="scroll-mt-24">
+            <SchemeEmbeddedCalculator scheme={scheme} initialLoanAmount={initialLoanAmount} />
+          </div>
 
           {/* Rules List */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -453,6 +461,15 @@ export const SchemeDetail: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         officialUrl={officialUrl}
         schemeName={scheme.scheme_name}
+      />
+
+      {/* Email Scheme Dialog */}
+      <EmailSchemeModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        schemeId={scheme.scheme_id}
+        schemeName={scheme.scheme_name}
+        defaultEmail={user?.email || ''}
       />
     </div>
   );

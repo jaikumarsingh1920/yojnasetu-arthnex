@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 interface Props {
   citation: SourceCitation;
+  onNavigate?: () => void;
 }
 
 const sanitizeClientSnippet = (text?: string): string => {
@@ -26,12 +27,13 @@ const sanitizeClientSnippet = (text?: string): string => {
   return clean;
 };
 
-export const SourceCitationCard: React.FC<Props> = ({ citation }) => {
+export const SourceCitationCard: React.FC<Props> = ({ citation, onNavigate }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   const handleClick = () => {
     if (citation.scheme_id) {
+      onNavigate?.();
       navigate(`/schemes/${citation.scheme_id}`);
     }
   };
