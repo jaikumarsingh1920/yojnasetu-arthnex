@@ -36,8 +36,16 @@ export const EmailSchemeModal: React.FC<EmailSchemeModalProps> = ({
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && !loading) {
+          onClose();
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen, defaultEmail]);
+  }, [isOpen, defaultEmail, loading, onClose]);
 
   if (!isOpen) return null;
 

@@ -62,12 +62,16 @@ export const Footer: React.FC = () => {
           <h4 className="text-white text-sm font-bold uppercase tracking-wider mb-3">{t('footer.supportTitle', 'Support & Helpline')}</h4>
           <ul className="space-y-2.5 text-xs text-slate-400">
             <li className="flex items-center gap-2">
-              <PhoneCall className="w-4 h-4 text-gov-saffron" />
-              {t('footer.helplineText', '1800-11-2026 (Toll-Free, 9 AM - 6 PM IST)')}
+              <PhoneCall className="w-4 h-4 text-gov-saffron shrink-0" />
+              <a href="tel:1800112026" className="hover:text-white transition" title="Call YojnaSetu Helpline">
+                {t('footer.helplineText', '1800-11-2026 (Toll-Free, 9 AM - 6 PM IST)')}
+              </a>
             </li>
             <li className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-sky-400" />
-              {t('footer.supportEmail', 'support@yojnasetu.gov.in')}
+              <Mail className="w-4 h-4 text-sky-400 shrink-0" />
+              <a href="mailto:support@yojnasetu.gov.in" className="hover:text-white transition" title="Email YojnaSetu Support">
+                {t('footer.supportEmail', 'support@yojnasetu.gov.in')}
+              </a>
             </li>
             <li className="flex items-start gap-2">
               <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />

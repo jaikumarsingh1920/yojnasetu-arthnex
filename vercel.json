@@ -1,10 +1,9 @@
 {
   "buildCommand": "npm --prefix \"yojna setu/01frontend\" install && npm --prefix \"yojna setu/01frontend\" run build",
   "outputDirectory": "yojna setu/01frontend/dist",
-  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/|assets/|.*\\.[^/]+$).*)",
       "destination": "/index.html"
     }
   ]

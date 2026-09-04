@@ -1720,7 +1720,21 @@
     "notSupported": "Voice input is not supported for this language in your browser.",
     "speakNow": "Press microphone and speak your query.",
     "title": "Voice Assistant",
-    "unavailable": "Voice STT unavailable in browser"
+    "unavailable": "Voice STT unavailable in browser",
+    "clickToStart": "Click to speak",
+    "clickToStop": "Listening... Click to stop",
+    "listeningTitle": "Listening... Speak now",
+    "listeningDesc": "Speak naturally to describe your background, occupation, and financial requirements.",
+    "listeningBtn": "Listening...",
+    "voiceBtn": "Voice Input",
+    "unavailableShort": "Voice N/A",
+    "noMicrophone": "No microphone detected on your device. Please ensure a microphone is connected and enabled.",
+    "permissionDenied": "Microphone permission was denied. Please allow microphone access in your browser site settings.",
+    "offlineError": "You appear to be offline. Voice recognition requires an active internet connection.",
+    "networkServiceError": "Network connection issue during voice recognition. Please try again or type directly.",
+    "serviceUnavailable": "Voice recognition service is unavailable in this browser. Please type your requirements.",
+    "startFailed": "Voice input could not be started. Please type your requirements directly.",
+    "recognitionError": "Speech recognition notice: {{error}}"
   },
   "map": {
     "authPending": "Scheme-specific authorization not confirmed",

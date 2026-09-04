@@ -32,6 +32,7 @@ import { TextSizeProvider } from './context/TextSizeContext';
 import { ComparisonTray } from './components/ComparisonTray';
 import { Compare } from './pages/Compare';
 import { ScrollToTop } from './components/ScrollToTop';
+import { PageTitleManager } from './components/PageTitleManager';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +51,7 @@ export const App: React.FC = () => {
           <ComparisonProvider>
             <Router>
               <ScrollToTop />
+              <PageTitleManager />
               <div className="flex flex-col min-h-screen bg-slate-50 w-full max-w-full">
                 <Navbar />
                 <main className="flex-grow w-full max-w-full min-w-0">

@@ -43,8 +43,7 @@ import {
   ArrowRight,
   Mic,
   MicOff,
-  Square,
-  Globe
+  Square
 } from 'lucide-react';
 
 type InputMode = 'PROFILE' | 'TYPE' | 'FORM';
@@ -108,42 +107,22 @@ export const Recommendations: React.FC = () => {
   const [inputMode, setInputMode] = useState<InputMode>('PROFILE');
 
   // Text Input State
-  const [userText, setUserText] = useState(
-    'I am a 28 year old woman from Uttar Pradesh. I belong to SC category. My annual income is around 1.8 lakh. I want to start a small tailoring business with a project cost of 1 lakh.'
-  );
+  const DEFAULT_USER_TEXT =
+    'I am a 28 year old woman from Uttar Pradesh. I belong to SC category. My annual income is around 1.8 lakh. I want to start a small tailoring business with a project cost of 1 lakh.';
+  const [userText, setUserText] = useState(DEFAULT_USER_TEXT);
 
   // Speech Recognition State for Natural Language / Voice Input
-  const [speechLangCode, setSpeechLangCode] = useState<string>(() => i18n.language || 'en');
-  const userManuallyChangedSpeechLangRef = useRef<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isSpeechSupported, setIsSpeechSupported] = useState<boolean>(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+
+  // References to guarantee no stale closures and prevent duplication across renders
   const recognitionRef = useRef<any>(null);
   const baseTextRef = useRef<string>('');
-
-  // Default to currently selected application language unless user manually chose a different speech language
-  useEffect(() => {
-    if (!userManuallyChangedSpeechLangRef.current && i18n.language) {
-      if (SUPPORTED_LANGUAGES.some((l) => l.code === i18n.language)) {
-        setSpeechLangCode(i18n.language);
-      }
-    }
-  }, [i18n.language]);
-
-  const activeSpeechLang = SUPPORTED_LANGUAGES.find((l) => l.code === speechLangCode) || SUPPORTED_LANGUAGES[0];
-
-  // Languages with experimental/limited browser speech model availability in Web Speech API
-  const LIMITED_SPEECH_LANG_CODES = ['or', 'as'];
-  const isLimitedBrowserSpeechLang = LIMITED_SPEECH_LANG_CODES.includes(activeSpeechLang.code);
-
-  const handleSpeechLangChange = (newCode: string) => {
-    userManuallyChangedSpeechLangRef.current = true;
-    setSpeechLangCode(newCode);
-    setVoiceError(null);
-    if (isListening) {
-      stopListening();
-    }
-  };
+  const finalTranscriptRef = useRef<string>('');
+  const interimTranscriptRef = useRef<string>('');
+  const lastProcessedIndexRef = useRef<number>(-1);
+  const isStartingRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -151,113 +130,202 @@ export const Recommendations: React.FC = () => {
     }
   }, []);
 
+  const cleanupRecognition = () => {
+    isStartingRef.current = false;
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.onstart = null;
+        recognitionRef.current.onresult = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.onend = null;
+        recognitionRef.current.abort();
+      } catch {
+        // ignore
+      }
+      recognitionRef.current = null;
+    }
+  };
+
   // Clean up speech recognition on unmount
   useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {
-          // ignore
-        }
-      }
+      cleanupRecognition();
     };
   }, []);
 
   // Stop listening if user switches input mode away from 'TYPE'
   useEffect(() => {
-    if (inputMode !== 'TYPE' && isListening) {
+    if (inputMode !== 'TYPE') {
       stopListening();
     }
   }, [inputMode]);
 
   const startListening = () => {
     setVoiceError(null);
+
+    // Guard against rapid duplicate clicks or concurrent start requests
+    if (isStartingRef.current || isListening) return;
+
+    // Check offline status before starting
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setVoiceError(
+        t('voice.offlineError', 'You appear to be offline. Voice recognition requires an active internet connection.')
+      );
+      return;
+    }
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setVoiceError(t('voice.unavailable', 'Voice recognition is not supported in this browser.'));
       return;
     }
 
-    try {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {
-          // ignore
-        }
-      }
+    // Clean up any existing recognition instance to avoid duplicate listeners
+    cleanupRecognition();
 
+    try {
+      isStartingRef.current = true;
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = activeSpeechLang.bcp47 || 'hi-IN';
+      recognition.maxAlternatives = 1;
 
-      // Capture initial text snapshot so spoken speech smoothly appends without duplication
-      baseTextRef.current = userText;
+      // Match speech recognition to the current site language, fallback to en-IN for Indian context
+      const activeLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language);
+      recognition.lang = activeLangObj?.bcp47 || 'en-IN';
+
+      // Capture base text from textarea; if default sample text, start clean
+      const current = userText.trim();
+      const isDefault = current === DEFAULT_USER_TEXT.trim();
+      baseTextRef.current = isDefault ? '' : userText;
+      finalTranscriptRef.current = '';
+      interimTranscriptRef.current = '';
+      lastProcessedIndexRef.current = -1;
 
       recognition.onstart = () => {
+        isStartingRef.current = false;
         setIsListening(true);
       };
 
       recognition.onresult = (event: any) => {
-        let sessionTranscript = '';
+        let latestInterim = '';
+
         for (let i = 0; i < event.results.length; i++) {
-          sessionTranscript += event.results[i][0].transcript;
+          const res = event.results[i];
+          if (!res || !res[0]) continue;
+          const transcript = (res[0].transcript || '').trim();
+          if (!transcript) continue;
+
+          if (res.isFinal) {
+            // Process finalized result ONCE per result index to prevent re-processing on Android Chrome
+            if (i > lastProcessedIndexRef.current) {
+              lastProcessedIndexRef.current = i;
+
+              const prevFinal = finalTranscriptRef.current.trim();
+
+              // Handle cumulative final engines (where subsequent final events include previous text)
+              if (prevFinal && transcript.toLowerCase().startsWith(prevFinal.toLowerCase())) {
+                finalTranscriptRef.current = transcript;
+              } else if (!prevFinal.toLowerCase().endsWith(transcript.toLowerCase())) {
+                // Incremental chunk: append once with a space
+                finalTranscriptRef.current = prevFinal ? `${prevFinal} ${transcript}` : transcript;
+              }
+
+              // Finalized chunk supersedes previous interim text
+              latestInterim = '';
+              interimTranscriptRef.current = '';
+            }
+          } else {
+            // Interim result: replace previous interim (NEVER append)
+            latestInterim = transcript;
+          }
         }
+
+        interimTranscriptRef.current = latestInterim;
+
+        const cleanFinal = finalTranscriptRef.current.trim();
+        let cleanInterim = interimTranscriptRef.current.trim();
+
+        // If interim text starts with what is already finalized, strip the duplicated prefix
+        if (cleanFinal && cleanInterim.toLowerCase().startsWith(cleanFinal.toLowerCase())) {
+          cleanInterim = cleanInterim.slice(cleanFinal.length).trim();
+        }
+
+        // Always construct textarea from: baseText + finalTranscript + currentInterimTranscript
+        const sessionSpoken = [cleanFinal, cleanInterim].filter(Boolean).join(' ').trim();
         const base = baseTextRef.current.trim();
-        const cleanSession = sessionTranscript.trim();
-        if (cleanSession) {
-          setUserText(base ? `${base} ${cleanSession}` : cleanSession);
-        }
+
+        const fullText = base ? (sessionSpoken ? `${base} ${sessionSpoken}` : base) : sessionSpoken;
+        setUserText(fullText);
       };
 
       recognition.onerror = (event: any) => {
         console.warn('Speech recognition error:', event.error);
-        if (event.error === 'language-not-supported') {
+        isStartingRef.current = false;
+
+        if (event.error === 'not-allowed') {
           setVoiceError(
             t(
-              'voice.langNotSupported',
-              'Voice input may not be supported in this browser for {{language}} ({{bcp47}}). Please type your details or select another language.',
-              { language: activeSpeechLang.name, bcp47: activeSpeechLang.bcp47 }
+              'voice.permissionDenied',
+              'Microphone access was denied. Please allow microphone permissions in your browser settings to use voice input.'
             )
           );
-        } else if (event.error === 'not-allowed') {
-          setVoiceError(t('voice.permissionDenied', 'Microphone access was denied. Please allow microphone permissions in your browser.'));
-        } else if (event.error === 'service-not-allowed') {
+        } else if (event.error === 'network') {
+          if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            setVoiceError(
+              t('voice.offlineError', 'You appear to be offline. Voice recognition requires an active internet connection.')
+            );
+          } else {
+            setVoiceError(
+              t(
+                'voice.networkServiceError',
+                'Speech service connection failed. Please check your internet connection or browser privacy/ad-block settings, or type your query directly.'
+              )
+            );
+          }
+        } else if (event.error === 'audio-capture') {
           setVoiceError(
-            t(
-              'voice.serviceNotAllowed',
-              'Speech recognition service is not available for {{language}} in this browser. Please type or choose another language.',
-              { language: activeSpeechLang.name }
-            )
+            t('voice.noMicrophone', 'No microphone detected on your device. Please ensure a microphone is connected and enabled.')
+          );
+        } else if (event.error === 'service-not-allowed' || event.error === 'language-not-supported') {
+          setVoiceError(
+            t('voice.serviceUnavailable', 'Voice recognition service is unavailable in this browser. Please type your requirements.')
           );
         } else if (event.error !== 'no-speech') {
           setVoiceError(t('voice.recognitionError', `Speech recognition notice: ${event.error}`));
         }
+
         setIsListening(false);
       };
 
       recognition.onend = () => {
+        isStartingRef.current = false;
         setIsListening(false);
+
+        // When recognition stops: clear temporary interim state and keep only the final clean transcript
+        interimTranscriptRef.current = '';
+        const base = baseTextRef.current.trim();
+        const finalSpoken = finalTranscriptRef.current.trim();
+        const fullFinal = base ? (finalSpoken ? `${base} ${finalSpoken}` : base) : finalSpoken;
+        if (fullFinal) {
+          setUserText(fullFinal);
+        }
       };
 
       recognitionRef.current = recognition;
       recognition.start();
     } catch (err: any) {
       console.error('Failed to start speech recognition:', err);
+      isStartingRef.current = false;
       setVoiceError(
-        t(
-          'voice.startFailed',
-          'Voice input could not be started for {{language}} ({{bcp47}}). Voice input may not be supported in this browser for this language.',
-          { language: activeSpeechLang.name, bcp47: activeSpeechLang.bcp47 }
-        )
+        t('voice.startFailed', 'Voice input could not be started. Please type your requirements directly.')
       );
       setIsListening(false);
     }
   };
 
   const stopListening = () => {
+    isStartingRef.current = false;
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -750,51 +818,11 @@ export const Recommendations: React.FC = () => {
       {inputMode === 'TYPE' && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-6">
           <form onSubmit={handleFindSchemes} className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3">
               <label htmlFor="user-text-input" className="block font-extrabold text-slate-900 text-xs uppercase tracking-wider">
                 {t('recommendations.describeLabel', 'Describe your background and project requirements:')}
               </label>
-
-              {/* Speech Language Selector */}
-              <div className="flex items-center gap-2">
-                <label htmlFor="speech-lang-select" className="text-[11px] font-bold text-slate-700 flex items-center gap-1 shrink-0">
-                  <Globe className="w-3.5 h-3.5 text-gov-blue" />
-                  <span>{t('voice.speechLanguage', 'Speech Language')}:</span>
-                </label>
-                <div className="relative inline-block">
-                  <select
-                    id="speech-lang-select"
-                    value={speechLangCode}
-                    onChange={(e) => handleSpeechLangChange(e.target.value)}
-                    disabled={isListening}
-                    className="bg-sky-50 hover:bg-sky-100/70 border border-sky-300 text-gov-blue font-bold text-xs rounded-lg pl-2.5 pr-7 py-1 outline-none focus:ring-2 focus:ring-gov-blue transition cursor-pointer appearance-none disabled:opacity-60 disabled:cursor-not-allowed shadow-2xs"
-                    title={t('voice.selectSpeechLanguage', 'Select Speech Recognition Language')}
-                    aria-label="Select Speech Recognition Language"
-                  >
-                    {SUPPORTED_LANGUAGES.map((lang) => (
-                      <option key={lang.code} value={lang.code} className="text-slate-900 bg-white font-medium">
-                        {lang.name} ({lang.nativeName}) — {lang.bcp47}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-gov-blue absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-              </div>
             </div>
-
-            {/* Advisory note if selected language has limited or experimental browser speech support */}
-            {isLimitedBrowserSpeechLang && (
-              <div className="flex items-start gap-2 text-[11px] text-amber-800 bg-amber-50/90 border border-amber-200 rounded-xl p-2.5 animate-in fade-in duration-150">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                <span>
-                  {t(
-                    'voice.limitedSupportNotice',
-                    'Voice input may not be supported in this browser for {{language}} ({{bcp47}}). If recognition does not start, you can type your query directly or choose Hindi / English.',
-                    { language: activeSpeechLang.name, bcp47: activeSpeechLang.bcp47 }
-                  )}
-                </span>
-              </div>
-            )}
 
             <div className="relative">
               <textarea
@@ -821,8 +849,8 @@ export const Recommendations: React.FC = () => {
                     }`}
                     title={
                       isListening
-                        ? t('voice.clickToStop', 'Listening in {{lang}}... Click to stop', { lang: activeSpeechLang.name })
-                        : t('voice.clickToStart', 'Click to speak in {{lang}} ({{bcp47}})', { lang: activeSpeechLang.name, bcp47: activeSpeechLang.bcp47 })
+                        ? t('voice.clickToStop', 'Listening... Click to stop')
+                        : t('voice.clickToStart', 'Click to speak')
                     }
                     aria-label={isListening ? 'Stop voice recognition' : 'Start voice recognition'}
                   >
@@ -843,7 +871,7 @@ export const Recommendations: React.FC = () => {
                     type="button"
                     disabled
                     className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center gap-1.5"
-                    title={t('voice.unavailable', 'Voice STT unavailable in browser')}
+                    title={t('voice.unavailable', 'Voice input is not supported in this browser')}
                     aria-label="Voice input unsupported"
                   >
                     <MicOff className="w-3.5 h-3.5" />
@@ -863,15 +891,10 @@ export const Recommendations: React.FC = () => {
                   </span>
                   <div>
                     <span className="font-bold">
-                      {t('voice.listeningInLang', 'Listening in {{language}} ({{bcp47}})...', {
-                        language: activeSpeechLang.name,
-                        bcp47: activeSpeechLang.bcp47
-                      })}
+                      {t('voice.listeningTitle', 'Listening... Speak now')}
                     </span>
                     <p className="text-[11px] text-rose-600 mt-0.5">
-                      {t('voice.speakInSelectedLang', 'Speak naturally in {{language}} to describe your background and project requirements.', {
-                        language: activeSpeechLang.name
-                      })}
+                      {t('voice.listeningDesc', 'Speak naturally to describe your background, occupation, and financial requirements.')}
                     </p>
                   </div>
                 </div>

@@ -61,11 +61,12 @@ class Settings(BaseSettings):
     SMTP_USERNAME: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
     SMTP_FROM: Optional[str] = None
+    SMTP_FROM_EMAIL: Optional[str] = None
     EMAIL_FROM: str = "noreply@yojnasetu.gov.in"
     YOJNASETU_BASE_URL: str = "http://localhost:3000"
 
     def get_sender_email(self) -> str:
-        return self.SMTP_FROM or self.EMAIL_FROM or self.SMTP_USERNAME or "noreply@yojnasetu.gov.in"
+        return self.SMTP_FROM or self.SMTP_FROM_EMAIL or self.SMTP_USERNAME or self.EMAIL_FROM or "noreply@yojnasetu.gov.in"
 
     model_config = SettingsConfigDict(
         env_file=os.path.join(PARENT_DIR, ".env") if os.path.exists(os.path.join(PARENT_DIR, ".env")) else ".env",

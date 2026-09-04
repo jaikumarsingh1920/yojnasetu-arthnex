@@ -308,7 +308,9 @@ class EmailService:
                 server.starttls()
                 server.ehlo()
                 if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
-                    server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+                    clean_user = settings.SMTP_USERNAME.strip()
+                    clean_pwd = settings.SMTP_PASSWORD.replace(" ", "").strip()
+                    server.login(clean_user, clean_pwd)
                 server.sendmail(sender, [clean_recipient], msg.as_string())
 
             logger.info(f"Scheme email successfully delivered to {clean_recipient} for {scheme.scheme_id}")
