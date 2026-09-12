@@ -7,6 +7,7 @@ import { Footer } from './components/Footer';
 import { ProtectedRoute, RoleGate } from './components/ProtectedRoute';
 
 import { Home } from './pages/Home';
+import { About } from './pages/About';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Profile } from './pages/Profile';
@@ -26,13 +27,14 @@ import { ChannelPartners } from './pages/ChannelPartners';
 import { Unauthorized } from './pages/Unauthorized';
 import { NotFound } from './pages/NotFound';
 import { AICopilot } from './components/ai/AICopilot';
-
+import Resources from './pages/Resources';
 import { ComparisonProvider } from './context/ComparisonContext';
 import { TextSizeProvider } from './context/TextSizeContext';
 import { ComparisonTray } from './components/ComparisonTray';
 import { Compare } from './pages/Compare';
 import { ScrollToTop } from './components/ScrollToTop';
 import { PageTitleManager } from './components/PageTitleManager';
+import Faq from './pages/Faq';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,12 +54,13 @@ export const App: React.FC = () => {
             <Router>
               <ScrollToTop />
               <PageTitleManager />
-              <div className="flex flex-col min-h-screen bg-slate-50 w-full max-w-full">
+              <div className="flex flex-col min-h-screen bg-[#fef9f3] w-full max-w-full">
                 <Navbar />
                 <main className="flex-grow w-full max-w-full min-w-0">
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/auth/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
@@ -70,6 +73,9 @@ export const App: React.FC = () => {
                   <Route path="/channel-partners" element={<ChannelPartners />} />
                   <Route path="/calculator" element={<CalculatorPage />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
+                  <Route path="/resources" element={<Resources />} />
+                  <Route path="/resources" element={<Resources />} />
+<Route path="/faq" element={<Faq />} />
 
                 {/* Authenticated Notifications Route */}
                 <Route

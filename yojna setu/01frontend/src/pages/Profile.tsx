@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api/profileApi';
@@ -8,7 +8,6 @@ import { Alert } from '../components/Alert';
 import {
   User,
   ShieldCheck,
-  Sparkles,
   Save,
   CheckCircle2,
   AlertTriangle,
@@ -79,7 +78,6 @@ const SECTORS = [
 export const Profile: React.FC = () => {
   const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
 
   const [profileData, setProfileData] = useState<BeneficiaryProfileInput>({
     age: 28,
@@ -206,11 +204,6 @@ export const Profile: React.FC = () => {
     }
   };
 
-  const handleSaveAndMatch = async () => {
-    await handleSave();
-    navigate('/recommendations');
-  };
-
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* ── Top Header Banner ── */}
@@ -231,17 +224,6 @@ export const Profile: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <button
-            type="button"
-            onClick={handleSaveAndMatch}
-            disabled={isSaving}
-            className="inline-flex items-center justify-center gap-2 bg-gov-saffron hover:bg-orange-600 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-lg shadow-orange-950/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-          >
-            <Sparkles className="w-4 h-4 text-amber-200" />
-            {t('profile.smartMatchCTA', 'Find Matching Schemes →')}
-          </button>
-        </div>
       </div>
 
       {feedback && (
@@ -755,26 +737,14 @@ export const Profile: React.FC = () => {
             {t('profile.resetBtn', 'Reset to Stored Values')}
           </button>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition shadow min-h-[44px]"
-            >
-              <Save className="w-4 h-4 text-slate-300" />
-              {isSaving ? t('profile.saving', 'Saving...') : t('profile.saveBtn', 'Save Profile')}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSaveAndMatch}
-              disabled={isSaving}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gov-saffron hover:bg-orange-600 text-white font-bold text-sm shadow-md transition min-h-[44px]"
-            >
-              <Sparkles className="w-4 h-4 text-amber-200" />
-              {t('profile.saveAndSmartMatch', 'Save & Find Schemes →')}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition shadow min-h-[44px]"
+          >
+            <Save className="w-4 h-4 text-slate-300" />
+            {isSaving ? t('profile.saving', 'Saving...') : t('profile.saveBtn', 'Save Profile')}
+          </button>
         </div>
       </form>
     </div>

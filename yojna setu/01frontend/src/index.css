@@ -33,7 +33,8 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans min-h-screen selection:bg-sky-500 selection:text-white;
+    @apply text-slate-900 antialiased font-sans min-h-screen selection:bg-sky-500 selection:text-white;
+    background-color: #fef9f3;
     overflow-x: clip;
     max-width: 100vw;
     width: 100%;
@@ -66,7 +67,7 @@
 }
 
 .glass-panel-dark {
-  background: rgba(13, 30, 54, 0.75);
+  background: rgba(134, 24, 35, 0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -74,17 +75,17 @@
 
 /* Tri-color Accent Bar */
 .gov-tricolor-bar {
-  background: linear-gradient(90deg, #ff6b00 0%, #ff6b00 33%, #ffffff 33%, #ffffff 66%, #059669 66%, #059669 100%);
+  background: linear-gradient(90deg, #d7832d 0%, #d7832d 33%, #ffffff 33%, #ffffff 66%, #861823 66%, #861823 100%);
   height: 3px;
   width: 100%;
 }
 
 /* Hero Mesh Background */
 .hero-mesh-gradient {
-  background: radial-gradient(circle at 10% 20%, rgba(255, 107, 0, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at 90% 80%, rgba(0, 112, 243, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at 50% 50%, rgba(5, 150, 105, 0.08) 0%, transparent 50%),
-              linear-gradient(135deg, #07172c 0%, #0d2a4d 50%, #040e1b 100%);
+  background: radial-gradient(circle at 10% 20%, rgba(215, 131, 45, 0.22) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(200, 83, 16, 0.18) 0%, transparent 40%),
+              radial-gradient(circle at 50% 50%, rgba(134, 24, 35, 0.14) 0%, transparent 50%),
+              linear-gradient(135deg, #861823 0%, #6f1420 50%, #4f0e16 100%);
 }
 
 /* Custom scrollbar */

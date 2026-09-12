@@ -102,7 +102,7 @@ export const ChannelPartners: React.FC = () => {
             <option value="">{t('channelPartners.allEligibleSchemes', '-- All Eligible Schemes --')}</option>
             {schemes.map(s => (
               <option key={s.scheme_id} value={s.scheme_id}>
-                {s.scheme_name} ({s.scheme_id})
+                {s.scheme_name}
               </option>
             ))}
           </select>
