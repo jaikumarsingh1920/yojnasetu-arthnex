@@ -336,7 +336,7 @@ export const CalculatorPage: React.FC = () => {
                 <option value="">{t('calculator.standardGeneralLoan', 'Standard General Loan (Custom Parameters)')}</option>
                 {schemes.map((s) => (
                   <option key={s.scheme_id} value={s.scheme_id}>
-                    {s.scheme_name} ({s.scheme_id})
+                    {s.scheme_name}
                   </option>
                 ))}
               </select>
