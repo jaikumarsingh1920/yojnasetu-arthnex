@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Heart, LogIn, X } from 'lucide-react';
+import { Bookmark, LogIn, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { savedSchemesApi } from '../api/savedSchemesApi';
 
@@ -23,7 +23,6 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
   const [isSaved, setIsSaved] = useState<boolean>(initialIsSaved || false);
   const [loading, setLoading] = useState<boolean>(false);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
@@ -36,12 +35,14 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
 
     if (isAuthenticated && schemeId) {
       let isMounted = true;
+
       savedSchemesApi
         .checkSavedStatus(schemeId)
         .then((res) => {
           if (isMounted) setIsSaved(res.is_saved);
         })
         .catch(() => {});
+
       return () => {
         isMounted = false;
       };
@@ -61,6 +62,7 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
 
     const previousState = isSaved;
     const nextState = !previousState;
+
     setIsSaved(nextState);
     setLoading(true);
 
@@ -70,6 +72,7 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
       } else {
         await savedSchemesApi.removeSavedScheme(schemeId);
       }
+
       if (onToggle) onToggle(nextState);
     } catch (error) {
       setIsSaved(previousState);
@@ -95,20 +98,37 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
       <button
         onClick={handleToggle}
         disabled={loading}
-        title={isSaved ? t('savedSchemes.removeSavedTooltip', 'Remove from Saved Schemes') : t('savedSchemes.saveSchemeTooltip', 'Save Scheme for Later')}
+        title={
+          isSaved
+            ? t(
+                'savedSchemes.removeSavedTooltip',
+                'Remove from Saved Schemes'
+              )
+            : t(
+                'savedSchemes.saveSchemeTooltip',
+                'Save Scheme for Later'
+              )
+        }
         className={`inline-flex items-center font-semibold rounded-lg border transition shadow-sm ${buttonSizeClasses} ${
           isSaved
             ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
             : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:text-slate-900'
         }`}
       >
-        <Heart
-          className={`${iconSizes} ${
-            isSaved ? 'fill-rose-600 text-rose-600 animate-pulse' : 'text-slate-400 group-hover:text-rose-500'
+        <Bookmark
+          className={`w-4 h-4 ${
+            isSaved
+              ? 'text-amber-500 fill-amber-500'
+              : 'text-amber-500'
           }`}
         />
+
         {showLabel && (
-          <span>{isSaved ? `♥ ${t('savedSchemes.saved', 'Saved')}` : `♡ ${t('savedSchemes.saveScheme', 'Save Scheme')}`}</span>
+          <span>
+            {isSaved
+              ? ` ${t('savedSchemes.saved', 'Saved')}`
+              : ` ${t('savedSchemes.saveScheme', 'Save Scheme')}`}
+          </span>
         )}
       </button>
 
@@ -118,8 +138,9 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex justify-between items-start">
               <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center">
-                <Heart className="w-5 h-5 fill-rose-600" />
+                <Bookmark className="w-5 h-5 text-amber-500 shrink-0" />
               </div>
+
               <button
                 onClick={() => setShowLoginModal(false)}
                 className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
@@ -129,9 +150,18 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
             </div>
 
             <div>
-              <h3 className="text-lg font-extrabold text-slate-900">{t('savedSchemes.saveToAccount', 'Save Scheme to Account')}</h3>
+              <h3 className="text-lg font-extrabold text-slate-900">
+                {t(
+                  'savedSchemes.saveToAccount',
+                  'Save Scheme to Account'
+                )}
+              </h3>
+
               <p className="text-sm text-slate-600 mt-1">
-                {t('savedSchemes.saveModalDesc', 'Please login to save schemes to your account. You can review saved schemes anytime from your dashboard.')}
+                {t(
+                  'savedSchemes.saveModalDesc',
+                  'Please login to save schemes to your account. You can review saved schemes anytime from your dashboard.'
+                )}
               </p>
             </div>
 
@@ -143,6 +173,7 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
                 <LogIn className="w-4 h-4" />
                 {t('auth.loginNow', 'Login Now')}
               </button>
+
               <button
                 onClick={() => setShowLoginModal(false)}
                 className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold text-sm hover:bg-slate-200 transition"

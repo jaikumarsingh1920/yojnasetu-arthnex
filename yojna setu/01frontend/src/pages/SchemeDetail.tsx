@@ -130,11 +130,17 @@ export const SchemeDetail: React.FC = () => {
       {/* Breadcrumbs & Back Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <nav className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-          <Link to="/" className="hover:text-sky-700 transition">{t('nav.home', 'Home')}</Link>
+          <Link to="/" className="hover:text-sky-700 transition">
+            {t('nav.home', 'Home')}
+          </Link>
           <span>/</span>
-          <Link to="/schemes" className="hover:text-sky-700 transition">{t('nav.schemes')}</Link>
+          <Link to="/schemes" className="hover:text-sky-700 transition">
+            {t('nav.schemes')}
+          </Link>
           <span>/</span>
-          <span className="text-slate-800 font-bold truncate max-w-xs">{scheme.scheme_name}</span>
+          <span className="text-slate-800 font-bold truncate max-w-xs">
+            {scheme.scheme_name}
+          </span>
         </nav>
 
         <Link
@@ -153,13 +159,16 @@ export const SchemeDetail: React.FC = () => {
               <span className="bg-gov-saffron text-white px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider">
                 {scheme.scheme_type || "CENTRAL SCHEME"}
               </span>
+
               <span className="font-mono text-xs text-slate-300 bg-slate-800 px-2 py-0.5 rounded">
                 ID: {scheme.scheme_id}
               </span>
             </div>
+
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               {scheme.scheme_name}
             </h1>
+
             <p className="text-xs text-slate-300 flex items-center gap-2">
               <Building2 className="w-4 h-4 text-gov-saffron" />
               {scheme.ministry || scheme.implementing_agency || "Government of India"}
@@ -167,11 +176,50 @@ export const SchemeDetail: React.FC = () => {
           </div>
 
           <div className="flex flex-col items-start sm:items-end gap-3 w-full sm:w-auto">
-            <VerificationBadge status={scheme.verification_status || (scheme.verifications && scheme.verifications.length > 0 ? (scheme.verifications[0] as any).verification_status : 'VERIFIED')} />
+            <VerificationBadge
+              status={
+                scheme.verification_status ||
+                (scheme.verifications && scheme.verifications.length > 0
+                  ? (scheme.verifications[0] as any).verification_status
+                  : 'VERIFIED')
+              }
+            />
+
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              
+              {/* Existing Save Button */}
               <SaveSchemeButton schemeId={scheme.scheme_id} size="md" />
+
+              {/* Existing Compare Button */}
               <CompareButton schemeId={scheme.scheme_id} variant="button" />
-            
+
+              {/* MOVED: Calculate EMI & Subsidy */}
+              <Link
+                to={`/calculator?scheme=${scheme.scheme_id}`}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 w-full sm:w-auto text-center min-h-[44px]"
+              >
+                <CalcIcon className="w-4 h-4" />
+                Calculate EMI & Subsidy
+              </Link>
+
+              {/* MOVED: Find Nearest Center */}
+              <Link
+                to={`/channel-partners?scheme_id=${scheme.scheme_id}`}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 w-full sm:w-auto text-center min-h-[44px]"
+              >
+                <MapPin className="w-4 h-4" />
+                Find Nearest Center
+              </Link>
+
+              {/* MOVED: Check My Eligibility */}
+              <Link
+                to="/recommendations"
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5 w-full sm:w-auto text-center min-h-[44px]"
+              >
+                Check My Eligibility
+              </Link>
+
+              {/* Existing Email Button */}
               <button
                 onClick={() => setIsEmailModalOpen(true)}
                 className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3.5 sm:px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5 shadow-sm min-h-[44px] cursor-pointer"
@@ -181,20 +229,30 @@ export const SchemeDetail: React.FC = () => {
                 {t('schemeDetail.emailMe', 'Email Me This Scheme')}
               </button>
 
-              {scheme.application_route === 'CHANNEL_PARTNER' || (scheme.partner_count && scheme.partner_count > 0) ? (
+              {scheme.application_route === 'CHANNEL_PARTNER' ||
+              (scheme.partner_count && scheme.partner_count > 0) ? (
                 <Link
                   to={`/channel-partners?scheme_id=${scheme.scheme_id}`}
                   className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 min-h-[44px]"
                 >
                   <MapPin className="w-4 h-4 text-sky-300" />
-                  {t('howToApply.ctaPartner', 'Find Authorized Channel Partners')}
+                  {t(
+                    'howToApply.ctaPartner',
+                    'Find Authorized Channel Partners'
+                  )}
                 </Link>
               ) : officialUrl ? (
                 <button
                   onClick={() => setIsModalOpen(true)}
                   className="w-full sm:w-auto bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 min-h-[44px]"
                 >
-                  {scheme.application_route === 'DIRECT_PORTAL' ? t('howToApply.ctaPortal', 'Apply on Official Portal') : t('howToApply.ctaOfficialGuidelines', 'View Official Guidelines')} <ExternalLink className="w-4 h-4" />
+                  {scheme.application_route === 'DIRECT_PORTAL'
+                    ? t('howToApply.ctaPortal', 'Apply on Official Portal')
+                    : t(
+                        'howToApply.ctaOfficialGuidelines',
+                        'View Official Guidelines'
+                      )}
+                  <ExternalLink className="w-4 h-4" />
                 </button>
               ) : null}
             </div>
@@ -210,15 +268,20 @@ export const SchemeDetail: React.FC = () => {
 
       {/* Main Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
         {/* Left 2 Columns: Scheme Details */}
         <div className="lg:col-span-2 space-y-8">
+          
           {/* Overview */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-3 flex items-center gap-2">
-              <Info className="w-5 h-5 text-sky-600" /> {t('schemeDetail.purposeTitle')}
+              <Info className="w-5 h-5 text-sky-600" />
+              {t('schemeDetail.purposeTitle')}
             </h2>
+
             <p className="text-xs text-slate-600 leading-relaxed">
-              {scheme.objective || "Verified scheme under Government of India welfare guidelines."}
+              {scheme.objective ||
+                "Verified scheme under Government of India welfare guidelines."}
             </p>
           </div>
 
@@ -226,16 +289,37 @@ export const SchemeDetail: React.FC = () => {
           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h2 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2.5 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              {t('schemeDetail.provenanceTitle', 'Official Provenance & Verification Metadata')}
+              {t(
+                'schemeDetail.provenanceTitle',
+                'Official Provenance & Verification Metadata'
+              )}
             </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
-                <span className="font-semibold text-slate-500 block">{t('schemeDetail.officialSourceMinistry', 'Official Source / Ministry')}</span>
-                <span className="font-bold text-slate-800">{scheme.ministry || scheme.implementing_agency || (scheme as any).source_organization || t('schemeDetail.notSpecifiedOfficial', 'Not specified in available official data')}</span>
+                <span className="font-semibold text-slate-500 block">
+                  {t(
+                    'schemeDetail.officialSourceMinistry',
+                    'Official Source / Ministry'
+                  )}
+                </span>
+
+                <span className="font-bold text-slate-800">
+                  {scheme.ministry ||
+                    scheme.implementing_agency ||
+                    (scheme as any).source_organization ||
+                    t(
+                      'schemeDetail.notSpecifiedOfficial',
+                      'Not specified in available official data'
+                    )}
+                </span>
               </div>
 
               <div className="space-y-1">
-                <span className="font-semibold text-slate-500 block">{t('schemeDetail.officialSourceUrl', 'Official Source URL')}</span>
+                <span className="font-semibold text-slate-500 block">
+                  {t('schemeDetail.officialSourceUrl', 'Official Source URL')}
+                </span>
+
                 {officialUrl ? (
                   <a
                     href={officialUrl}
@@ -243,25 +327,59 @@ export const SchemeDetail: React.FC = () => {
                     rel="noopener noreferrer"
                     className="text-sky-700 font-bold hover:underline flex items-center gap-1 truncate max-w-full break-all"
                   >
-                    <span className="truncate">{officialUrl}</span> <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{officialUrl}</span>
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                   </a>
                 ) : (
-                  <span className="italic text-slate-400">{t('schemeDetail.notSpecifiedOfficial', 'Not specified in available official data')}</span>
+                  <span className="italic text-slate-400">
+                    {t(
+                      'schemeDetail.notSpecifiedOfficial',
+                      'Not specified in available official data'
+                    )}
+                  </span>
                 )}
               </div>
 
               <div className="space-y-1">
-                <span className="font-semibold text-slate-500 block">{t('schemeDetail.verificationStatus', 'Verification Status')}</span>
+                <span className="font-semibold text-slate-500 block">
+                  {t(
+                    'schemeDetail.verificationStatus',
+                    'Verification Status'
+                  )}
+                </span>
+
                 <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-[11px]">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  {scheme.verification_status || (scheme.verifications?.[0] as any)?.verification_status || t('schemeDetail.verifiedBadge', 'VERIFIED')}
+                  {scheme.verification_status ||
+                    (scheme.verifications?.[0] as any)
+                      ?.verification_status ||
+                    t('schemeDetail.verifiedBadge', 'VERIFIED')}
                 </span>
               </div>
 
               <div className="space-y-1">
-                <span className="font-semibold text-slate-500 block">{t('schemeDetail.lastVerifiedDate', 'Last Verified Date')}</span>
+                <span className="font-semibold text-slate-500 block">
+                  {t(
+                    'schemeDetail.lastVerifiedDate',
+                    'Last Verified Date'
+                  )}
+                </span>
+
                 <span className="font-mono text-slate-700">
-                  {(scheme as any).last_verified_date || (scheme as any).source_date || (scheme as any).updated_at ? new Date((scheme as any).updated_at || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : t('schemeDetail.notSpecifiedOfficial', 'Not specified in available official data')}
+                  {(scheme as any).last_verified_date ||
+                  (scheme as any).source_date ||
+                  (scheme as any).updated_at
+                    ? new Date(
+                        (scheme as any).updated_at || Date.now()
+                      ).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })
+                    : t(
+                        'schemeDetail.notSpecifiedOfficial',
+                        'Not specified in available official data'
+                      )}
                 </span>
               </div>
             </div>
@@ -269,21 +387,30 @@ export const SchemeDetail: React.FC = () => {
 
           {/* Scheme-Aware Embedded Financial Calculator & Assistance Section */}
           <div id="calculator" className="scroll-mt-24">
-            <SchemeEmbeddedCalculator scheme={scheme} initialLoanAmount={initialLoanAmount} />
+            <SchemeEmbeddedCalculator
+              scheme={scheme}
+              initialLoanAmount={initialLoanAmount}
+            />
           </div>
 
           {/* Rules List */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" /> {t('schemeDetail.eligibilityTitle')} ({scheme.rules?.length || 0})
+                <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                {t('schemeDetail.eligibilityTitle')} (
+                {scheme.rules?.length || 0})
               </h2>
             </div>
 
             <div className="bg-sky-50 border border-sky-200 p-3.5 rounded-xl text-xs text-sky-900 flex items-start gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-sky-700 shrink-0 mt-0.5" />
+
               <div>
-                <p className="font-bold">{t('schemeDetail.guidanceNoteTitle')}</p>
+                <p className="font-bold">
+                  {t('schemeDetail.guidanceNoteTitle')}
+                </p>
+
                 <p className="text-[11px] text-sky-800 mt-0.5">
                   {t('schemeDetail.guidanceNoteDesc')}
                 </p>
@@ -291,53 +418,113 @@ export const SchemeDetail: React.FC = () => {
             </div>
 
             {!scheme.rules || scheme.rules.length === 0 ? (
-              <p className="text-xs text-slate-500 italic">{t('schemeDetail.standardConditions')}</p>
+              <p className="text-xs text-slate-500 italic">
+                {t('schemeDetail.standardConditions')}
+              </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {scheme.rules.map((rule) => {
                   const f = (rule.field || '').toLowerCase();
                   const val = String(rule.value || '').trim();
-                  let displayCriterion = `${rule.field.replace(/_/g, ' ')}: ${val}`;
-                  
-                  if (f === 'age_min') displayCriterion = `Minimum Age: ${val} years`;
-                  else if (f === 'age_max') displayCriterion = `Maximum Age: ${val} years`;
-                  else if (f === 'annual_income_max' || f === 'income_limit') {
+                  let displayCriterion = `${rule.field.replace(
+                    /_/g,
+                    ' '
+                  )}: ${val}`;
+
+                  if (f === 'age_min')
+                    displayCriterion = `Minimum Age: ${val} years`;
+                  else if (f === 'age_max')
+                    displayCriterion = `Maximum Age: ${val} years`;
+                  else if (
+                    f === 'annual_income_max' ||
+                    f === 'income_limit'
+                  ) {
                     const num = Number(val);
-                    displayCriterion = !isNaN(num) && num > 0 ? `Annual Family Income Limit: ₹${num.toLocaleString('en-IN')}` : `Annual Income Limit: ${val}`;
-                  } else if (f === 'gender_condition' || f === 'gender') {
-                    displayCriterion = `Eligible Gender: ${val === 'F' || val === 'FEMALE' ? 'Female Beneficiaries' : val}`;
-                  } else if (f === 'social_category' || f === 'caste') {
+
+                    displayCriterion =
+                      !isNaN(num) && num > 0
+                        ? `Annual Family Income Limit: ₹${num.toLocaleString(
+                            'en-IN'
+                          )}`
+                        : `Annual Income Limit: ${val}`;
+                  } else if (
+                    f === 'gender_condition' ||
+                    f === 'gender'
+                  ) {
+                    displayCriterion = `Eligible Gender: ${
+                      val === 'F' || val === 'FEMALE'
+                        ? 'Female Beneficiaries'
+                        : val
+                    }`;
+                  } else if (
+                    f === 'social_category' ||
+                    f === 'caste'
+                  ) {
                     displayCriterion = `Target Social Category: ${val}`;
-                  } else if (f === 'activity_type' || f === 'trade') {
-                    if (val === 'TRADITIONAL_TRADE_18') displayCriterion = 'Covered Trades: 18 traditional artisan and craft trades';
-                    else displayCriterion = `Eligible Activities: ${val.replace(/_/g, ' ')}`;
-                  } else if (f === 'state_coverage' || f === 'state') {
+                  } else if (
+                    f === 'activity_type' ||
+                    f === 'trade'
+                  ) {
+                    if (val === 'TRADITIONAL_TRADE_18')
+                      displayCriterion =
+                        'Covered Trades: 18 traditional artisan and craft trades';
+                    else
+                      displayCriterion = `Eligible Activities: ${val.replace(
+                        /_/g,
+                        ' '
+                      )}`;
+                  } else if (
+                    f === 'state_coverage' ||
+                    f === 'state'
+                  ) {
                     displayCriterion = `Geographic Coverage: ${val}`;
                   } else if (f === 'project_cost_max') {
                     const num = Number(val);
-                    displayCriterion = !isNaN(num) && num > 0 ? `Maximum Project Cost: ₹${num.toLocaleString('en-IN')}` : `Project Cost Limit: ${val}`;
-                  } else if (rule.description && !rule.description.includes('RULE-')) {
+
+                    displayCriterion =
+                      !isNaN(num) && num > 0
+                        ? `Maximum Project Cost: ₹${num.toLocaleString(
+                            'en-IN'
+                          )}`
+                        : `Project Cost Limit: ${val}`;
+                  } else if (
+                    rule.description &&
+                    !rule.description.includes('RULE-')
+                  ) {
                     displayCriterion = rule.description;
                   }
 
                   return (
-                    <div key={rule.rule_id} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1.5">
+                    <div
+                      key={rule.rule_id}
+                      className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1.5"
+                    >
                       <div className="flex items-center justify-between font-bold text-slate-800">
                         <span className="font-semibold text-slate-700 capitalize text-xs">
                           {rule.field.replace(/_/g, ' ')}
                         </span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
-                          rule.rule_type === 'ELIGIBILITY' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'
-                        }`}>
+
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
+                            rule.rule_type === 'ELIGIBILITY'
+                              ? 'bg-sky-100 text-sky-800'
+                              : 'bg-emerald-100 text-emerald-800'
+                          }`}
+                        >
                           {rule.rule_type}
                         </span>
                       </div>
+
                       <p className="text-slate-900 font-bold">
                         {displayCriterion}
                       </p>
-                      {rule.error_message && !rule.error_message.includes('RULE-') && (
-                        <p className="text-[11px] text-slate-500">{rule.error_message}</p>
-                      )}
+
+                      {rule.error_message &&
+                        !rule.error_message.includes('RULE-') && (
+                          <p className="text-[11px] text-slate-500">
+                            {rule.error_message}
+                          </p>
+                        )}
                     </div>
                   );
                 })}
@@ -349,8 +536,10 @@ export const SchemeDetail: React.FC = () => {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Bot className="w-5 h-5 text-sky-600" /> {t('schemeDetail.askAiTitle')}
+                <Bot className="w-5 h-5 text-sky-600" />
+                {t('schemeDetail.askAiTitle')}
               </h2>
+
               <span className="text-[11px] bg-emerald-50 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
                 {t('schemeDetail.verifiedInfoBadge')}
               </span>
@@ -364,6 +553,7 @@ export const SchemeDetail: React.FC = () => {
                 placeholder={t('schemeDetail.askAiPlaceholder')}
                 className="flex-1 rounded-xl border-slate-300 text-xs p-3 shadow-sm focus:border-sky-500 focus:ring-sky-500 border outline-none"
               />
+
               <button
                 type="submit"
                 disabled={isChatLoading || !chatMessage.trim()}
@@ -373,7 +563,8 @@ export const SchemeDetail: React.FC = () => {
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Send className="w-4 h-4" /> {t('schemeDetail.askBtn')}
+                    <Send className="w-4 h-4" />
+                    {t('schemeDetail.askBtn')}
                   </>
                 )}
               </button>
@@ -382,25 +573,40 @@ export const SchemeDetail: React.FC = () => {
             {chatResult && (
               <div className="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 text-xs text-slate-700">
                 <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                  <Bot className="w-4 h-4 text-sky-600" /> {t('schemeDetail.answerLabel')}
+                  <Bot className="w-4 h-4 text-sky-600" />
+                  {t('schemeDetail.answerLabel')}
                 </div>
-                <div className="whitespace-pre-wrap font-sans leading-relaxed text-slate-800">{chatResult.answer}</div>
 
-                {chatResult.citations && chatResult.citations.length > 0 && (
-                  <div className="pt-2 border-t border-slate-200 space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                      <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" /> {t('schemeDetail.sourcesLabel')}
-                    </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {chatResult.citations.map((cite, i) => (
-                        <div key={i} className="bg-white p-2.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 space-y-1">
-                          <span className="font-bold text-slate-800 block">{t('schemeDetail.verifiedInfo')}</span>
-                          <p className="line-clamp-2 italic text-slate-500">"{cite.snippet}"</p>
-                        </div>
-                      ))}
+                <div className="whitespace-pre-wrap font-sans leading-relaxed text-slate-800">
+                  {chatResult.answer}
+                </div>
+
+                {chatResult.citations &&
+                  chatResult.citations.length > 0 && (
+                    <div className="pt-2 border-t border-slate-200 space-y-1.5">
+                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                        <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        {t('schemeDetail.sourcesLabel')}
+                      </span>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {chatResult.citations.map((cite, i) => (
+                          <div
+                            key={i}
+                            className="bg-white p-2.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 space-y-1"
+                          >
+                            <span className="font-bold text-slate-800 block">
+                              {t('schemeDetail.verifiedInfo')}
+                            </span>
+
+                            <p className="line-clamp-2 italic text-slate-500">
+                              "{cite.snippet}"
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             )}
           </div>
@@ -415,45 +621,10 @@ export const SchemeDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Next Actions Continuity Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-gov-navy to-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <span className="text-[10px] font-extrabold text-gov-saffron uppercase tracking-wider bg-slate-800 px-2.5 py-1 rounded">
-              NEXT RECOMMENDED ACTIONS
-            </span>
-            <h3 className="text-lg sm:text-xl font-extrabold text-white mt-1">
-              Explore More Options for {scheme.scheme_name}
-            </h3>
-            <p className="text-xs text-slate-300 max-w-xl mt-0.5">
-              Estimate loan installments, locate verified assistance centers, or check other schemes matching your profile.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
-            <Link
-              to={`/calculator?scheme=${scheme.scheme_id}`}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 w-full sm:w-auto text-center"
-            >
-              <CalcIcon className="w-4 h-4" /> Calculate EMI & Subsidy
-            </Link>
-
-            <Link
-              to={`/channel-partners?scheme_id=${scheme.scheme_id}`}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 w-full sm:w-auto text-center"
-            >
-              <MapPin className="w-4 h-4" /> Find Nearest Center
-            </Link>
-
-            <Link
-              to="/recommendations"
-              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5 w-full sm:w-auto text-center"
-            >
-              Check My Eligibility
-            </Link>
-          </div>
-        </div>
-      </div>
+      {/* 
+        Next Actions Continuity Banner REMOVED
+        The three actions have been moved to the Hero Banner above.
+      */}
 
       {/* Official Portal Safety Dialog */}
       <OfficialPortalModal
