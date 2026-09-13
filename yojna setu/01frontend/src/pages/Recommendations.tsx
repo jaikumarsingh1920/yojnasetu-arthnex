@@ -1277,7 +1277,7 @@ export const Recommendations: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-2 pt-1">
                           {isEligible && (
                             <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              
                               <span>✓ {t('recommendations.tabEligible', 'Eligible')}</span>
                             </span>
                           )}
