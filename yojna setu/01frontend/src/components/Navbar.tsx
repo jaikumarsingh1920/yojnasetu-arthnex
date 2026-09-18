@@ -2037,6 +2037,18 @@ export const Navbar: React.FC = () => {
 </Link>
 
 <Link
+  to="/blogs"
+  onClick={() => setMoreMenuOpen(false)}
+  className="w-full text-left px-4 py-2.5 text-xs flex items-center gap-3 text-slate-200 hover:bg-white/5"
+>
+  <BookOpen className="w-4 h-4 text-sky-400" />
+  <div>
+    <div className="text-white font-bold">Blog</div>
+    <span className="text-[10px] text-slate-400">Financial guidance & insights</span>
+  </div>
+</Link>
+
+<Link
   to="/faq"
   onClick={() => setMoreMenuOpen(false)}
   className="w-full text-left px-4 py-2.5 text-xs flex items-center gap-3 text-slate-200 hover:bg-white/5"

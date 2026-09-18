@@ -73,6 +73,44 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+@keyframes blog-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(18px, -20px, 0) rotate(5deg); }
+}
+
+@keyframes blog-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.blog-orb { position: absolute; border-radius: 9999px; pointer-events: none; animation: blog-float 9s ease-in-out infinite; }
+.blog-orb-one { right: 8%; top: 18%; width: 100px; height: 100px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,191,73,.12); }
+.blog-orb-two { bottom: -68px; left: 43%; width: 176px; height: 176px; background: rgba(100,181,246,.10); animation-delay: -4s; }
+.blog-enter { animation: blog-enter .7s cubic-bezier(.22, 1, .36, 1) both; }
+.blog-card { animation: blog-enter .55s cubic-bezier(.22, 1, .36, 1) both; transition: transform .25s ease, box-shadow .25s ease; }
+.blog-card:hover { transform: translateY(-5px); box-shadow: 0 20px 38px -25px rgba(15, 23, 42, .36); }
+
+.blog-page > section:first-child {
+  background:
+    radial-gradient(ellipse 300px 235px at 88% -5%, rgba(255, 190, 73, .54) 0 45%, transparent 46%),
+    radial-gradient(ellipse 340px 220px at 67% 112%, rgba(255,255,255,.13) 0 47%, transparent 48%),
+    radial-gradient(circle at 101% 53%, rgba(255, 215, 150, .22) 0 82px, transparent 83px),
+    linear-gradient(125deg, #071b2b 0%, #3c1424 48%, #861823 100%);
+}
+.blog-page > section:first-child::after {
+  content: '';
+  position: absolute;
+  right: 7%; top: 22%; width: 112px; height: 112px;
+  border: 1px solid rgba(255,255,255,.3); border-radius: 28px;
+  background: rgba(134,24,35,.22); transform: rotate(24deg);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blog-orb, .blog-enter, .blog-card { animation: none; }
+  .blog-card:hover { transform: none; }
+}
+
 /* Tri-color Accent Bar */
 .gov-tricolor-bar {
   background: linear-gradient(90deg, #d7832d 0%, #d7832d 33%, #ffffff 33%, #ffffff 66%, #861823 66%, #861823 100%);

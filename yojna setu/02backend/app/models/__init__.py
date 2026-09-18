@@ -21,6 +21,7 @@ from app.models.audit import AuditLog
 from app.models.notification import Notification
 from app.models.notification_preference import NotificationPreference
 from app.models.saved_scheme import SavedScheme
+from app.models.blog import FinancialBlog
 
 __all__ = [
     "Base",
@@ -43,6 +44,7 @@ __all__ = [
     "Notification",
     "NotificationPreference",
     "SavedScheme",
+    "FinancialBlog",
 ]
 
 

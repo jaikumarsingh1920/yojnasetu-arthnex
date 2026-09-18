@@ -54,6 +54,8 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { PageTitleManager } from './components/PageTitleManager';
 
 import Faq from './pages/Faq';
+import { BlogsLanding } from './pages/BlogsLanding';
+import { BlogReader } from './pages/BlogReader';
 
 
 const queryClient = new QueryClient({
@@ -182,6 +184,16 @@ const AppContent: React.FC = () => {
           <Route
             path="/faq"
             element={<Faq />}
+          />
+
+          <Route
+            path="/blogs"
+            element={<BlogsLanding />}
+          />
+
+          <Route
+            path="/blogs/:blogId"
+            element={<BlogReader />}
           />
 
 
@@ -318,6 +330,7 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
+
 
 
           {/* =================================================
