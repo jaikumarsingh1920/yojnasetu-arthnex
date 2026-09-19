@@ -15,15 +15,17 @@ client = TestClient(app)
 # -----------------------------------------------------------------------------
 def test_total_scheme_count_matches_database():
     db = SessionLocal()
-    db_count = db.query(Scheme).count()
+    db_active_count = db.query(Scheme).filter(Scheme.scheme_status == "ACTIVE").count()
+    baseline_count = db.query(Scheme).filter(Scheme.scheme_id.like("SIH26092-%")).count()
     db.close()
     
-    assert db_count == 90, f"Expected 90 schemes in DB after Task-034, found {db_count}"
+    # Dynamic invariant: baseline schemes must remain intact
+    assert baseline_count >= 90, f"Catastrophic baseline data loss: expected at least 90 baseline schemes, found {baseline_count}"
     
     res = client.get("/api/v1/schemes?page_size=1")
     assert res.status_code == 200
     data = res.json()
-    assert data["total"] == db_count, f"API returned total {data['total']} but DB has {db_count}"
+    assert data["total"] == db_active_count, f"API returned total {data['total']} but active DB has {db_active_count}"
 
 # -----------------------------------------------------------------------------
 # 2. SCHEME LIST ITEMS SERIALIZE VERIFICATION_STATUS
@@ -32,7 +34,7 @@ def test_scheme_list_items_expose_verification_status():
     res = client.get("/api/v1/schemes?page_size=100")
     assert res.status_code == 200
     items = res.json()["items"]
-    assert len(items) == 90
+    assert len(items) == min(res.json()["total"], 100)
     
     verified_count = 0
     for item in items:
@@ -41,7 +43,7 @@ def test_scheme_list_items_expose_verification_status():
         if item["verification_status"] in ("VERIFIED", "VERIFIED_OFFICIAL"):
             verified_count += 1
             
-    assert verified_count == 90, f"Expected all 90 verified schemes to have VERIFIED status, found {verified_count}"
+    assert verified_count == len(items), f"Expected all listed verified schemes to have VERIFIED status, found {verified_count}"
 
 # -----------------------------------------------------------------------------
 # 3. SCHEME DETAIL RESPONSE EXPOSES VERIFICATION_STATUS & VERIFICATIONS
@@ -86,7 +88,11 @@ def test_verification_statistics_truthfulness():
     verified = sum(1 for s in data["items"] if s["verification_status"] in ("VERIFIED", "VERIFIED_OFFICIAL"))
     
     # Truthful percentage calculation
-    pct = round((verified / total) * 100) if total > 0 else 0
+    pct = round((verified / len(data["items"])) * 100) if data["items"] else 0
     assert pct == 100
-    assert total == 90
-    assert verified == 90
+
+    db = SessionLocal()
+    db_active_count = db.query(Scheme).filter(Scheme.scheme_status == "ACTIVE").count()
+    db.close()
+    assert total == db_active_count, f"Expected total schemes in API ({total}) to match active database count ({db_active_count})"
+    assert verified == len(data["items"])

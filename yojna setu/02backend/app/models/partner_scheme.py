@@ -58,6 +58,11 @@ class PartnerSchemeMapping(Base):
         default="VERIFIED_OFFICIAL",
         server_default="VERIFIED_OFFICIAL"
     )
+    confidence: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        nullable=True,
+        default="HIGH"
+    )
     verification_notes: Mapped[Optional[str]] = mapped_column(
         String(500),
         nullable=True

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Bot, Sparkles } from 'lucide-react';
+import { Sparkles, MessageSquare, Bot } from 'lucide-react';
 import { ChatWindow } from './ChatWindow';
 import { useComparison } from '../../context/ComparisonContext';
 
@@ -22,7 +22,7 @@ export const AICopilot: React.FC = () => {
   const appMatch = location.pathname.match(/\/applications\/([^\/]+)/);
   const applicationIdContext = appMatch ? appMatch[1] : undefined;
 
-  // Automatically minimize the expanded chatbot when route changes (e.g. navigating to scheme details)
+  // Automatically minimize expanded chatbot when route changes
   const prevPathnameRef = useRef(location.pathname);
   useEffect(() => {
     if (prevPathnameRef.current !== location.pathname) {
@@ -33,6 +33,16 @@ export const AICopilot: React.FC = () => {
       }
     }
   }, [location.pathname, isOpen, isMinimized]);
+
+  // Support opening assistant from external homepage prompt clicks
+  useEffect(() => {
+    const handleOpenExternal = (e: Event) => {
+      setIsMinimized(false);
+      setIsOpen(true);
+    };
+    window.addEventListener('open-yojnasetu-ai', handleOpenExternal);
+    return () => window.removeEventListener('open-yojnasetu-ai', handleOpenExternal);
+  }, []);
 
   const handleToggle = () => {
     if (isMinimized || !isOpen) {
@@ -46,21 +56,23 @@ export const AICopilot: React.FC = () => {
 
   return (
     <>
-      {/* Floating Action Button when closed or minimized */}
+      {/* Floating Action Button: Sleek, compact, accessible, non-intrusive */}
       {(!isOpen || isMinimized) && (
         <button
           onClick={handleToggle}
           className={`fixed ${
-            hasComparisonDock ? 'bottom-28 sm:bottom-24' : 'bottom-3 sm:bottom-5'
-          } right-3 sm:right-5 bg-gradient-to-r from-gov-navy via-sky-900 to-slate-900 text-white min-w-[48px] min-h-[48px] p-3 sm:p-3.5 rounded-full shadow-2xl hover:scale-105 border-2 border-sky-400/50 transition-all z-40 group flex items-center justify-center gap-2`}
+            hasComparisonDock ? 'bottom-24 sm:bottom-20' : 'bottom-4 sm:bottom-6'
+          } right-4 sm:right-6 bg-[#4A2525] hover:bg-[#3B2522] text-[#FFFBF0] p-2.5 sm:px-4 sm:py-2.5 rounded-full shadow-warm-lg hover:shadow-warm-xl border border-[#E8D8D2]/40 transition-all duration-200 z-40 group flex items-center justify-center gap-2 hover:-translate-y-0.5`}
           aria-label={t('copilot.openAssistantTitle', 'Open YojnaSetu AI Assistant')}
           title={t('copilot.openAssistantTitle', 'Open YojnaSetu AI Assistant')}
         >
-          <div className="relative">
-            <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-sky-300 group-hover:rotate-6 transition" />
-            <span className="absolute -top-1 -right-1 bg-emerald-400 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full border-2 border-slate-900 animate-pulse" />
+          <div className="relative flex items-center justify-center">
+            <Bot className="w-5 h-5 text-[#F7AE56] group-hover:scale-110 transition-transform" aria-hidden="true" />
+            <span className="absolute -top-0.5 -right-0.5 bg-[#EA717B] w-2 h-2 rounded-full ring-2 ring-[#4A2525] animate-pulse" />
           </div>
-          <span className="hidden sm:inline text-xs font-bold pr-1 tracking-tight">YojnaSetu AI</span>
+          <span className="hidden sm:inline text-xs font-bold tracking-tight text-[#FFFBF0]">
+            Ask YojnaSetu
+          </span>
         </button>
       )}
 

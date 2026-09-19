@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import APIRouter, Depends, Query, Path, status
+from fastapi import APIRouter, Depends, Query, Path, status, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_user, require_roles
@@ -8,6 +8,9 @@ from app.schemas.partner import (
     PaginatedPartnerApplicationListResponse,
     PartnerApplicationDetailResponse,
     NearestPartnerResponse,
+    PartnerRoutingAuditResponse,
+    PartnerCoverageReportResponse,
+    PartnerFinancialHealthResponse,
     DocumentReviewRequest,
     DocumentReviewResponse,
     ApplicationAssignmentRequest,
@@ -16,11 +19,74 @@ from app.schemas.partner import (
     ApplicationReviewDecisionRequest,
     ApprovalReadinessResponse,
     RequestCorrectionRequest,
+    SchemeFinancialSummaryResponse,
+    SchemeFinancialDetailResponse,
 )
 from app.services.partner_service import PartnerService
 from app.services.geo_partner_service import GeoPartnerLocatorService
+from app.services.channel_partner_enrichment_service import ChannelPartnerEnrichmentService
 
 router = APIRouter()
+
+
+@router.get(
+    "/coverage-report",
+    response_model=PartnerCoverageReportResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get channel partner and scheme coverage statistics",
+    description="Returns aggregate metrics on schemes, channel partners, geocoding coverage, partner types, and distribution."
+)
+def get_channel_partner_coverage_report(
+    db: Session = Depends(get_db)
+):
+    """
+    Returns verified channel partner coverage metrics across the scheme corpus.
+    """
+    return ChannelPartnerEnrichmentService.get_coverage_report(db)
+
+
+@router.get(
+    "/routing-audit",
+    response_model=PartnerRoutingAuditResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get channel partner routing evaluation and structured exclusion audit",
+    description="Returns both recommended channel partners and excluded candidates with structured statutory prudential explanations."
+)
+def get_partner_routing_audit(
+    latitude: float = Query(..., description="Citizen's latitude"),
+    longitude: float = Query(..., description="Citizen's longitude"),
+    radius_km: float = Query(100.0, description="Search radius in km"),
+    max_npa: float = Query(10.0, description="Maximum acceptable NPA percentage"),
+    partner_type: Optional[str] = Query(None, description="Filter by partner type"),
+    partner_category: Optional[str] = Query(None, description="Filter by category"),
+    district: Optional[str] = Query(None, description="Filter by district"),
+    state: Optional[str] = Query(None, description="Filter by state"),
+    pincode: Optional[str] = Query(None, description="Filter by postal PIN code"),
+    scheme_id: Optional[str] = Query(None, description="Filter by compatible scheme"),
+    loan_category: Optional[str] = Query(None, description="Filter by loan category"),
+    service_type: Optional[str] = Query(None, description="Filter by service type"),
+    limit: int = Query(50, ge=1, le=100, description="Max recommended results"),
+    db: Session = Depends(get_db)
+):
+    """
+    Executes multi-signal candidate routing with structured exclusion audit.
+    """
+    return GeoPartnerLocatorService.find_partners_with_routing_audit(
+        db=db,
+        latitude=latitude,
+        longitude=longitude,
+        radius_km=radius_km,
+        max_npa=max_npa,
+        partner_type=partner_type,
+        partner_category=partner_category,
+        district=district,
+        state=state,
+        pincode=pincode,
+        scheme_id=scheme_id,
+        loan_category=loan_category,
+        service_type=service_type,
+        limit=limit
+    )
 
 
 @router.get(
@@ -28,7 +94,7 @@ router = APIRouter()
     response_model=List[NearestPartnerResponse],
     status_code=status.HTTP_200_OK,
     summary="Find nearest channel partners",
-    description="Returns a list of active, eligible channel partners sorted by distance and filtered by NPA limits."
+    description="Returns a list of active, eligible channel partners sorted by proximity and scheme suitability, filtered by statutory prudential rules."
 )
 def get_nearest_partners(
     latitude: float = Query(..., description="User's latitude"),
@@ -39,14 +105,16 @@ def get_nearest_partners(
     partner_category: Optional[str] = Query(None, description="Filter by category (AUTHORIZED_SCHEME_PARTNER, IMPLEMENTING_ASSISTANCE_CENTRE, NEARBY_FINANCIAL_SERVICE_POINT)"),
     district: Optional[str] = Query(None, description="Filter by district (e.g. Gorakhpur, Lucknow)"),
     state: Optional[str] = Query(None, description="Filter by state (e.g. Uttar Pradesh)"),
+    pincode: Optional[str] = Query(None, description="Filter by postal PIN code (e.g. 273001)"),
     scheme_id: Optional[str] = Query(None, description="Filter by compatible scheme"),
     loan_category: Optional[str] = Query(None, description="Filter by loan category"),
     service_type: Optional[str] = Query(None, description="Filter by service type"),
+    include_excluded: bool = Query(False, description="Include excluded partners with structured exclusion reasons"),
     limit: int = Query(100, ge=1, le=100, description="Max results"),
     db: Session = Depends(get_db)
 ):
     """
-    Geospatial partner lookup prioritizing low NPA and proximity.
+    Geospatial partner lookup prioritizing scheme authorization, statutory compliance, and proximity.
     """
     return GeoPartnerLocatorService.find_nearest_partners(
         db=db,
@@ -58,10 +126,12 @@ def get_nearest_partners(
         partner_category=partner_category,
         district=district,
         state=state,
+        pincode=pincode,
         scheme_id=scheme_id,
         loan_category=loan_category,
         service_type=service_type,
-        limit=limit
+        limit=limit,
+        include_excluded=include_excluded
     )
 
 
@@ -98,6 +168,98 @@ def browse_partner_directory(
         scheme_id=scheme_id,
         limit=limit
     )
+
+
+@router.get(
+    "/financial-health/schemes",
+    response_model=List[SchemeFinancialSummaryResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List schemes with verified channel partner financial health coverage",
+    description="Returns audited scheme counts with channel partners, verified financial indicators, and limited data counts from real database records."
+)
+def get_financial_health_schemes(
+    limit: Optional[int] = Query(None, ge=1, le=1000, description="Max schemes (omit for all canonical schemes)"),
+    search: Optional[str] = Query(None, description="Search by scheme name or ID"),
+    ministry: Optional[str] = Query(None, description="Filter by ministry"),
+    has_partners_only: bool = Query(False, description="Include only schemes with mapped channel partners"),
+    availability: Optional[str] = Query(None, description="Filter by availability: ALL, VERIFIED, LIMITED, DIRECT, FINANCIAL_ONLY"),
+    db: Session = Depends(get_db)
+):
+    return ChannelPartnerEnrichmentService.get_financial_health_schemes(
+        db=db,
+        limit=limit,
+        search=search,
+        ministry=ministry,
+        has_partners_only=has_partners_only,
+        availability=availability
+    )
+
+
+@router.get(
+    "/financial-health/schemes/{scheme_id}",
+    response_model=SchemeFinancialDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get channel partner financial health directory for a specific scheme",
+    description="Returns scheme financial summary and channel partners with neutral alphabetical ordering. Excludes quarantined partner records."
+)
+def get_scheme_financial_health(
+    scheme_id: str = Path(..., description="Scheme ID"),
+    search: Optional[str] = Query(None, description="Search partner name or code"),
+    state: Optional[str] = Query(None, description="Filter by state"),
+    district: Optional[str] = Query(None, description="Filter by district"),
+    partner_type: Optional[str] = Query(None, description="Filter by partner type"),
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by financial status (STRONGER, MIXED, HIGHER_STRESS, LIMITED_DATA)"),
+    db: Session = Depends(get_db)
+):
+    result = ChannelPartnerEnrichmentService.get_scheme_financial_health(
+        db=db,
+        scheme_id=scheme_id,
+        search=search,
+        state=state,
+        district=district,
+        partner_type=partner_type,
+        status=status_filter
+    )
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scheme '{scheme_id}' not found or has no active channel partners"
+        )
+    return result
+
+
+@router.get(
+    "/{partner_id}/financial-health",
+    response_model=PartnerFinancialHealthResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get statutory financial intelligence and prudential evaluation for a channel partner",
+    description="Returns multi-dimensional financial metrics, regulatory source citations, and NSFDC prudential rule evaluation."
+)
+@router.get(
+    "/financial-health/{partner_id}",
+    response_model=PartnerFinancialHealthResponse,
+    status_code=status.HTTP_200_OK,
+    include_in_schema=False
+)
+def get_partner_financial_health(
+    partner_id: str = Path(..., description="Unique Channel Partner ID"),
+    db: Session = Depends(get_db)
+):
+    """
+    Returns evidence-backed financial observations and statutory prudential evaluation.
+    """
+    result = GeoPartnerLocatorService.evaluate_partner_financial_health(db, partner_id)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Channel partner '{partner_id}' not found"
+        )
+    if result.get("record_status") == "QUARANTINED":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Channel partner '{partner_id}' has been quarantined per data integrity policy"
+        )
+    return result
 
 
 @router.get(

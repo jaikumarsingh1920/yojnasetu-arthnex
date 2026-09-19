@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, Field, field_validator, EmailStr
+from app.schemas.financial_health import SchemeFinancialAssessment
 
 
 # ─────────────────────────────────────────────────────────────
@@ -213,6 +214,8 @@ class SchemeDetailResponse(BaseModel):
     beneficiary_contribution_percentage_raw: Optional[str] = None
 
     subsidy_available: Optional[str] = None
+    subsidy_amount: Optional[float] = None
+    subsidy_amount_raw: Optional[str] = None
     subsidy_percentage: Optional[float] = None
     subsidy_percentage_raw: Optional[str] = None
     subsidy_details: Optional[str] = None
@@ -226,6 +229,8 @@ class SchemeDetailResponse(BaseModel):
     interest_rate_max: Optional[float] = None
     interest_rate_max_raw: Optional[str] = None
     interest_rate_type: Optional[str] = None
+    interest_subsidy: Optional[float] = None
+    interest_subsidy_raw: Optional[str] = None
 
     repayment_period_min_months: Optional[int] = None
     repayment_period_min_months_raw: Optional[str] = None
@@ -241,6 +246,8 @@ class SchemeDetailResponse(BaseModel):
 
     collateral_required: Optional[str] = None
     security_required: Optional[str] = None
+    guarantee_requirement: Optional[str] = None
+    processing_fee: Optional[str] = None
 
     # Non-Financial Supports
     training_available: Optional[str] = None
@@ -316,6 +323,7 @@ class FilterOptionsResponse(BaseModel):
     states: List[FilterOptionItem]
     application_routes: List[FilterOptionItem]
     total_schemes: int
+    availability_counts: Optional[Dict[str, int]] = None
 
 
 # ─────────────────────────────────────────────────────────────
@@ -331,6 +339,7 @@ class SchemePersonalizedEligibility(BaseModel):
 class SchemeComparisonItem(BaseModel):
     scheme: SchemeDetailResponse
     personalized_eligibility: Optional[SchemePersonalizedEligibility] = None
+    financial_assessment: Optional[SchemeFinancialAssessment] = None
 
 
 class SchemeComparisonResponse(BaseModel):
@@ -351,6 +360,18 @@ class EmailSchemeResponse(BaseModel):
     sent: bool
     message: str
     recipient_email: Optional[str] = None
+
+
+class SchemeSelectorItem(BaseModel):
+    scheme_id: str
+    scheme_code: str
+    scheme_name: str
+    category: Optional[str] = None
+    ministry: Optional[str] = None
+    has_partner_mapping: bool = False
+
+    class Config:
+        from_attributes = True
 
 
 

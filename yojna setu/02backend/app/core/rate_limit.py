@@ -17,7 +17,11 @@ RATE_LIMIT_RULES: List[Tuple[str, int, int]] = [
     ("/api/v1/auth/login", 10, 60),
     ("/api/v1/auth/register", 10, 60),
     ("/api/v1/ai/profile/extract", 15, 60),
-    ("/api/v1/ai/recommendations", 15, 60),
+    ("/api/v1/ai/recommend", 15, 60),
+    ("/api/v1/ai/chat", 60, 60),
+    ("/api/v1/ai/schemes/", 60, 60),
+    ("/api/v1/financial-health/assess", 30, 60),
+    ("/email", 5, 60),
 ]
 
 
@@ -31,13 +35,15 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         method = request.method
         client_ip = request.client.host if request.client else "unknown"
 
-        # Skip rate limiting in automated testing environments
-        if settings.ENV == "testing" or client_ip == "testclient":
+        # Allow automated tests and local demo environment to skip rate limiting unless explicitly testing it
+        test_force_rate_limit = request.headers.get("X-Test-Rate-Limit") == "1"
+        if (settings.ENV in ("testing", "development") and client_ip in ("127.0.0.1", "localhost", "testclient")) and not test_force_rate_limit:
             return await call_next(request)
 
         if method in ("POST", "PUT"):
             for prefix, max_reqs, window_sec in RATE_LIMIT_RULES:
-                if path.startswith(prefix):
+                matches = path.startswith(prefix) or (prefix == "/email" and path.endswith("/email"))
+                if matches:
                     key = f"{client_ip}:{prefix}"
                     now = time.time()
                     cutoff = now - window_sec
@@ -57,3 +63,4 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     break
 
         return await call_next(request)
+

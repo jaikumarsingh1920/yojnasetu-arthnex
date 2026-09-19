@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { partnerApi, NearestPartnerResponse } from '../api/partnerApi';
+import {
+  getNNPADisplay,
+  getSourceDisplay,
+  getDataPeriodDisplay,
+  getScopeDisplay,
+  getRoutingStatusDisplay,
+} from '../utils/financialEvidence';
+import { FinancialIntelligencePanel } from './FinancialIntelligencePanel';
 import {
   MapPin,
   Navigation,
@@ -18,13 +27,17 @@ import {
   ExternalLink,
   ShieldCheck,
   CheckCircle,
+  CheckCircle2,
   ZoomIn,
   ZoomOut,
   Lock,
   Unlock,
   RotateCcw,
   Compass,
-  Globe
+  Globe,
+  ChevronDown,
+  ChevronUp,
+  ShieldAlert
 } from 'lucide-react';
 
 interface MapLocatorProps {
@@ -129,6 +142,39 @@ const createPartnerIcon = (type: string, category: string = '', index: number, i
     iconSize: [size, size],
     iconAnchor: [size / 2, size],
     popupAnchor: [0, -size],
+  });
+};
+
+// Helper to generate excluded partner pin (used in transparency audit)
+const createExcludedPartnerIcon = (index: number) => {
+  return L.divIcon({
+    className: 'custom-excluded-partner-pin',
+    html: `
+      <div style="
+        background-color: #dc2626;
+        width: 26px;
+        height: 26px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #ffffff;
+        box-shadow: 0 3px 6px rgba(220, 38, 38, 0.45);
+        cursor: pointer;
+      ">
+        <span style="
+          transform: rotate(45deg);
+          color: #ffffff;
+          font-weight: 800;
+          font-size: 10px;
+          font-family: system-ui, sans-serif;
+        ">✕</span>
+      </div>
+    `,
+    iconSize: [26, 26],
+    iconAnchor: [13, 26],
+    popupAnchor: [0, -26],
   });
 };
 
@@ -401,29 +447,88 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
   loanCategory,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // Read restored history state if available (from Back/Forward navigation)
+  const historyState = (typeof window !== 'undefined' && window.history.state?.yojnasetu_locator_state) || null;
 
   // Authoritative GPS Location State
-  const [gpsLocation, setGpsLocation] = useState<UserLocation | null>(null);
-  const [isGpsActive, setIsGpsActive] = useState<boolean>(false);
+  const [gpsLocation, setGpsLocation] = useState<UserLocation | null>(historyState?.gpsLocation ?? null);
+  const [isGpsActive, setIsGpsActive] = useState<boolean>(historyState?.isGpsActive ?? false);
 
   // Search Area Location State
-  const [searchLocation, setSearchLocation] = useState<{ lat: number; lng: number; label: string } | null>(null);
-  const [pinCode, setPinCode] = useState('');
+  const [searchLocation, setSearchLocation] = useState<{ lat: number; lng: number; label: string } | null>(
+    historyState?.searchLocation ?? null
+  );
+  const [pinCode, setPinCode] = useState(historyState?.pinCode ?? '');
 
   const [isLoading, setIsLoading] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
-  const [partners, setPartners] = useState<NearestPartnerResponse[]>([]);
-  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(initialSelectedId);
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
+  const [partners, setPartners] = useState<NearestPartnerResponse[]>(historyState?.partners ?? []);
+  const [excludedPartners, setExcludedPartners] = useState<NearestPartnerResponse[]>(historyState?.excludedPartners ?? []);
+  const [routingSummary, setRoutingSummary] = useState<string | null>(historyState?.routingSummary ?? null);
+  const [showExcluded, setShowExcluded] = useState<boolean>(historyState?.showExcluded ?? false);
+  const [expandedEvidence, setExpandedEvidence] = useState<Record<string, boolean>>({});
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(
+    historyState?.selectedPartnerId ?? initialSelectedId
+  );
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>(
+    historyState?.selectedCategoryFilter ?? 'ALL'
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const isRestoredRef = useRef<boolean>(Boolean(historyState?.partners && historyState.partners.length > 0));
+
+  const persistLocatorState = useCallback(
+    (overrides?: Record<string, any>) => {
+      if (typeof window === 'undefined') return;
+      const currentSaved = window.history.state?.yojnasetu_locator_state || {};
+      const updated = {
+        ...currentSaved,
+        pinCode,
+        searchLocation,
+        gpsLocation,
+        isGpsActive,
+        selectedCategoryFilter,
+        selectedPartnerId,
+        showExcluded,
+        partners,
+        excludedPartners,
+        routingSummary,
+        ...overrides,
+      };
+      window.history.replaceState({ ...window.history.state, yojnasetu_locator_state: updated }, '');
+    },
+    [pinCode, searchLocation, gpsLocation, isGpsActive, selectedCategoryFilter, selectedPartnerId, showExcluded, partners, excludedPartners, routingSummary]
+  );
+
+  const handleOpenFinancialHealth = (partnerId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    persistLocatorState({ selectedPartnerId: partnerId });
+    navigate(`/channel-partners/${partnerId}/financial-health`);
+  };
+
+  const toggleEvidence = (partnerId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedEvidence((prev) => ({
+      ...prev,
+      [partnerId]: !prev[partnerId],
+    }));
+  };
 
   // Filtered partners based on selected category tab
   const filteredPartners = useMemo(() => {
     let list = partners;
-    if (selectedCategoryFilter === 'AUTHORIZED_SCHEME_PARTNER') {
-      list = list.filter(p => p.partner && p.partner.partner_category === 'AUTHORIZED_SCHEME_PARTNER');
+    if (selectedCategoryFilter === 'BANKS') {
+      list = list.filter(p => p.partner && (p.partner.institution_type === 'PSB' || p.partner.partner_type === 'PSB' || p.partner.institution_type?.includes('BANK') || p.partner.partner_type?.includes('BANK') || p.institution_name?.includes('Bank')));
+    } else if (selectedCategoryFilter === 'RRB') {
+      list = list.filter(p => p.partner && (p.partner.institution_type === 'RRB' || p.partner.partner_type === 'RRB' || p.institution_name?.includes('Gramin') || p.partner.name?.includes('Gramin')));
+    } else if (selectedCategoryFilter === 'NBFC_MFI') {
+      list = list.filter(p => p.partner && (p.partner.institution_type === 'NBFC_MFI' || p.partner.partner_type === 'NBFC_MFI' || p.partner.institution_type?.includes('MFI')));
+    } else if (selectedCategoryFilter === 'AUTHORIZED_SCHEME_PARTNER') {
+      list = list.filter(p => p.partner && (p.partner.partner_category === 'AUTHORIZED_SCHEME_PARTNER' || p.is_scheme_matched));
     } else if (selectedCategoryFilter === 'IMPLEMENTING_ASSISTANCE_CENTRE') {
-      list = list.filter(p => p.partner && p.partner.partner_category === 'IMPLEMENTING_ASSISTANCE_CENTRE');
+      list = list.filter(p => p.partner && (p.partner.partner_category === 'IMPLEMENTING_ASSISTANCE_CENTRE' || p.partner.institution_type === 'SCA' || p.partner.partner_type === 'SCA'));
     } else if (selectedCategoryFilter === 'NEARBY_FINANCIAL_SERVICE_POINT') {
       list = list.filter(p => p.partner && p.partner.partner_category === 'NEARBY_FINANCIAL_SERVICE_POINT');
     } else if (selectedCategoryFilter === 'TRAINING_HANDHOLDING_CENTRE') {
@@ -478,7 +583,26 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
     return null;
   }, [isGpsActive, gpsLocation, searchLocation]);
 
-  // Recalculate partner distances and sort based on the authoritative active origin
+  // Compute distance for excluded partners
+  const processExcludedPartners = useCallback(
+    (rawExcluded: NearestPartnerResponse[], originLat: number, originLng: number) => {
+      return (Array.isArray(rawExcluded) ? rawExcluded : [])
+        .filter((item) => item && item.partner && typeof item.partner.latitude === 'number' && typeof item.partner.longitude === 'number' && isValidCoord(item.partner.latitude, item.partner.longitude))
+        .map((item) => {
+          const pLat = item.partner.latitude as number;
+          const pLng = item.partner.longitude as number;
+          const distKm = calculateHaversineKm(originLat, originLng, pLat, pLng);
+          return {
+            ...item,
+            distance_km: distKm,
+          };
+        })
+        .sort((a, b) => a.distance_km - b.distance_km);
+    },
+    []
+  );
+
+  // Recalculate partner distances and respect smart multi-signal ranking for scheme routing
   const processAndSetPartners = useCallback(
     (rawPartners: NearestPartnerResponse[], originLat: number, originLng: number) => {
       const validPartners = (Array.isArray(rawPartners) ? rawPartners : [])
@@ -498,13 +622,18 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
           };
         });
 
-      // Sort by distance from active origin
-      validPartners.sort((a, b) => a.distance_km - b.distance_km);
+      // For general directory lookups (without a scheme filter), sort purely by distance.
+      // For scheme routing, preserve the backend's multi-signal smart ranking order
+      // (authorization > category > prudential clearance > distance).
+      if (!schemeId) {
+        validPartners.sort((a, b) => a.distance_km - b.distance_km);
+      }
 
       setPartners(validPartners);
+      const firstId = validPartners.length > 0 ? validPartners[0].partner.partner_id : null;
       if (validPartners.length > 0) {
-        setSelectedPartnerId(validPartners[0].partner.partner_id);
-        if (onSelectPartner) onSelectPartner(validPartners[0].partner.partner_id);
+        setSelectedPartnerId(firstId);
+        if (onSelectPartner && firstId) onSelectPartner(firstId);
         setErrorMsg(null);
       } else {
         setSelectedPartnerId(null);
@@ -514,11 +643,12 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
           setErrorMsg('No verified channel partner was found matching this criteria.');
         }
       }
+      persistLocatorState({ partners: validPartners, selectedPartnerId: firstId });
     },
-    [schemeId, onSelectPartner]
+    [schemeId, onSelectPartner, persistLocatorState]
   );
 
-  // Fetch partners based on current state
+  // Fetch partners based on current state using the smart routing audit API
   const fetchPartnersForCurrentState = useCallback(async () => {
     setIsLoading(true);
     setErrorMsg(null);
@@ -534,24 +664,30 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
     }
 
     try {
-      const data = await partnerApi.getNearestPartners(
+      const audit = await partnerApi.getRoutingAudit(
         queryLat,
         queryLng,
         queryRadius,
         schemeId,
         loanCategory
       );
-      processAndSetPartners(data, queryLat, queryLng);
+      setRoutingSummary(audit.routing_summary || null);
+      setExcludedPartners(processExcludedPartners(audit.excluded_partners || [], queryLat, queryLng));
+      processAndSetPartners(audit.recommended_partners || [], queryLat, queryLng);
     } catch (err: any) {
       console.error('Failed to load nearest partners:', err);
       setErrorMsg(err?.response?.data?.detail || 'Unable to connect to partner directory service.');
     } finally {
       setIsLoading(false);
     }
-  }, [schemeId, loanCategory, activeOrigin, processAndSetPartners]);
+  }, [schemeId, loanCategory, activeOrigin, processAndSetPartners, processExcludedPartners]);
 
   // Trigger partner fetch on mount or when schemeId / loanCategory changes
   useEffect(() => {
+    if (isRestoredRef.current) {
+      isRestoredRef.current = false;
+      return;
+    }
     fetchPartnersForCurrentState();
   }, [schemeId, loanCategory]);
 
@@ -571,14 +707,18 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
         const lng = pos.coords.longitude;
 
         if (isValidCoord(lat, lng)) {
-          setGpsLocation({ lat, lng });
+          const newGps = { lat, lng };
+          setGpsLocation(newGps);
           setIsGpsActive(true);
           setSearchLocation(null);
+          persistLocatorState({ gpsLocation: newGps, isGpsActive: true, searchLocation: null });
 
           try {
             setIsLoading(true);
-            const data = await partnerApi.getNearestPartners(lat, lng, 350, schemeId, loanCategory);
-            processAndSetPartners(data, lat, lng);
+            const audit = await partnerApi.getRoutingAudit(lat, lng, 350, schemeId, loanCategory);
+            setRoutingSummary(audit.routing_summary || null);
+            setExcludedPartners(processExcludedPartners(audit.excluded_partners || [], lat, lng));
+            processAndSetPartners(audit.recommended_partners || [], lat, lng);
             setRecenterTrigger((prev) => prev + 1);
           } catch (err: any) {
             setErrorMsg(err?.response?.data?.detail || 'Failed to fetch nearest partners.');
@@ -664,14 +804,18 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
       return;
     }
 
-    setSearchLocation({ lat: searchLat!, lng: searchLng!, label: cleanInput });
+    const newSearchLoc = { lat: searchLat!, lng: searchLng!, label: cleanInput };
+    setSearchLocation(newSearchLoc);
+    persistLocatorState({ searchLocation: newSearchLoc, pinCode: cleanInput, isGpsActive: false });
 
     const effectiveOriginLat = isGpsActive && gpsLocation ? gpsLocation.lat : searchLat!;
     const effectiveOriginLng = isGpsActive && gpsLocation ? gpsLocation.lng : searchLng!;
 
     try {
-      const data = await partnerApi.getNearestPartners(searchLat!, searchLng!, 500, schemeId, loanCategory);
-      processAndSetPartners(data, effectiveOriginLat, effectiveOriginLng);
+      const audit = await partnerApi.getRoutingAudit(searchLat!, searchLng!, 500, schemeId, loanCategory);
+      setRoutingSummary(audit.routing_summary || null);
+      setExcludedPartners(processExcludedPartners(audit.excluded_partners || [], effectiveOriginLat, effectiveOriginLng));
+      processAndSetPartners(audit.recommended_partners || [], effectiveOriginLat, effectiveOriginLng);
       setRecenterTrigger((prev) => prev + 1);
     } catch (err: any) {
       setErrorMsg(err?.response?.data?.detail || 'Failed to fetch nearby partners.');
@@ -792,49 +936,48 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2.5">
-            <button
-              onClick={handleUseCurrentLocation}
-              disabled={isLocating || isLoading}
-              className={`w-full px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm disabled:opacity-50 ${
-                isGpsActive
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-300'
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-              }`}
-            >
-              {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
-              {isGpsActive ? `✓ ${t('partnerLocator.currentGpsActive', 'Current GPS Location Active')}` : t('partnerLocator.useCurrentLocation', 'Use My Current Location')}
-            </button>
+          {/* Unified Location & Search Bar */}
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <button
+                onClick={handleUseCurrentLocation}
+                disabled={isLocating || isLoading}
+                className={`px-3.5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs shrink-0 disabled:opacity-50 ${
+                  isGpsActive
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-300'
+                    : 'bg-gov-navy hover:bg-slate-800 text-white'
+                }`}
+              >
+                {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5 text-sky-400" />}
+                <span>{isGpsActive ? '✓ GPS Active' : 'Use My Location'}</span>
+              </button>
 
-            <div className="relative flex items-center justify-center py-0.5">
-              <div className="border-t border-slate-200 w-full" />
-              <span className="bg-white px-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider absolute">
-                {t('partnerLocator.orFilterArea', 'or filter / search area')}
-              </span>
+              <form onSubmit={handlePinSearch} className="flex-1 flex gap-1.5">
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Enter District, City or PIN Code..."
+                    value={pinCode}
+                    onChange={(e) => setPinCode(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-gov-blue outline-none font-medium transition placeholder-slate-400"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-gov-saffron hover:bg-orange-600 text-white px-4 py-2 rounded-xl transition font-bold text-xs flex items-center gap-1 shadow-xs shrink-0"
+                >
+                  {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+                  <span>Search</span>
+                </button>
+              </form>
             </div>
 
-            <form onSubmit={handlePinSearch} className="flex gap-2">
-              <input
-                type="text"
-                placeholder={t('partnerLocator.searchPlaceholder', 'Enter state, PIN or city (e.g. Gorakhpur, Lucknow)')}
-                value={pinCode}
-                onChange={(e) => setPinCode(e.target.value)}
-                className="flex-1 px-3.5 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-medium transition"
-              />
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="bg-slate-800 text-white px-4 py-2 rounded-xl hover:bg-slate-700 transition font-bold text-xs flex items-center gap-1 shadow-sm"
-              >
-                {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-                {t('partnerLocator.search', 'Search')}
-              </button>
-            </form>
-
             {/* Quick Demo City Focus */}
-            <div className="flex items-center gap-2 text-[11px] pt-0.5">
-              <span className="text-slate-400 font-semibold text-[10px] uppercase tracking-wider">{t('partnerLocator.quickFocus', 'Quick Focus:')}</span>
-              <div className="flex flex-wrap gap-1.5">
+            <div className="flex items-center gap-1.5 text-[11px] overflow-x-auto pb-0.5 scrollbar-none">
+              <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider shrink-0">Quick:</span>
+              <div className="flex gap-1">
                 {[
                   { name: 'Gorakhpur', lat: 26.7606, lng: 83.3732 },
                   { name: 'Lucknow', lat: 26.8467, lng: 80.9462 },
@@ -848,14 +991,16 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
                     onClick={() => {
                       setPinCode(city.name);
                       setSearchLocation({ lat: city.lat, lng: city.lng, label: city.name });
-                      partnerApi.getNearestPartners(city.lat, city.lng, 250, schemeId, loanCategory).then(data => {
-                        processAndSetPartners(data, city.lat, city.lng);
+                      partnerApi.getRoutingAudit(city.lat, city.lng, 250, schemeId, loanCategory).then(audit => {
+                        setRoutingSummary(audit.routing_summary || null);
+                        setExcludedPartners(processExcludedPartners(audit.excluded_partners || [], city.lat, city.lng));
+                        processAndSetPartners(audit.recommended_partners || [], city.lat, city.lng);
                         setRecenterTrigger(prev => prev + 1);
                       });
                     }}
-                    className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition ${
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition shrink-0 ${
                       pinCode.toLowerCase() === city.name.toLowerCase()
-                        ? 'bg-sky-100 text-sky-800 border-sky-300'
+                        ? 'bg-sky-100 text-sky-800 border-sky-300 font-bold'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
@@ -870,12 +1015,12 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
           {activeOrigin && (
             <div>
               {activeOrigin.isGps ? (
-                <div className="flex items-center gap-2 text-[11px] text-emerald-900 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl font-medium shadow-xs">
+                <div className="flex items-center gap-2 text-[11px] text-emerald-900 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl font-medium shadow-2xs">
                   <Navigation className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   <span>{t('partnerLocator.distGps', 'Distances computed from your GPS location')}</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-[11px] text-slate-800 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl font-medium shadow-xs">
+                <div className="flex items-center gap-2 text-[11px] text-slate-800 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl font-medium shadow-2xs">
                   <MapPin className="w-3.5 h-3.5 text-slate-600 shrink-0" />
                   <span>{t('partnerLocator.distCustom', 'Distances computed from {{label}}', { label: activeOrigin.label })}</span>
                 </div>
@@ -887,19 +1032,23 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
           <div className="space-y-1 pt-1">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
               {[
-                { id: 'ALL', label: t('partnerLocator.categoryAll', 'All Partners') },
-                { id: 'AUTHORIZED_SCHEME_PARTNER', label: t('partnerLocator.categoryAuthorized', 'Authorized Partners') },
-                { id: 'IMPLEMENTING_ASSISTANCE_CENTRE', label: t('partnerLocator.categoryAssistance', 'Assistance Centres') },
-                { id: 'TRAINING_HANDHOLDING_CENTRE', label: t('partnerLocator.categoryTraining', 'Training / EDP') },
-                { id: 'NEARBY_FINANCIAL_SERVICE_POINT', label: t('partnerLocator.categoryFinancial', 'Financial Institutions') },
+                { id: 'ALL', label: 'All Partners' },
+                { id: 'BANKS', label: 'Banks' },
+                { id: 'RRB', label: 'Rural Banks' },
+                { id: 'NBFC_MFI', label: 'NBFC-MFIs' },
+                { id: 'IMPLEMENTING_ASSISTANCE_CENTRE', label: 'Assistance Centres' },
+                { id: 'AUTHORIZED_SCHEME_PARTNER', label: 'Authorized Partners' },
               ].map(tab => (
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setSelectedCategoryFilter(tab.id)}
-                  className={`px-3 py-1 rounded-full whitespace-nowrap font-bold transition text-[10px] shrink-0 ${
+                  onClick={() => {
+                    setSelectedCategoryFilter(tab.id);
+                    persistLocatorState({ selectedCategoryFilter: tab.id });
+                  }}
+                  className={`px-3 py-1.5 rounded-full whitespace-nowrap font-bold transition text-[11px] shrink-0 ${
                     selectedCategoryFilter === tab.id
-                      ? 'bg-slate-900 text-white shadow-xs'
+                      ? 'bg-gov-navy text-white shadow-xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
                   }`}
                 >
@@ -930,6 +1079,26 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
 
         {/* Scrollable Partner List */}
         <div className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-3">
+          {/* Citizen Smart Routing Guidance Banner */}
+          <div className="bg-gradient-to-r from-indigo-50 via-sky-50 to-blue-50 border border-indigo-100 rounded-2xl p-3.5 shadow-2xs space-y-1">
+            <div className="flex items-center gap-2 text-indigo-950 font-bold text-xs">
+              <Compass className="w-4 h-4 text-indigo-600 shrink-0" />
+              <span>{t('partnerLocator.smartRoutingTitle', 'Smart Channel Partner Routing')}</span>
+            </div>
+            <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
+              {t(
+                'partnerLocator.smartRoutingDesc',
+                'These are nearby channel partners relevant to your scheme, after applying statutory eligibility and financial routing constraints.'
+              )}
+            </p>
+            {routingSummary && (
+              <div className="text-[10px] text-indigo-900 font-semibold pt-0.5 flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{routingSummary}</span>
+              </div>
+            )}
+          </div>
+
           {errorMsg && (
             <div
               className={`p-4 rounded-xl flex items-start gap-2.5 text-xs border shadow-sm ${
@@ -1007,43 +1176,106 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
 
           {filteredPartners.length > 0 && (
             <div className="space-y-3">
-              <h4 className="text-[10px] font-extrabold text-slate-500 uppercase px-1 tracking-wider">
-                {schemeId
-                  ? t('partnerLocator.authorizedPartners', 'Authorized Channel Partners ({{count}})', { count: filteredPartners.length })
-                  : t('partnerLocator.recommendedPartners', 'Recommended Channel Partners ({{count}})', { count: filteredPartners.length })}
-              </h4>
+              <div className="flex items-center justify-between px-1">
+                <h4 className="text-xs font-bold text-slate-800">
+                  {schemeId
+                    ? t('partnerLocator.authorizedPartners', 'Authorized Channel Partners ({{count}})', { count: filteredPartners.length })
+                    : `Nearby Partners (${filteredPartners.length})`}
+                </h4>
+                <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                  <span>Sort by:</span>
+                  <span className="font-bold text-slate-700">Distance</span>
+                </div>
+              </div>
+
               {filteredPartners.map((p, idx) => {
                 const partner = p.partner;
                 if (!partner) return null;
                 const isSelected = selectedPartnerId === partner.partner_id;
-
                 const category = partner.partner_category || 'AUTHORIZED_SCHEME_PARTNER';
+
+                // 1. Header: Legal Institution Name vs Branch Separation
+                const institutionTitle = p.institution_name || partner.name;
+                const subtitle = partner.institution_type?.replace(/_/g, ' ') || partner.partner_type || 'Channel Partner';
+                const branchLocation = p.branch_location || partner.address || (partner.city ? `${partner.city}, ${partner.state}` : '');
+                const isResolved = p.entity_resolution_status !== 'UNRESOLVED';
 
                 return (
                   <div
                     key={partner.partner_id}
-                    className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
                       isSelected
-                        ? 'border-indigo-600 bg-white shadow-md ring-4 ring-indigo-50'
-                        : 'border-slate-200 bg-white hover:border-indigo-300 shadow-xs hover:shadow'
+                        ? 'border-gov-blue bg-blue-50/20 shadow-md ring-4 ring-blue-50'
+                        : 'border-slate-200 bg-white hover:border-slate-300 shadow-xs hover:shadow'
                     }`}
                     onClick={() => handlePartnerSelect(partner.partner_id)}
                   >
-                    {/* Header Row: Number + Name + Distance */}
-                    <div className="flex justify-between items-start mb-1.5">
-                      <div className="font-bold text-slate-900 flex items-start gap-2 pr-2 text-xs">
-                        <span className="bg-slate-800 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">
-                          {idx + 1}
-                        </span>
-                        <span className="leading-snug">{partner.name}</span>
+                    {/* Header Row with Icon Tile + Legal Institution Name + Distance */}
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                        category === 'AUTHORIZED_SCHEME_PARTNER'
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : category === 'IMPLEMENTING_ASSISTANCE_CENTRE'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}>
+                        <Building2 className="w-5 h-5" />
                       </div>
-                      <div className="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
-                        {p.distance_km.toLocaleString()} {t('partnerLocator.kmAway', 'km away')}
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="font-bold text-slate-900 text-sm leading-snug">{institutionTitle}</h4>
+                            <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5 font-medium">
+                              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span className="truncate">{branchLocation || subtitle}</span>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-[11px] font-bold text-gov-blue bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                              {p.distance_km.toLocaleString()} km
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Badges row matching Panel 6 */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            Verified
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+                            {p.is_scheme_matched ? 'Authorized for Scheme' : 'Channel Partner'}
+                          </span>
+                          {p.financial_intelligence?.NNPA_PERCENT?.value != null && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full">
+                              Public Financials
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Trust Category Badges */}
-                    <div className="ml-7 mb-2 flex flex-wrap gap-1.5">
+                    {/* Part 3: Branch Location Line */}
+                    {branchLocation && (
+                      <div className="text-[11px] text-slate-600 ml-7 flex items-start gap-1.5 my-1.5 font-medium leading-relaxed">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                        <span>{branchLocation}</span>
+                      </div>
+                    )}
+
+                    {/* Part 5: Unresolved Identity Alert (if applicable) */}
+                    {!isResolved && (
+                      <div className="ml-7 my-1.5">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                          <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
+                          Institution identity not publicly verified
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Trust Category & Scheme Authorization Badges */}
+                    <div className="ml-7 my-2 flex flex-wrap gap-1.5">
                       {category === 'AUTHORIZED_SCHEME_PARTNER' && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
                           <ShieldCheck className="w-3 h-3 text-blue-600 shrink-0" />
@@ -1062,103 +1294,80 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
                           {t('partnerLocator.badgeFinancial', 'FINANCIAL INSTITUTION (GENERAL ROUTE)')}
                         </span>
                       )}
-                      {partner.institution_type && (
-                        <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-                          {partner.institution_type.replace(/_/g, ' ')}
+                      {p.is_scheme_matched && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full">
+                          <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
+                          ✓ Authorized for Scheme
                         </span>
                       )}
                     </div>
 
-                    {/* Address & District */}
-                    {partner.address && (
-                      <div className="text-[11px] text-slate-600 ml-7 flex items-start gap-1.5 mb-1.5 font-medium leading-relaxed">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                        <span>{partner.address}</span>
-                      </div>
-                    )}
-
-                    {/* Contact Pills: Phone, Email, Website, Official Source */}
-                    <div className="ml-7 flex flex-wrap gap-1.5 mb-2">
-                      {partner.phone && (
-                        <a
-                          href={`tel:${partner.phone}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-0.5 rounded-md transition"
-                        >
-                          <Phone className="w-3 h-3 text-slate-500" />
-                          {partner.phone}
-                        </a>
-                      )}
-                      {partner.email && (
-                        <a
-                          href={`mailto:${partner.email}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-0.5 rounded-md transition"
-                        >
-                          <Mail className="w-3 h-3 text-slate-500" />
-                          {partner.email}
-                        </a>
-                      )}
-                      {partner.website && (
-                        <a
-                          href={partner.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 px-2.5 py-0.5 rounded-md transition border border-sky-100"
-                        >
-                          <Globe className="w-3 h-3 text-sky-500" />
-                          {t('partnerLocator.website', 'Website')}
-                        </a>
-                      )}
-                      {partner.source_url && (
-                        <a
-                          href={partner.source_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-0.5 rounded-md transition border border-indigo-100"
-                        >
-                          <ExternalLink className="w-3 h-3 text-indigo-500" />
-                          {t('partnerLocator.officialSource', 'Official Source')}
-                        </a>
+                    {/* Part 6: Concise Financial Evidence Status Indicator (Replaces Clutter) */}
+                    <div className="ml-7 my-2">
+                      {p.financial_intelligence?.NNPA_PERCENT?.value != null ? (
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          Verified institutional financial evidence {p.financial_intelligence?.NNPA_PERCENT?.source ? `(${p.financial_intelligence.NNPA_PERCENT.source})` : p.financial_intelligence?.NNPA_PERCENT?.source_authority ? `(${p.financial_intelligence.NNPA_PERCENT.source_authority})` : ''}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full">
+                          <Info className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                          Financial data not publicly verified
+                        </span>
                       )}
                     </div>
 
-                    {/* Schemes Supported */}
-                    {partner.supported_schemes && partner.supported_schemes.length > 0 && (
-                      <div className="ml-7 text-[10px] text-slate-600 mb-1.5">
-                        <span className="font-bold text-slate-700">{t('partnerLocator.schemesSupported', 'Schemes Supported')}: </span>
-                        <span className="text-slate-600">{partner.supported_schemes.slice(0, 3).join(', ')}</span>
-                        {partner.supported_schemes.length > 3 && (
-                          <span className="font-semibold text-indigo-600 ml-1">+{partner.supported_schemes.length - 3} more</span>
+                    {/* Part 7: Compact "Why this partner?" (2-3 concise bullets) */}
+                    {((p.routing_reasons && p.routing_reasons.length > 0) || p.suitability_reason) && (
+                      <div className="ml-7 my-2.5 bg-indigo-50/60 border border-indigo-100 rounded-xl p-2.5 space-y-1">
+                        <div className="flex items-center gap-1 text-[10px] font-extrabold text-indigo-950 uppercase tracking-wider">
+                          <Compass className="w-3 h-3 text-indigo-600 shrink-0" />
+                          <span>Why this partner?</span>
+                        </div>
+                        <ul className="space-y-0.5 text-[10px] text-slate-700 font-medium">
+                          {p.suitability_reason && (
+                            <li className="flex items-start gap-1">
+                              <CheckCircle className="w-3 h-3 text-emerald-600 shrink-0 mt-0.5" />
+                              <span>{p.suitability_reason}</span>
+                            </li>
+                          )}
+                          {p.routing_reasons?.slice(0, 2).map((reason, rIdx) => (
+                            <li key={rIdx} className="flex items-start gap-1">
+                              <CheckCircle className="w-3 h-3 text-emerald-600 shrink-0 mt-0.5" />
+                              <span>{reason}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Part 8: Action Buttons */}
+                    <div className="flex flex-wrap justify-between items-center mt-3 pt-2.5 border-t border-slate-100 ml-7 gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => handleOpenFinancialHealth(partner.partner_id, e)}
+                          className="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-xl transition shadow-2xs"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>View Financial Health</span>
+                        </button>
+
+                        {isValidCoord(partner.latitude, partner.longitude) && (
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${partner.latitude},${partner.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition border border-slate-200"
+                            title={`Directions to ${partner.latitude}, ${partner.longitude}`}
+                          >
+                            <ExternalLink className="w-3 h-3 text-slate-500" />
+                            <span>Directions</span>
+                          </a>
                         )}
                       </div>
-                    )}
 
-                    {/* Scheme Authorization and Capacity */}
-                    <div className="ml-7 space-y-1 mb-2">
-                      {p.is_scheme_matched ? (
-                        <div className="flex items-center gap-1.5 text-[11px] text-emerald-800 font-semibold bg-emerald-50/80 border border-emerald-200 px-2.5 py-1 rounded-lg">
-                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          ✓ {t('map.authorizedForScheme', 'Authorized for selected scheme')}
-                          {p.service_type ? ` (${p.service_type.replace(/_/g, ' ')})` : ''}
-                        </div>
-                      ) : schemeId ? (
-                        <div className="flex items-center gap-1.5 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
-                          <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                          {t('map.authPending', '⚠ Scheme-specific authorization not confirmed')}
-                        </div>
-                      ) : null}
-
-                      <div className="text-[10px] text-slate-500">
-                        <span>{t('partnerLocator.lastVerified', 'Last verified')}: </span>
-                        <span className="font-semibold text-slate-700">{partner.last_verified_date || '2026-09-01'}</span>
-                      </div>
-                    </div>
-
-                    {/* Action Row: Radio Select + Navigate */}
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 ml-7 gap-2">
                       <div className="flex items-center gap-1.5">
                         <input
                           type="radio"
@@ -1168,23 +1377,75 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
                         />
                         <span className="text-[11px] font-bold text-slate-800">{t('map.selectPartner', 'Select Partner')}</span>
                       </div>
-
-                      {isValidCoord(partner.latitude, partner.longitude) && (
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${partner.latitude},${partner.longitude}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-[10px] text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 shadow-xs hover:shadow"
-                          title={`Navigate to ${partner.latitude}, ${partner.longitude}`}
-                        >
-                          <ExternalLink className="w-3 h-3 text-sky-400" /> {t('partnerLocator.getDirections', 'Get Directions')}
-                        </a>
-                      )}
                     </div>
                   </div>
                 );
               })}
+              {/* Excluded Nearby Partners (Regulatory Audit & Transparency) */}
+              {excludedPartners.length > 0 && (
+                <div className="mt-4 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setShowExcluded(!showExcluded)}
+                    className="w-full flex items-center justify-between p-3 bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200 rounded-xl transition text-left shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                      <div>
+                        <div className="text-xs font-bold text-amber-950">
+                          {t('partnerLocator.excludedTitle', 'Excluded Nearby Partners ({{count}})', { count: excludedPartners.length })}
+                        </div>
+                        <div className="text-[10px] text-amber-800 font-medium">
+                          {t('partnerLocator.excludedSubtitle', 'Screened out by statutory prudential rules (Regulatory Audit)')}
+                        </div>
+                      </div>
+                    </div>
+                    {showExcluded ? (
+                      <ChevronUp className="w-4 h-4 text-amber-800" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-amber-800" />
+                    )}
+                  </button>
+
+                  {showExcluded && (
+                    <div className="mt-2 space-y-2">
+                      {excludedPartners.map((ep) => (
+                        <div
+                          key={ep.partner.partner_id}
+                          className="p-3 bg-white border border-amber-200 rounded-xl space-y-1.5 shadow-2xs"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="font-bold text-slate-900 text-xs">{ep.partner.name}</div>
+                            <span className="text-[9px] font-extrabold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                              NOT ROUTABLE
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-slate-500 font-medium">
+                            {ep.partner.institution_type || ep.partner.partner_type} • {ep.distance_km.toLocaleString()} km away
+                          </div>
+                          {ep.exclusion_reason && (
+                            <div className="text-[10px] text-red-900 bg-red-50 p-2 rounded-lg border border-red-200 flex items-start gap-1.5">
+                              <AlertCircle className="w-3.5 h-3.5 text-red-600 shrink-0 mt-0.5" />
+                              <div>
+                                <span className="font-bold">{t('partnerLocator.reason', 'Exclusion reason:')} </span>
+                                <span>{ep.exclusion_reason}</span>
+                              </div>
+                            </div>
+                          )}
+                          {ep.prudential_summary && (
+                            <div className="text-[10px] text-slate-600 pl-5">
+                              Statutory finding: {ep.prudential_summary}
+                            </div>
+                          )}
+                          <p className="text-[10px] text-slate-500 italic pl-1">
+                            Citizens are not routed to this branch to ensure compliance with statutory lending and prudential guidelines.
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1289,38 +1550,102 @@ export const MapLocator: React.FC<MapLocatorProps> = ({
                 }}
               >
                 <Popup>
-                  <div className="p-1.5 min-w-[210px] text-slate-800">
-                    <div className="font-extrabold text-xs mb-1 text-slate-900 leading-snug">
-                      {idx + 1}. {partner.name}
+                  <div className="p-2 min-w-[230px] text-slate-800 space-y-1.5">
+                    <div className="font-extrabold text-xs text-slate-900 leading-snug">
+                      {idx + 1}. {p.institution_name || partner.name}
                     </div>
-                    <div className="text-[11px] text-slate-500 mb-1 flex items-center gap-1 font-medium">
-                      <Building className="w-3 h-3 text-slate-400" /> {partner.institution_type || partner.partner_type}
+                    <div className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+                      <Building className="w-3.5 h-3.5 text-slate-400" />
+                      {partner.institution_type?.replace(/_/g, ' ') || partner.partner_type}
                     </div>
-                    {partner.address && (
-                      <div className="text-[10px] text-slate-600 mb-1.5 font-normal line-clamp-2">
-                        {partner.address}
+                    {(p.branch_location || partner.address) && (
+                      <div className="text-[10px] text-slate-600 line-clamp-2">
+                        {p.branch_location || partner.address}
                       </div>
                     )}
                     {p.is_scheme_matched ? (
-                      <div className="text-[10px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded mb-1.5 flex items-center gap-1">
+                      <div className="text-[10px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-1">
                         <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" /> Scheme Authorized
                       </div>
                     ) : null}
-                    <div className="text-indigo-600 font-bold text-xs bg-indigo-50 inline-block px-2 py-0.5 rounded mb-2">
+                    <div className="text-indigo-600 font-bold text-xs bg-indigo-50 inline-block px-2 py-0.5 rounded">
                       {p.distance_km.toLocaleString()} km away
                     </div>
-                    {isValidCoord(partner.latitude, partner.longitude) && (
-                      <div className="pt-2 border-t border-slate-100">
+
+                    {/* Financial Evidence Status Indicator */}
+                    <div className="pt-1">
+                      {p.financial_intelligence?.NNPA_PERCENT?.value != null ? (
+                        <div className="text-[10px] bg-emerald-50 text-emerald-900 border border-emerald-200 rounded p-1.5 flex items-center gap-1 font-semibold">
+                          <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
+                          <span>Net NPA: {p.financial_intelligence.NNPA_PERCENT.value.toFixed(2)}% {p.financial_intelligence.NNPA_PERCENT.source ? `(${p.financial_intelligence.NNPA_PERCENT.source})` : p.financial_intelligence.NNPA_PERCENT.source_authority ? `(${p.financial_intelligence.NNPA_PERCENT.source_authority})` : ''}</span>
+                        </div>
+                      ) : (
+                        <div className="text-[9px] text-slate-600 bg-slate-100 rounded p-1">
+                          Financial data not publicly verified
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 flex flex-col gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => handleOpenFinancialHealth(partner.partner_id, e)}
+                        className="w-full text-[10px] text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-1 rounded-lg font-bold transition flex items-center justify-center gap-1"
+                      >
+                        <ShieldCheck className="w-3 h-3 text-indigo-600" />
+                        <span>View Financial Health</span>
+                      </button>
+
+                      {isValidCoord(partner.latitude, partner.longitude) && (
                         <a
                           href={`https://www.google.com/maps/dir/?api=1&destination=${partner.latitude},${partner.longitude}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full text-[10px] text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded-lg font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+                          className="w-full text-[10px] text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg font-bold transition flex items-center justify-center gap-1 shadow-xs"
                         >
                           <ExternalLink className="w-3 h-3 text-sky-400" /> {t('partnerLocator.getDirections', 'Get Directions')}
                         </a>
+                      )}
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
+          {/* Excluded Partner Markers (visible when regulatory audit transparency is opened) */}
+          {showExcluded && excludedPartners.map((p, idx) => {
+            const partner = p.partner;
+            if (!partner || typeof partner.latitude !== 'number' || typeof partner.longitude !== 'number' || !isValidCoord(partner.latitude, partner.longitude)) return null;
+
+            return (
+              <Marker
+                key={`excluded-${partner.partner_id}`}
+                position={[partner.latitude, partner.longitude]}
+                icon={createExcludedPartnerIcon(idx + 1)}
+              >
+                <Popup>
+                  <div className="p-1.5 min-w-[210px] text-slate-800">
+                    <div className="font-extrabold text-xs mb-1 text-red-900 leading-snug flex items-center gap-1">
+                      <ShieldAlert className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                      {partner.name} (Excluded)
+                    </div>
+                    <div className="text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded mb-1.5">
+                      {t('partnerLocator.notRoutable', '✕ Not Routable: Statutory Restriction')}
+                    </div>
+                    {p.exclusion_reason && (
+                      <div className="text-[10px] text-slate-700 mb-1.5 leading-snug">
+                        <strong>{t('partnerLocator.reason', 'Reason:')}</strong> {p.exclusion_reason}
                       </div>
                     )}
+                    {p.prudential_summary && (
+                      <div className="text-[9px] text-slate-500 mb-1.5">
+                        {p.prudential_summary}
+                      </div>
+                    )}
+                    <div className="text-slate-500 font-bold text-xs bg-slate-100 inline-block px-2 py-0.5 rounded">
+                      {p.distance_km.toLocaleString()} km away
+                    </div>
                   </div>
                 </Popup>
               </Marker>

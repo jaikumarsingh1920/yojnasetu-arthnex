@@ -13,7 +13,9 @@ class PartnerResponse(BaseModel):
     partner_sub_type: Optional[str] = None
     institution_type: Optional[str] = None
     partner_category: Optional[str] = None
+    parent_organization: Optional[str] = None
     address: Optional[str] = None
+    city: Optional[str] = None
     district: Optional[str] = None
     state: Optional[str] = None
     pincode: Optional[str] = None
@@ -24,6 +26,7 @@ class PartnerResponse(BaseModel):
     last_verified_date: Optional[str] = None
     scheme_authorization_level: Optional[str] = None
     coordinates_status: Optional[str] = None
+    coordinate_precision: Optional[str] = None
     source_url: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -39,8 +42,27 @@ class PartnerResponse(BaseModel):
     geocoding_confidence: Optional[str] = None
     geocoding_display_name: Optional[str] = None
     scheme_specific_mapping_available: Optional[bool] = None
+    record_status: Optional[str] = "ACTIVE"
+    validation_status: Optional[str] = "VALID"
+    quarantine_reason: Optional[str] = None
+    nsfdc_authorized: Optional[str] = "UNKNOWN"
     supported_schemes: Optional[List[str]] = Field(default_factory=list)
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class FinancialIndicatorStatusResponse(BaseModel):
+    code: str = Field(..., description="STRONGER | MIXED | HIGHER_STRESS | LIMITED_DATA")
+    label: str
+    short_description: str
+    explanation: str
+    why_this_status: Optional[str] = None
+    evidence_count: int
+    calculated_from: List[str] = Field(default_factory=list)
+    methodology_version: str = "YS-FIS-V1"
+    scope_disclaimer: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -58,9 +80,86 @@ class NearestPartnerResponse(BaseModel):
     scheme_mapping_notes: Optional[str] = None
     suitability_reason: Optional[str] = None
     lending_capacity_status: Optional[str] = None
+    google_maps_url: Optional[str] = None
+    coordinate_precision: Optional[str] = None
+    confidence: Optional[str] = None
+    application_channel: Optional[str] = None
+    routing_status: Optional[str] = "ROUTABLE_WITH_FINANCIAL_DATA_LIMITATION"
+    institution_name: Optional[str] = None
+    entity_resolution_status: Optional[str] = None
+    branch_location: Optional[str] = None
+    financial_scope: Optional[str] = "INSTITUTION_LEVEL"
+    financial_intelligence: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    rules_evaluated: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
+    routing_reasons: Optional[List[str]] = Field(default_factory=list)
+    is_restricted: bool = False
+    exclusion_reason: Optional[str] = None
+    financial_status: Optional[FinancialIndicatorStatusResponse] = None
 
     class Config:
         from_attributes = True
+
+
+class PartnerRoutingAuditResponse(BaseModel):
+    recommended_partners: List[NearestPartnerResponse] = Field(default_factory=list)
+    excluded_partners: List[NearestPartnerResponse] = Field(default_factory=list)
+    total_evaluated: int = 0
+    total_recommended: int = 0
+    total_excluded: int = 0
+    routing_summary: str = ""
+    hard_restrictions_enforced: bool = True
+
+    class Config:
+        from_attributes = True
+
+
+class PartnerFinancialHealthResponse(BaseModel):
+    partner_id: str
+    partner_name: str
+    partner_code: str
+    institution_name: Optional[str] = None
+    entity_resolution_status: Optional[str] = "RESOLVED"
+    entity_match_level: Optional[str] = None
+    entity_confidence: Optional[float] = None
+    entity_resolution_notes: Optional[str] = None
+    branch_location: Optional[str] = None
+    branch_address: Optional[str] = None
+    branch_city: Optional[str] = None
+    branch_state: Optional[str] = None
+    branch_pincode: Optional[str] = None
+    financial_scope: Optional[str] = "INSTITUTION_LEVEL"
+    institution_type: Optional[str] = None
+    routing_status: str
+    is_restricted: bool
+    primary_reason: str
+    rules_evaluated: List[Dict[str, Any]] = Field(default_factory=list)
+    verified_metrics: Dict[str, Any] = Field(default_factory=dict)
+    unverified_metrics: List[str] = Field(default_factory=list)
+    record_status: Optional[str] = "ACTIVE"
+    nsfdc_authorized: Optional[str] = "UNKNOWN"
+    financial_status: Optional[FinancialIndicatorStatusResponse] = None
+
+    class Config:
+        from_attributes = True
+
+
+class PartnerCoverageReportResponse(BaseModel):
+    total_schemes: int
+    schemes_with_verified_channel: int
+    schemes_with_physical_partner_mapping: int
+    schemes_online_portal_channel: int
+    schemes_without_partner_data: int
+    total_partners: int
+    active_partners: Optional[int] = None
+    quarantined_partners: Optional[int] = None
+    verified_authorized_partners: Optional[int] = None
+    total_scheme_partner_mappings: int
+    physical_locations: int
+    coordinates_available: int
+    coordinates_missing: int
+    mappings_by_partner_type: Dict[str, int] = Field(default_factory=dict)
+    mappings_by_state: Dict[str, int] = Field(default_factory=dict)
+    coordinate_precision_breakdown: Dict[str, int] = Field(default_factory=dict)
 
 
 class PartnerCreateInput(BaseModel):
@@ -245,3 +344,60 @@ class PartnerApplicationDetailResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SchemePartnerFinancialCard(BaseModel):
+    partner_id: str
+    partner_name: str
+    partner_code: str
+    institution_name: Optional[str] = None
+    partner_type: Optional[str] = None
+    institution_type: Optional[str] = None
+    nsfdc_authorized: Optional[str] = "UNKNOWN"
+    branch_location: Optional[str] = None
+    city: Optional[str] = None
+    district: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    financial_status: FinancialIndicatorStatusResponse
+    verified_metrics: Dict[str, Any] = Field(default_factory=dict)
+    latest_reporting_period: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class SchemeFinancialSummaryResponse(BaseModel):
+    scheme_id: str
+    scheme_name: str
+    short_description: Optional[str] = None
+    ministry: Optional[str] = None
+    sector: Optional[str] = None
+    channel_partners_count: int
+    with_verified_financial_info_count: int
+    limited_information_count: int
+    latest_reporting_period: Optional[str] = None
+    delivery_mode: Optional[str] = "FINANCIAL_INTERMEDIARY"
+
+    class Config:
+        from_attributes = True
+
+
+class SchemeFinancialDetailResponse(BaseModel):
+    scheme_id: str
+    scheme_name: str
+    short_description: Optional[str] = None
+    overview: Optional[str] = None
+    full_details: Optional[str] = None
+    ministry: Optional[str] = None
+    sector: Optional[str] = None
+    total_channel_partners: int
+    partners_with_verified_financial_info: int
+    partners_with_limited_information: int
+    latest_reporting_period: Optional[str] = None
+    delivery_mode: Optional[str] = "FINANCIAL_INTERMEDIARY"
+    partners: List[SchemePartnerFinancialCard] = Field(default_factory=list)
+
+    class Config:
+        from_attributes = True
+

@@ -20,22 +20,33 @@ class HybridSchemeRAG:
     """
 
     TERM_SYNONYMS = {
-        "tailoring": ["small micro business", "artisan", "craftsperson", "self employment"],
-        "stitching": ["small micro business", "artisan", "self employment"],
-        "dairy": ["animal husbandry", "ahidf", "livestock", "milk", "agriculture", "farmer", "kisan"],
+        "tailoring": ["small micro business", "artisan", "craftsperson", "self employment", "silai"],
+        "stitching": ["small micro business", "artisan", "self employment", "silai"],
+        "silai": ["tailoring", "small micro business", "artisan", "craftsperson"],
+        "dairy": ["animal husbandry", "ahidf", "livestock", "milk", "agriculture", "farmer", "kisan", "pashupalan"],
         "dery": ["dairy", "animal husbandry", "ahidf", "livestock", "milk"],
-        "doodh": ["dairy", "animal husbandry", "milk"],
-        "business": ["small micro business", "msme", "self employment", "pmegp", "mudra"],
-        "education": ["education loan", "higher education", "student", "scholarship"],
+        "doodh": ["dairy", "animal husbandry", "milk", "livestock", "pashupalan"],
+        "pashupalan": ["dairy", "animal husbandry", "ahidf", "livestock", "milk"],
+        "business": ["small micro business", "msme", "self employment", "pmegp", "mudra", "vyapar", "karobar"],
+        "vyapar": ["small micro business", "msme", "self employment", "pmegp", "mudra"],
+        "karobar": ["small micro business", "msme", "self employment", "pmegp", "mudra"],
+        "education": ["education loan", "higher education", "student", "scholarship", "padhai"],
         "sc": ["scheduled caste", "nsfdc"],
         "st": ["scheduled tribe", "nstfdc"],
+        "obc": ["other backward classes", "nbcfdc"],
         "up": ["uttar pradesh"],
-        "paperwork": ["document", "documents", "certificate"],
-        "paper": ["document", "documents"],
+        "mp": ["madhya pradesh"],
+        "paperwork": ["document", "documents", "certificate", "dastavej"],
+        "paper": ["document", "documents", "dastavej"],
+        "dastavej": ["document", "documents", "certificate", "required paper"],
         "gareeb": ["bpl", "low income", "financial assistance", "subsidy", "welfare"],
         "garib": ["bpl", "low income", "financial assistance", "subsidy", "welfare"],
         "yojna": ["scheme", "government scheme", "assistance"],
         "yojana": ["scheme", "government scheme", "assistance"],
+        "loan": ["credit", "financial assistance", "mudra", "pmegp", "rin"],
+        "subsidy": ["capital subsidy", "subvention", "financial grant", "anudan"],
+        "anudan": ["subsidy", "grant", "financial assistance"],
+        "byaj": ["interest rate", "subvention", "concessional finance"],
     }
 
     def __init__(self, db: Session):
@@ -48,7 +59,7 @@ class HybridSchemeRAG:
         expanded_terms = [query]
 
         for k, v in self.TERM_SYNONYMS.items():
-            if k in q_lower:
+            if re.search(rf"\b{re.escape(k)}\b", q_lower):
                 expanded_terms.extend(v)
 
         return " ".join(expanded_terms)
@@ -99,14 +110,17 @@ class HybridSchemeRAG:
     def build_grounded_context(self, citations: List[SourceCitation]) -> str:
         """Formats source citations into a clean grounded prompt block for LLM synthesis."""
         if not citations:
-            return "NO RELEVANT OFFICIAL SCHEME DATA FOUND."
+            return "NO RELEVANT OFFICIAL SCHEME DATA FOUND IN AUTHORITATIVE RECORDS."
         
         context_blocks = []
         for i, c in enumerate(citations, 1):
             block = (
-                f"[DOCUMENT {i} | Scheme: {c.scheme_name} ({c.scheme_id}) | Source: {c.source_type} ({c.source_document or 'Official Record'})]\n"
-                f"{c.snippet}"
+                f"[DOCUMENT {i} | Scheme: {c.scheme_name} (ID: {c.scheme_id}) | "
+                f"Source: {c.source_type} | Reference: {c.source_document or 'Official Guidelines'}]\n"
+                f"Content: {c.snippet}\n"
+                f"Confidence Score: {c.relevance_score}"
             )
             context_blocks.append(block)
         
         return "\n\n".join(context_blocks)
+

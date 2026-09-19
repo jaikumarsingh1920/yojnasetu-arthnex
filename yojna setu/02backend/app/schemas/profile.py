@@ -12,6 +12,7 @@ class BeneficiaryProfileInput(BaseModel):
     - Application Guidance Engine (Snapshot verification)
     """
     # 1. Personal & Social Identity
+    name: Optional[str] = Field(default=None, description="Full name of citizen applicant")
     age: Optional[int] = Field(default=None, description="Age in years (14 to 120)")
     gender: Optional[str] = Field(default=None, description="Gender: FEMALE, MALE, TRANSGENDER, OTHER")
     marital_status: Optional[str] = Field(default=None, description="Marital status: SINGLE, MARRIED, WIDOWED, DIVORCED")
@@ -25,8 +26,13 @@ class BeneficiaryProfileInput(BaseModel):
 
     # 2. Economic & Income
     annual_income: Optional[float] = Field(default=None, description="Annual family income in INR (>= 0)")
+    monthly_income: Optional[float] = Field(default=None, description="Monthly family income in INR (>= 0)")
+    monthly_expenses: Optional[float] = Field(default=None, description="Monthly living or operational expenses in INR (>= 0)")
     employment_status: Optional[str] = Field(default=None, description="Employment status: UNEMPLOYED, SELF_EMPLOYED, SALARIED, STUDENT, DAILY_WAGE")
     occupation: Optional[str] = Field(default=None, description="Specific trade, job, or occupation title")
+    existing_liabilities: Optional[float] = Field(default=None, description="Total outstanding debt / loans in INR (>= 0)")
+    monthly_obligations: Optional[float] = Field(default=None, description="Existing monthly debt service / EMIs in INR (>= 0)")
+    liquid_savings: Optional[float] = Field(default=None, description="Available emergency fund / liquid savings in INR (>= 0)")
 
     # 3. Education & Vocation
     education_level: Optional[str] = Field(default=None, description="Education level: BELOW_8TH, 8TH_PASS, 10TH_PASS, 12TH_PASS, DIPLOMA, GRADUATE, POST_GRADUATE, DOCTORATE, ILLITERATE")
@@ -64,7 +70,17 @@ class BeneficiaryProfileInput(BaseModel):
             return None
         return str(v).strip().upper()
 
-    @field_validator("annual_income", "project_cost", "requested_loan_amount", mode="before")
+    @field_validator(
+        "annual_income",
+        "monthly_income",
+        "monthly_expenses",
+        "project_cost",
+        "requested_loan_amount",
+        "existing_liabilities",
+        "monthly_obligations",
+        "liquid_savings",
+        mode="before"
+    )
     @classmethod
     def validate_non_negative_floats(cls, v: Any) -> Optional[float]:
         if v is None or v == "" or v == "UNKNOWN":

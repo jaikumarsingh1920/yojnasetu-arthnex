@@ -694,6 +694,48 @@ class DeterministicFinancialEngine:
         errors: List[ValidationError] = []
         param_map = {p.field: p for p in resolved}
 
+        # ── Non-positive & boundary validations ──
+        if calc_input.project_cost is not None and calc_input.project_cost <= ZERO:
+            errors.append(ValidationError(
+                field="project_cost",
+                message="Project cost must be greater than zero.",
+                requested_value=calc_input.project_cost,
+                authoritative_limit=ZERO,
+            ))
+
+        if calc_input.requested_loan_amount is not None and calc_input.requested_loan_amount <= ZERO:
+            errors.append(ValidationError(
+                field="requested_loan_amount",
+                message="Requested loan amount must be greater than zero.",
+                requested_value=calc_input.requested_loan_amount,
+                authoritative_limit=ZERO,
+            ))
+
+        if (calc_input.project_cost is not None and calc_input.requested_loan_amount is not None
+                and calc_input.project_cost > ZERO and calc_input.requested_loan_amount > calc_input.project_cost):
+            errors.append(ValidationError(
+                field="requested_loan_amount",
+                message=f"Requested loan ₹{calc_input.requested_loan_amount:,.2f} cannot exceed total project cost ₹{calc_input.project_cost:,.2f}.",
+                requested_value=calc_input.requested_loan_amount,
+                authoritative_limit=calc_input.project_cost,
+            ))
+
+        if calc_input.interest_rate is not None and calc_input.interest_rate < ZERO:
+            errors.append(ValidationError(
+                field="interest_rate",
+                message="Interest rate cannot be negative.",
+                requested_value=calc_input.interest_rate,
+                authoritative_limit=ZERO,
+            ))
+
+        if calc_input.repayment_period_months is not None and calc_input.repayment_period_months <= 0:
+            errors.append(ValidationError(
+                field="repayment_period_months",
+                message="Repayment period must be greater than zero.",
+                requested_value=calc_input.repayment_period_months,
+                authoritative_limit=0,
+            ))
+
         # ── Project cost validation ──
         if calc_input.project_cost is not None:
             max_proj = param_map.get("max_project_cost")

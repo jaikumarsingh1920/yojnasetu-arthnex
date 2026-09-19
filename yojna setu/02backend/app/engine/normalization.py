@@ -4,6 +4,7 @@ Generates rich normalized matching metadata for all 56 schemes without altering
 authoritative official policy facts or inventing government legal/financial data.
 """
 
+import re
 from typing import List, Dict, Set, Optional, Any
 from pydantic import BaseModel, Field
 from app.models.scheme import Scheme
@@ -57,11 +58,14 @@ class SchemeNormalizedProfileBuilder:
             scheme.target_groups,
             scheme.sector,
             scheme.activity_type,
-            scheme.ministry,
-            scheme.implementing_agency,
             scheme.support_type,
             scheme.benefit_description,
         ])).lower()
+
+        # Strip ministry/department boilerplate to avoid cross-polluting sub-activities
+        text_corpus = re.sub(r"\b(department|ministry)\s+of\s+animal\s+husbandry(\s+and\s+dairying)?\b", "", text_corpus)
+        text_corpus = re.sub(r"\b(department|ministry)\s+of\s+fisheries,?\s+animal\s+husbandry(\s+and\s+dairying)?\b", "", text_corpus)
+        text_corpus = re.sub(r"\banimal\s+husbandry\s+and\s+dairying\b", "", text_corpus)
 
         # 1. Normalized Sectors
         sectors: Set[str] = set()
@@ -82,9 +86,12 @@ class SchemeNormalizedProfileBuilder:
         if "tailor" in text_corpus or "stitching" in text_corpus or "sewing" in text_corpus or "garment" in text_corpus:
             sectors.update(["TEXTILES", "TAILORING", "GARMENTS", "HANDICRAFTS", "SELF_EMPLOYMENT"])
         if "dairy" in text_corpus or "milk" in text_corpus or "cattle" in text_corpus:
-            sectors.update(["DAIRY", "ANIMAL_HUSBANDRY", "AGRICULTURE", "ALLIED_AGRICULTURE"])
-        if "fish" in text_corpus or "aqua" in text_corpus:
-            sectors.update(["FISHERIES", "AQUACULTURE", "ALLIED_AGRICULTURE"])
+            if not any(pig_w in scheme.scheme_name.lower() for pig_w in ["pig", "piggery", "swine", "pork"]):
+                sectors.update(["DAIRY", "AGRICULTURE"])
+        if "fish" in text_corpus or "aqua" in text_corpus or "matsya" in text_corpus:
+            sectors.update(["FISHERIES", "AQUACULTURE"])
+        if any(pig_w in text_corpus for pig_w in ["pig", "piggery", "swine", "pork"]):
+            sectors.update(["PIGGERY", "LIVESTOCK"])
         if "artisan" in text_corpus or "craft" in text_corpus or "vishwakarma" in text_corpus:
             sectors.update(["ARTISAN_ACTIVITY", "HANDICRAFTS", "TRADITIONAL_TRADE", "MICRO_ENTERPRISE"])
 
@@ -101,7 +108,8 @@ class SchemeNormalizedProfileBuilder:
         for sec in sectors:
             if sec in ACTIVITY_ALIASES:
                 aliases.update(ACTIVITY_ALIASES[sec])
-            if sec in SECTORS:
+            # Only expand specialized sectors, NOT broad umbrella categories like ALLIED_AGRICULTURE or AGRICULTURE
+            if sec in SECTORS and sec not in ("ALLIED_AGRICULTURE", "AGRICULTURE", "ANIMAL_HUSBANDRY"):
                 activities.update(SECTORS[sec])
 
         # Add explicit keyword aliases
@@ -109,8 +117,11 @@ class SchemeNormalizedProfileBuilder:
             activities.update(["STITCHING", "SEWING", "GARMENT_MAKING", "BOUTIQUE"])
             aliases.update(ACTIVITY_ALIASES["TAILORING"])
         if "DAIRY" in sectors:
-            activities.update(["MILK_PRODUCTION", "CATTLE_REARING", "MILK_PROCESSING"])
+            activities.update(["MILK_PRODUCTION", "CATTLE_REARING", "MILK_PROCESSING", "DAIRY_FARMING"])
             aliases.update(ACTIVITY_ALIASES["DAIRY"])
+        if "FISHERIES" in sectors:
+            activities.update(["FISH_FARMING", "AQUACULTURE", "INLAND_FISHERIES"])
+            aliases.update(ACTIVITY_ALIASES["FISHERIES"])
         if "ARTISAN_ACTIVITY" in sectors:
             activities.update(["HANDICRAFT", "TRADITIONAL_CRAFT", "POTTERY", "CARPENTRY", "BLACKSMITHY"])
             aliases.update(ACTIVITY_ALIASES["ARTISAN"])
@@ -167,12 +178,17 @@ class SchemeNormalizedProfileBuilder:
         # 6. Geographies
         geographies: Set[str] = set()
         if scheme.state_coverage:
-            geographies.add(TaxonomyMatcher.normalize_geography(scheme.state_coverage))
-        if scheme.state_restriction:
-            geographies.add(TaxonomyMatcher.normalize_geography(scheme.state_restriction))
-        
-        if not geographies or "UNKNOWN_GEOGRAPHY" in geographies:
-            geographies.clear()
+            for g in scheme.state_coverage.replace('/', ',').replace(';', ',').split(','):
+                norm_g = TaxonomyMatcher.normalize_geography(g.strip())
+                if norm_g and norm_g != "UNKNOWN_GEOGRAPHY":
+                    geographies.add(norm_g)
+
+        # Check if scheme is central/national
+        is_central = bool(
+            (scheme.ministry and any(scheme.ministry.strip().lower().startswith(p) for p in ["ministry of", "department of"]))
+            or (str(getattr(scheme, "level", "") or "").upper() == "CENTRAL_SECTOR")
+        )
+        if not geographies and is_central and str(scheme.state_restriction or "").strip().upper() != "YES":
             geographies.add("ALL_INDIA")
 
         # 7. Support Types

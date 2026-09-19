@@ -22,6 +22,21 @@ from app.models.notification import Notification
 from app.models.notification_preference import NotificationPreference
 from app.models.saved_scheme import SavedScheme
 from app.models.blog import FinancialBlog
+from app.models.ingestion import (
+    SchemeSource,
+    SourceSnapshot,
+    PendingSchemeUpdate,
+    IngestionRun,
+    SourceHealthLog,
+)
+from app.models.candidate import CandidateScheme
+from app.models.knowledge import SchemeFAQ, SchemeKnowledgeProfile
+from app.models.financial_intelligence import (
+    InstitutionEntity,
+    InstitutionAlias,
+    PartnerFinancialObservation,
+    PrudentialRule,
+)
 
 __all__ = [
     "Base",
@@ -30,6 +45,8 @@ __all__ = [
     "SchemeRule",
     "SchemeDocument",
     "SchemeChangelog",
+    "SchemeFAQ",
+    "SchemeKnowledgeProfile",
     "User",
     "UserRole",
     "Partner",
@@ -45,6 +62,16 @@ __all__ = [
     "NotificationPreference",
     "SavedScheme",
     "FinancialBlog",
+    "SchemeSource",
+    "SourceSnapshot",
+    "PendingSchemeUpdate",
+    "IngestionRun",
+    "SourceHealthLog",
+    "CandidateScheme",
+    "InstitutionEntity",
+    "InstitutionAlias",
+    "PartnerFinancialObservation",
+    "PrudentialRule",
 ]
 
 

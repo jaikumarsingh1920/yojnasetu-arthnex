@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { FinancialCalculationResult } from '../types';
+import { FinancialCalculationResult, FinancialHealthInput, FinancialHealthResponse } from '../types';
 
 export interface FinancialCalculateRequest {
   scheme_id: string;
@@ -15,4 +15,15 @@ export const financialApi = {
     const response = await apiClient.post<FinancialCalculationResult>('/calculator/calculate', payload);
     return response.data;
   },
+
+  getFinancialHealth: async (): Promise<FinancialHealthResponse> => {
+    const response = await apiClient.get<FinancialHealthResponse>('/financial-health');
+    return response.data;
+  },
+
+  assessFinancialHealth: async (input: FinancialHealthInput): Promise<FinancialHealthResponse> => {
+    const response = await apiClient.post<FinancialHealthResponse>('/financial-health/assess', input);
+    return response.data;
+  },
 };
+

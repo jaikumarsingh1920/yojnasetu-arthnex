@@ -1,8 +1,9 @@
 import sqlite3
 import os
 
-db_path = r"c:\Users\jaiku\OneDrive\Desktop\yojnasetu\yojna setu\02backend\yojnasetu.db"
-conn = sqlite3.connect(db_path)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CANONICAL_DB_PATH = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", "02backend", "app", "yojnasetu.db"))
+conn = sqlite3.connect(CANONICAL_DB_PATH)
 cursor = conn.cursor()
 
 OFFICIAL_URL_MAPPING = {

@@ -23,9 +23,25 @@ export interface SchemeQueryParams {
   sort_order?: string;
 }
 
+export interface SchemeSelectorItem {
+  scheme_id: string;
+  scheme_code: string;
+  scheme_name: string;
+  category?: string;
+  ministry?: string;
+  has_partner_mapping: boolean;
+}
+
 export const schemeApi = {
   getSchemes: async (params?: SchemeQueryParams): Promise<PaginatedSchemeListResponse> => {
     const response = await apiClient.get<PaginatedSchemeListResponse>('/schemes', { params });
+    return response.data;
+  },
+
+  getSchemeSelector: async (onlyWithPartners: boolean = false): Promise<SchemeSelectorItem[]> => {
+    const response = await apiClient.get<SchemeSelectorItem[]>('/schemes/selector', {
+      params: { only_with_partners: onlyWithPartners }
+    });
     return response.data;
   },
 

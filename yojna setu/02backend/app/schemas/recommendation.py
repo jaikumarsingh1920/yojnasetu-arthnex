@@ -22,9 +22,11 @@ class RecommendationItem(BaseModel):
     rank: int = Field(..., description="1-indexed recommendation rank")
     scheme_id: str = Field(..., description="Authoritative scheme ID")
     scheme_name: str = Field(..., description="Official scheme name")
-    eligibility_status: str = Field(..., description="ELIGIBLE, INELIGIBLE, or INSUFFICIENT_INFORMATION")
+    eligibility_status: str = Field(..., description="ELIGIBLE, INELIGIBLE, INSUFFICIENT_INFORMATION, CONDITIONAL, or NOT_APPLICABLE")
     score: float = Field(..., description="Normalized soft-fit score between 0.0 and 100.0")
     eligible: bool = Field(default=True, description="True if eligibility_status is ELIGIBLE, else False")
+    short_description: Optional[str] = Field(None, description="Short summary of scheme purpose")
+    purpose: Optional[str] = Field(None, description="Official purpose or objective of the scheme")
 
     # Structured explainability rules for TASK-032
     matched_rules: List[str] = Field(default_factory=list, description="Factual reasons why applicant qualifies (passed rules)")
@@ -59,21 +61,57 @@ class RecommendationItem(BaseModel):
     official_source_url: Optional[str] = Field(None, description="Official scheme guidelines reference URL")
     source_document: Optional[str] = Field(None, description="Official source document name")
     is_direct_portal_scheme: bool = Field(default=False, description="True if applications are submitted directly on government portal")
+    has_verified_partner_mapping: bool = Field(default=False, description="True if verified channel partner mapping exists")
+    application_channel: str = Field("OFFICIAL_DIRECT_PORTAL", description="OFFICIAL_DIRECT_PORTAL or CHANNEL_PARTNER_LOCATOR")
+
+    # Financial Health Suitability Advisory
+    financial_health_status: Optional[str] = Field(None, description="Citizen financial health rating: HEALTHY, MODERATE, STRESSED, HIGH_RISK, INSUFFICIENT_INFORMATION")
+    financial_health_advisory: Optional[str] = Field(None, description="Advisory guidance on financial suitability for this scheme")
+    financial_suitability: Optional[str] = Field(None, description="STRONG_FIT, POSSIBLE_FIT, INSUFFICIENT_INFORMATION, FINANCIALLY_UNSUITABLE")
+    financial_suitability_reason: Optional[str] = Field(None, description="Deterministic factual explanation of scheme financial fit")
+    estimated_monthly_installment: Optional[float] = Field(None, description="Estimated monthly repayment installment under this scheme")
+    available_subsidy_amount: Optional[float] = Field(None, description="Estimated capital/margin subsidy in INR")
+    required_own_contribution: Optional[float] = Field(None, description="Required promoter margin money in INR")
+    min_project_cost: Optional[float] = Field(None, description="Official minimum project cost")
+    max_project_cost: Optional[float] = Field(None, description="Official maximum project cost")
+    min_loan_amount: Optional[float] = Field(None, description="Official minimum loan limit")
+    collateral_requirement: Optional[str] = Field(None, description="Collateral policy (NO, YES, CONDITIONAL, NOT_PUBLICLY_AVAILABLE)")
+    guarantee_requirement: Optional[str] = Field(None, description="Credit guarantee coverage (e.g. CGTMSE) or status")
+    processing_fee: Optional[str] = Field(None, description="Processing fee details")
+
+    # Auditability, Policy Versioning & Ranking Explanation
+    scoring_policy_version: Optional[str] = Field("v2.1.0", description="Scoring policy version used for evaluation")
+    data_quality_score: Optional[float] = Field(None, description="Objective scheme data quality and completeness score (0-100)")
+    comparative_ranking_reason: Optional[str] = Field(None, description="Factual explanation of why this scheme earned its relative ranking")
+    match_tier: Optional[str] = Field("ELIGIBLE", description="BEST_MATCH, ELIGIBLE, or POTENTIALLY_RELEVANT")
+    required_documents: List[str] = Field(default_factory=list, description="Documents required for application")
+    partner_availability: Optional[str] = Field(None, description="Availability of physical or online partner channel")
+    key_conditions: List[str] = Field(default_factory=list, description="Important statutory conditions or guidelines")
+    bonuses: List[str] = Field(default_factory=list, description="List of affirmative policy bonuses earned")
+    penalties: List[str] = Field(default_factory=list, description="List of policy penalties applied")
 
 
 class RecommendationRequest(BaseModel):
     profile: BeneficiaryProfileInput = Field(..., description="Beneficiary profile attributes")
     top_k: int = Field(default=5, ge=1, le=100, description="Maximum number of top recommendations to return")
     include_ineligible: bool = Field(default=True, description="Whether to include evaluated ineligible schemes with failure explanations")
+    semantic_query: Optional[str] = Field(None, description="Optional natural language query or description for semantic relevance ranking")
 
 
 class RecommendationResponse(BaseModel):
     profile_summary: Dict[str, Any] = Field(default_factory=dict, description="Summary of provided beneficiary profile fields")
+    scoring_policy_version: Optional[str] = Field("v2.1.0", description="Scoring policy version applied")
+    recommendation_trace_id: Optional[str] = Field(None, description="Unique deterministic trace ID for auditability")
+    candidate_shortlist_count: Optional[int] = Field(None, description="Candidate schemes pre-filtered before in-memory scoring")
     evaluated_scheme_count: int = Field(..., description="Total schemes evaluated against hard eligibility gate")
     eligible_scheme_count: int = Field(..., description="Count of schemes passing hard eligibility gate")
     excluded_scheme_count: int = Field(..., description="Count of schemes excluded by hard eligibility gate")
     insufficient_info_scheme_count: int = Field(..., description="Count of schemes with insufficient eligibility information")
+    conditional_scheme_count: int = Field(default=0, description="Count of conditional schemes")
+    not_applicable_scheme_count: int = Field(default=0, description="Count of not-applicable schemes")
     recommendations: List[RecommendationItem] = Field(default_factory=list, description="Top-K ranked scheme recommendations")
     ineligible_schemes: List[RecommendationItem] = Field(default_factory=list, description="Evaluated schemes that failed eligibility with exact failed rules")
     insufficient_info_schemes: List[RecommendationItem] = Field(default_factory=list, description="Evaluated schemes requiring more information")
+    conditional_schemes: List[RecommendationItem] = Field(default_factory=list, description="Conditional schemes requiring special conditions")
+    not_applicable_schemes: List[RecommendationItem] = Field(default_factory=list, description="Non-applicable/discontinued schemes")
     missing_profile_fields: List[str] = Field(default_factory=list, description="Beneficiary profile fields that were missing/None")

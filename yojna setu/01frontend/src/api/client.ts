@@ -39,9 +39,14 @@ apiClient.interceptors.response.use(
         if (typeof data.detail === 'string') {
           customMessage = data.detail;
         } else if (Array.isArray(data.detail)) {
-          customMessage = data.detail.map((d: any) => d.msg || d.message).join('; ');
+          customMessage = data.detail.map((d: any) => d.msg || d.message || JSON.stringify(d)).join('; ');
+        } else if (typeof data.detail === 'object') {
+          customMessage = data.detail.message || data.detail.detail || JSON.stringify(data.detail);
         }
+      } else if (data?.message) {
+        customMessage = data.message;
       }
+
 
       error.userFriendlyMessage = customMessage;
       error.requestId = data?.error?.request_id || error.response.headers['x-request-id'];

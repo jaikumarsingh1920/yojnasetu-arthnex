@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import time
-import requests
+import httpx
 from datetime import datetime, timezone
 
 # Add backend directory to sys.path
@@ -151,7 +151,7 @@ def run_geocoding_pipeline():
         else:
             print(f"[{idx}/{len(partners)}] Nominatim Request for: {partner.name[:40]}... Query: '{query}'")
             try:
-                resp = requests.get(NOMINATIM_URL, params={"q": query, "format": "json", "addressdetails": 1}, headers=headers, timeout=10)
+                resp = httpx.get(NOMINATIM_URL, params={"q": query, "format": "json", "addressdetails": 1}, headers=headers, timeout=10.0)
                 if resp.status_code == 200:
                     results = resp.json()
                     cache[cache_key] = results

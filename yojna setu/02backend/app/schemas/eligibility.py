@@ -15,6 +15,8 @@ class SchemeEligibilityStatus(str, Enum):
     ELIGIBLE = "ELIGIBLE"
     INELIGIBLE = "INELIGIBLE"
     INSUFFICIENT_INFORMATION = "INSUFFICIENT_INFORMATION"
+    CONDITIONAL = "CONDITIONAL"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
 
 
 class RuleEvaluationDetail(BaseModel):

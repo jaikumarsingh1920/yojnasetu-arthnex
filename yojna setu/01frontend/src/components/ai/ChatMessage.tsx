@@ -52,37 +52,37 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion, onNa
       <div
         className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 font-bold ${
           isAssistant
-            ? 'bg-gradient-to-tr from-gov-navy to-sky-900 text-white shadow-xs border border-sky-500'
-            : 'bg-slate-900 text-white'
+            ? 'bg-[#4A2525] text-[#F7AE56] shadow-warm-xs border border-[#FFD0CA]/40'
+            : 'bg-[#EA717B] text-white shadow-warm-xs'
         }`}
       >
-        {isAssistant ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
+        {isAssistant ? <Bot className="w-4 h-4" aria-hidden="true" /> : <User className="w-4 h-4" aria-hidden="true" />}
       </div>
 
       {/* Message Bubble & Content */}
       <div className={`space-y-2 max-w-[88%] min-w-0 ${isAssistant ? '' : 'text-right'}`}>
         <div
-          className={`p-3.5 rounded-2xl shadow-xs leading-relaxed space-y-2 relative group ${
+          className={`p-3.5 rounded-2xl shadow-warm-sm leading-relaxed space-y-2 relative group ${
             isAssistant
-              ? 'bg-white border border-slate-200 text-slate-900 rounded-tl-xs'
-              : 'bg-gradient-to-r from-gov-blue to-slate-900 text-white rounded-tr-xs'
+              ? 'bg-white border border-[#E8D8D2] text-[#3B2522] rounded-tl-xs'
+              : 'bg-[#4A2525] text-[#FFFBF0] rounded-tr-xs'
           }`}
         >
           {/* Copy Button */}
           {isAssistant && (
             <button
               onClick={handleCopyText}
-              className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-700 bg-slate-100/80 hover:bg-slate-200 rounded transition opacity-0 group-hover:opacity-100"
+              className="absolute top-2 right-2 p-1 text-[#765E59] hover:text-[#3B2522] bg-[#FFF4EC] hover:bg-[#FFD0CA] rounded transition opacity-0 group-hover:opacity-100"
               title={t('copilot.copyAnswer', 'Copy Answer')}
             >
-              {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+              {copied ? <Check className="w-3 h-3 text-emerald-600" aria-hidden="true" /> : <Copy className="w-3 h-3" aria-hidden="true" />}
             </button>
           )}
 
           {/* Humanized Verified Badge */}
           {isAssistant && message.deterministicUsed && (
             <div className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">
-              <ShieldCheck className="w-3 h-3 text-emerald-600" /> {t('copilot.verifiedBadge', 'Verified Government Information')}
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" /> {t('copilot.verifiedBadge', 'Verified Government Information')}
             </div>
           )}
 
@@ -90,7 +90,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion, onNa
           {isAssistant ? (
             <SafeChatMarkdown content={message.text} />
           ) : (
-            <div className="whitespace-pre-wrap text-[11px] sm:text-xs font-sans leading-relaxed break-words">
+            <div className="whitespace-pre-wrap text-[11px] sm:text-xs font-sans leading-relaxed break-words text-[#FFFBF0]">
               {message.text}
             </div>
           )}
@@ -106,12 +106,12 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion, onNa
 
           {/* Action Buttons */}
           {isAssistant && message.actions && message.actions.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
+            <div className="flex flex-wrap gap-2 pt-1 border-t border-[#E8D8D2]">
               {message.actions.map((act, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleActionClick(act)}
-                  className="bg-gov-blue hover:bg-gov-navy text-white font-bold text-[10px] px-3 py-1.5 rounded-lg shadow-xs transition flex items-center gap-1"
+                  className="bg-[#EA717B] hover:bg-[#D65D67] text-white font-bold text-[10px] px-3 py-1.5 rounded-lg shadow-warm-xs transition flex items-center gap-1"
                 >
                   {act.label} <ArrowRight className="w-3 h-3" />
                 </button>
@@ -123,7 +123,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion, onNa
         {/* Source Citations */}
         {isAssistant && message.citations && message.citations.length > 0 && (
           <div className="space-y-1.5 pt-1">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('copilot.verifiedSources', 'Verified Sources')}</p>
+            <p className="text-[10px] font-bold text-[#765E59] uppercase tracking-wider">{t('copilot.verifiedSources', 'Verified Sources')}</p>
             <div className="grid grid-cols-1 gap-1.5">
               {message.citations.map((cite, idx) => (
                 <SourceCitationCard key={idx} citation={cite} onNavigate={onNavigate} />
@@ -139,7 +139,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion, onNa
               <button
                 key={idx}
                 onClick={() => onSelectSuggestion(q)}
-                className="bg-sky-50 hover:bg-sky-100 text-sky-800 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200 transition text-left"
+                className="bg-[#FFF4EC] hover:bg-[#FFD0CA] text-[#4A2525] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#E8D8D2] transition text-left"
               >
                 {q}
               </button>
@@ -147,7 +147,7 @@ export const ChatMessage: React.FC<Props> = ({ message, onSelectSuggestion, onNa
           </div>
         )}
 
-        <span className="text-[9px] text-slate-400 block font-mono">
+        <span className="text-[9px] text-[#765E59] block font-mono">
           {message.timestamp}
         </span>
       </div>

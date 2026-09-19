@@ -1,395 +1,166 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Mail,
-  MapPin,
-  PhoneCall,
-  ShieldCheck,
-} from 'lucide-react';
+import { Mail, MapPin, PhoneCall, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const footerLinkClass =
-  'w-fit text-left text-[14px] text-white/75 transition-all duration-200 hover:text-[#B7F21B] hover:translate-x-[2px]';
+  'w-fit text-left text-sm text-[#FFFBF0]/80 transition hover:text-[#F7AE56] flex items-center gap-1.5';
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <footer className="mt-auto w-full bg-[#741321] text-white">
-
-      {/* Main Footer */}
-      <div className="mx-auto w-full max-w-[1380px] px-8 py-16 lg:px-12">
-
-        <div className="grid grid-cols-1 gap-14 md:grid-cols-2 lg:grid-cols-4">
-
-          {/* =========================================================
-              BRAND / ABOUT
-          ========================================================= */}
-          <div>
-
-            <Link
-              to="/"
-              className="flex w-fit items-center gap-4 text-left"
-            >
-              <div
-                className="
-                  flex h-[64px] w-[64px] shrink-0
-                  items-center justify-center
-                  overflow-hidden rounded-2xl
-                  bg-[#071A2A]
-                  ring-1 ring-white/10
-                  shadow-[0_8px_25px_rgba(0,0,0,0.18)]
-                "
-              >
-                <img
-                  src="/logo.png"
-                  alt="YojnaSetu Logo"
-                  className="h-[58px] w-[58px] object-contain"
-                />
-              </div>
-
-              <span className="text-[25px] font-bold tracking-tight text-white">
-                Yojna
-                <span className="text-[#B7F21B]">Setu</span>
+    <footer className="mt-auto w-full bg-[#4A2525] text-[#FFFBF0] border-t border-[#3B2522]">
+      <div className="mx-auto w-full max-w-[1440px] px-6 py-14 lg:px-12 lg:py-16">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+          {/* Column 1: Brand & Mission */}
+          <div className="space-y-4">
+            <Link to="/" className="flex items-center gap-3 text-left">
+              <img
+                src="/logo.png"
+                alt="YojnaSetu Logo"
+                className="h-10 w-10 object-contain"
+              />
+              <span className="text-xl font-bold tracking-tight text-[#FFFBF0]">
+                Yojna<span className="text-[#F7AE56]">Setu</span>
               </span>
             </Link>
 
-            <p
-              className="
-                mt-7 max-w-[310px]
-                text-[14px] leading-7
-                text-white/80
-              "
-            >
-              {t('footer.aboutDesc')}
+            <p className="text-sm leading-6 text-[#FFFBF0]/80 max-w-[300px]">
+              {t(
+                'footer.aboutDesc',
+                'National civic-tech platform connecting Indian citizens, entrepreneurs, and students to verified government schemes.'
+              )}
             </p>
 
-            <div
-              className="
-                mt-5 flex items-center gap-2
-                text-[13px] text-white/65
-              "
-            >
-              <ShieldCheck
-                className="h-4 w-4 shrink-0 text-[#B7F21B]"
-              />
-
-              <span>
-                100% {t('home.gazetteVerified')}
-              </span>
+            <div className="inline-flex items-center gap-2 bg-[#3B2522] border border-[#E8D8D2]/20 text-[#FFFBF0] px-3 py-1.5 rounded-xl text-xs font-semibold">
+              <ShieldCheck className="h-4 w-4 text-[#A5D6A7] shrink-0" />
+              <span>{t('footer.gazetteVerified', '100% Gazette-Verified Portfolios')}</span>
             </div>
-
           </div>
 
-
-          {/* =========================================================
-              QUICK LINKS
-          ========================================================= */}
-          <div>
-
-            <h3 className="text-[17px] font-bold text-white">
-              {t('footer.quickLinks')}
+          {/* Column 2: Quick Links */}
+          <div className="space-y-4">
+            <h3 className="text-sm sm:text-base font-bold text-[#FFFBF0]">
+              {t('footer.quickLinks', 'Quick Links')}
             </h3>
+            <div className="h-0.5 w-8 bg-[#F7AE56] rounded-full" />
 
-            <div
-              className="
-                mt-3 h-[2px] w-[55px]
-                rounded-full bg-[#B7F21B]
-              "
-            />
-
-            <div className="mt-7 flex flex-col gap-4">
-
-              <Link
-                to="/schemes"
-                className={footerLinkClass}
-              >
-                {t('footer.allSchemes')}
+            <div className="flex flex-col gap-3 pt-1">
+              <Link to="/schemes" className={footerLinkClass}>
+                <span>{t('footer.allSchemes', 'Explore Schemes Directory')}</span>
               </Link>
-
-              <Link
-                to="/recommendations"
-                className={footerLinkClass}
-              >
-                {t('footer.smartMatch')}
+              <Link to="/recommendations" className={footerLinkClass}>
+                <span>{t('footer.smartMatch', 'Smart Scheme Matching')}</span>
               </Link>
-
-              <Link
-                to="/calculator"
-                className={footerLinkClass}
-              >
-                {t('footer.calculator')}
+              <Link to="/calculator" className={footerLinkClass}>
+                <span>{t('footer.calculator', 'Financial Calculator')}</span>
               </Link>
-
-              <Link
-                to="/channel-partners"
-                className={footerLinkClass}
-              >
-                {t('footer.partnerCenters')}
+              <Link to="/channel-partners" className={footerLinkClass}>
+                <span>{t('footer.partnerCenters', 'Nearby Partner Centers')}</span>
               </Link>
-
-              <Link
-                to="/login"
-                className={footerLinkClass}
-              >
-                {t('footer.adminPortal')}
+              <Link to="/compare" className={footerLinkClass}>
+                <span>{t('footer.compare', 'Compare Schemes')}</span>
               </Link>
-
+              <Link to="/login" className={footerLinkClass}>
+                <span>{t('footer.adminPortal', 'Citizen & Partner Login')}</span>
+              </Link>
             </div>
-
           </div>
 
-
-          {/* =========================================================
-              INFORMATION
-              Replaced Governance & Trust
-          ========================================================= */}
-          <div>
-
-            <h3 className="text-[17px] font-bold text-white">
-              {t('footer.information', 'Information')}
+          {/* Column 3: Governance & Policy */}
+          <div className="space-y-4">
+            <h3 className="text-sm sm:text-base font-bold text-[#FFFBF0]">
+              {t('footer.governanceTitle', 'Governance & Trust')}
             </h3>
+            <div className="h-0.5 w-8 bg-[#F7AE56] rounded-full" />
 
-            <div
-              className="
-                mt-3 h-[2px] w-[55px]
-                rounded-full bg-[#B7F21B]
-              "
-            />
+            <p className="text-sm leading-6 text-[#FFFBF0]/80">
+              {t(
+                'footer.governanceDesc',
+                'Built to eliminate financial misrepresentation, opaque approvals, and unverified intermediary fees in welfare distribution.'
+              )}
+            </p>
 
-            <div className="mt-7 flex flex-col gap-4">
-
-              <Link
-                to="/contact"
-                className={footerLinkClass}
-              >
-                {t('footer.contactUs', 'Contact Us')}
-              </Link>
-
-              <Link
-                to="/privacy-policy"
-                className={footerLinkClass}
-              >
-                {t('footer.privacyPolicy', 'Privacy Policy')}
-              </Link>
-
-              <Link
-                to="/profile"
-                className={footerLinkClass}
-              >
-                {t('footer.myProfile', 'My Profile')}
-              </Link>
-
-              <Link
-                to="/login"
-                className={footerLinkClass}
-              >
-                {t('footer.loginSignup', 'Login / Sign Up')}
-              </Link>
-
+            <div className="rounded-2xl border border-[#E8D8D2]/20 bg-[#3B2522]/90 p-4 text-xs text-[#FFFBF0]/80 space-y-1.5">
+              <p className="font-bold text-[#FFFBF0]">
+                {t('footer.enginePolicyTitle', 'Deterministic Engine Policy:')}
+              </p>
+              <p className="text-xs leading-relaxed text-[#FFFBF0]/75">
+                {t('footer.enginePolicyDesc', 'Eligibility determinations are grounded in published Ministry criteria without speculative estimation.')}
+              </p>
             </div>
-
           </div>
 
-
-          {/* =========================================================
-              CONTACT INFO
-          ========================================================= */}
-          <div>
-
-            <h3 className="text-[17px] font-bold text-white">
-              {t('footer.contactInfo', 'Contact Info')}
+          {/* Column 4: Helpline & Support */}
+          <div className="space-y-4">
+            <h3 className="text-sm sm:text-base font-bold text-[#FFFBF0]">
+              {t('footer.supportTitle', 'Support & Helpline')}
             </h3>
+            <div className="h-0.5 w-8 bg-[#F7AE56] rounded-full" />
 
-            <div
-              className="
-                mt-3 h-[2px] w-[55px]
-                rounded-full bg-[#B7F21B]
-              "
-            />
-
-            <div className="mt-7 flex flex-col gap-5">
-
-              {/* ---------------- Toll Free ---------------- */}
-              <div className="flex items-start gap-4">
-
-                <div
-                  className="
-                    flex h-10 w-10 shrink-0
-                    items-center justify-center
-                    rounded-full
-                    bg-[#B7F21B]
-                    text-[#741321]
-                    shadow-[0_5px_15px_rgba(0,0,0,0.12)]
-                  "
-                >
+            <div className="flex flex-col gap-3 pt-1">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#3B2522] border border-[#E8D8D2]/20 text-[#F7AE56]">
                   <PhoneCall className="h-4 w-4" />
                 </div>
-
                 <div>
-
-                  <p
-                    className="
-                      text-[11px] font-semibold
-                      uppercase tracking-wider
-                      text-white/50
-                    "
-                  >
-                    Toll Free
+                  <p className="text-xs font-medium text-[#FFFBF0]/70">
+                    {t('footer.helplineLabel', 'Toll-free helpline')}
                   </p>
-
                   <a
                     href="tel:1800112026"
-                    title="Call YojnaSetu Helpline"
-                    className="
-                      mt-1 block
-                      text-[14px] leading-6
-                      text-white/85
-                      transition-colors
-                      hover:text-[#B7F21B]
-                    "
+                    className="text-sm font-semibold text-[#FFFBF0] hover:text-[#F7AE56] transition"
                   >
-                    {t(
-                      'footer.helplineText',
-                      '1800-11-2026 (Toll-Free, 9 AM - 6 PM IST)'
-                    )}
+                    1800-11-2026 (9 AM – 6 PM IST)
                   </a>
-
                 </div>
-
               </div>
 
-
-              {/* ---------------- Email ---------------- */}
-              <div className="flex items-start gap-4">
-
-                <div
-                  className="
-                    flex h-10 w-10 shrink-0
-                    items-center justify-center
-                    rounded-full
-                    bg-[#B7F21B]
-                    text-[#741321]
-                    shadow-[0_5px_15px_rgba(0,0,0,0.12)]
-                  "
-                >
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#3B2522] border border-[#E8D8D2]/20 text-[#FFD0CA]">
                   <Mail className="h-4 w-4" />
                 </div>
-
                 <div>
-
-                  <p
-                    className="
-                      text-[11px] font-semibold
-                      uppercase tracking-wider
-                      text-white/50
-                    "
-                  >
-                    Email
+                  <p className="text-xs font-medium text-[#FFFBF0]/70">
+                    {t('footer.supportEmailLabel', 'Citizen support email')}
                   </p>
-
                   <a
                     href="mailto:support@yojnasetu.gov.in"
-                    title="Email YojnaSetu Support"
-                    className="
-                      mt-1 block break-all
-                      text-[14px] leading-6
-                      text-white/85
-                      transition-colors
-                      hover:text-[#B7F21B]
-                    "
+                    className="text-sm text-[#FFFBF0] hover:text-[#F7AE56] transition"
                   >
-                    {t(
-                      'footer.supportEmail',
-                      'support@yojnasetu.gov.in'
-                    )}
+                    support@yojnasetu.gov.in
                   </a>
-
                 </div>
-
               </div>
 
-
-              {/* ---------------- Office ---------------- */}
-              <div className="flex items-start gap-4">
-
-                <div
-                  className="
-                    flex h-10 w-10 shrink-0
-                    items-center justify-center
-                    rounded-full
-                    bg-[#B7F21B]
-                    text-[#741321]
-                    shadow-[0_5px_15px_rgba(0,0,0,0.12)]
-                  "
-                >
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#3B2522] border border-[#E8D8D2]/20 text-[#A5D6A7]">
                   <MapPin className="h-4 w-4" />
                 </div>
-
                 <div>
-
-                  <p
-                    className="
-                      text-[11px] font-semibold
-                      uppercase tracking-wider
-                      text-white/50
-                    "
-                  >
-                    Office
+                  <p className="text-xs font-medium text-[#FFFBF0]/70">
+                    {t('footer.nationalOfficeLabel', 'National head office')}
                   </p>
-
-                  <p
-                    className="
-                      mt-1 max-w-[230px]
-                      text-[14px] leading-6
-                      text-white/85
-                    "
-                  >
-                    {t(
-                      'footer.ministryAddress',
-                      'Ministry of Social Justice & Empowerment, New Delhi, India'
-                    )}
-                  </p>
-
+                  <span className="text-sm text-[#FFFBF0]/85">
+                    Ministry of Social Justice & Empowerment, New Delhi
+                  </span>
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
 
-      </div>
-
-
-      {/* =========================================================
-          BOTTOM COPYRIGHT BAR
-      ========================================================= */}
-      <div className="border-t border-white/15">
-
-        <div
-          className="
-            mx-auto flex min-h-[65px]
-            max-w-[1380px]
-            items-center
-            px-8
-            text-center
-            text-[12px]
-            text-white/60
-            lg:px-12
-          "
-        >
-
-          <p className="m-0 w-full">
-            {t('footer.rights')}
-          </p>
-
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-6 border-t border-[#E8D8D2]/15 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#FFFBF0]/70">
+          <p>{t('footer.rights', '© 2026 YojnaSetu Civic-Tech Portal. Content authoritative from published Gazette notifications.')}</p>
+          <div className="flex items-center gap-5 text-[#FFFBF0]/75">
+            <Link to="/about" className="hover:text-[#F7AE56] transition">{t('footer.about', 'About')}</Link>
+            <Link to="/resources" className="hover:text-[#F7AE56] transition">{t('footer.guidelines', 'Guidelines')}</Link>
+            <Link to="/faq" className="hover:text-[#F7AE56] transition">{t('footer.faq', 'FAQ')}</Link>
+          </div>
         </div>
-
       </div>
-
     </footer>
   );
 };

@@ -5,15 +5,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PARENT_DIR = os.path.dirname(BASE_DIR)
 
-# Locate the canonical seeded SQLite database
-_primary_db = os.path.join(BASE_DIR, "yojnasetu.db")
-_secondary_db = os.path.join(PARENT_DIR, "yojnasetu.db")
-if os.path.exists(_primary_db):
-    DEFAULT_DB_FILE = _primary_db
-elif os.path.exists(_secondary_db):
-    DEFAULT_DB_FILE = _secondary_db
-else:
-    DEFAULT_DB_FILE = _primary_db
+# Authoritative canonical SQLite database (02backend/app/yojnasetu.db)
+DEFAULT_DB_FILE = os.path.join(BASE_DIR, "yojnasetu.db")
 
 
 
@@ -38,12 +31,20 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
     # Database configuration
-    POSTGRES_SERVER: str = "localhost"
+    POSTGRES_SERVER: Optional[str] = None
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres_password"
-    POSTGRES_DB: str = "yojnasetu_db"
+    POSTGRES_USER: Optional[str] = None
+    POSTGRES_PASSWORD: Optional[str] = None
+    POSTGRES_DB: Optional[str] = None
     DATABASE_URL: Optional[str] = None
+
+    # Database connection pool settings (for PostgreSQL / Production)
+    DB_POOL_SIZE: int = 20
+    DB_MAX_OVERFLOW: int = 10
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 1800
+    DB_ECHO: bool = False
+    SQLITE_ENABLE_FOREIGN_KEYS: bool = False
 
     # AI Provider configuration
     GEMINI_API_KEY: Optional[str] = None
@@ -53,6 +54,16 @@ class Settings(BaseSettings):
 
     # Google Authentication configuration
     GOOGLE_CLIENT_ID: Optional[str] = None
+
+    # Government Scheme Ingestion & Auto-Scheduler configuration (24-hour cadence)
+    MYSCHEME_API_KEY: Optional[str] = None
+    SCHEME_INGESTION_ENABLED: bool = True
+    SCHEME_INGEST_INTERVAL_HOURS: int = 24
+    SCHEME_INGEST_INTERVAL_DAYS: int = 1
+    SCHEME_INGESTION_INTERVAL_MINUTES: int = 1440
+    SCHEME_INGESTION_BATCH_SIZE: int = 50
+    SCHEME_INGESTION_REQUEST_TIMEOUT_SECONDS: int = 15
+    SCHEME_INGESTION_RETRY_BACKOFF_HOURS: int = 2
 
     # Email configuration
     EMAIL_PROVIDER: str = "none"  # none, smtp, console
@@ -64,6 +75,9 @@ class Settings(BaseSettings):
     SMTP_FROM_EMAIL: Optional[str] = None
     EMAIL_FROM: str = "noreply@yojnasetu.gov.in"
     YOJNASETU_BASE_URL: str = "http://localhost:3000"
+
+    def is_production(self) -> bool:
+        return self.ENV.lower() == "production"
 
     def get_sender_email(self) -> str:
         return self.SMTP_FROM or self.SMTP_FROM_EMAIL or self.SMTP_USERNAME or self.EMAIL_FROM or "noreply@yojnasetu.gov.in"
@@ -77,8 +91,29 @@ class Settings(BaseSettings):
 
     def get_database_url(self) -> str:
         if self.DATABASE_URL:
-            return self.DATABASE_URL
+            url = self.DATABASE_URL.strip()
+            # Normalize legacy Heroku/Render postgres:// to standard postgresql://
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql://", 1)
+            return url
+        if self.POSTGRES_SERVER and self.POSTGRES_USER and self.POSTGRES_PASSWORD and self.POSTGRES_DB:
+            return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         return f"sqlite:///{DEFAULT_DB_FILE}"
+
+    def validate_production_security(self) -> None:
+        """
+        Validates critical security invariants when running in production mode.
+        """
+        if self.is_production():
+            if self.SECRET_KEY == "yojnasetu_dev_secret_key_change_in_production_9f8a7b6c5d4e3f2a1b" or len(self.SECRET_KEY) < 32:
+                raise ValueError(
+                    "CRITICAL SECURITY CONFIGURATION ERROR: Running in production with default or insecure SECRET_KEY. "
+                    "You must provide a high-entropy secret of at least 32 characters in the SECRET_KEY environment variable."
+                )
+            if self.DEBUG:
+                self.DEBUG = False
 
 
 settings = Settings()
+settings.validate_production_security()
+

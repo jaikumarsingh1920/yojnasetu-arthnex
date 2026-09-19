@@ -200,11 +200,73 @@ GEOGRAPHY_MAP: Dict[str, str] = {
     "OD": "ODISHA",
     "ODISHA": "ODISHA",
     "ORISSA": "ODISHA",
+    "AS": "ASSAM",
+    "ASSAM": "ASSAM",
+    "CG": "CHHATTISGARH",
+    "CHHATTISGARH": "CHHATTISGARH",
+    "GA": "GOA",
+    "GOA": "GOA",
+    "HP": "HIMACHAL_PRADESH",
+    "HIMACHAL PRADESH": "HIMACHAL_PRADESH",
+    "JH": "JHARKHAND",
+    "JHARKHAND": "JHARKHAND",
+    "UK": "UTTARAKHAND",
+    "UTTARAKHAND": "UTTARAKHAND",
+    "UTTARANCHAL": "UTTARAKHAND",
+    "JK": "JAMMU_AND_KASHMIR",
+    "J&K": "JAMMU_AND_KASHMIR",
+    "JAMMU AND KASHMIR": "JAMMU_AND_KASHMIR",
+    "JAMMU & KASHMIR": "JAMMU_AND_KASHMIR",
+    "LA": "LADAKH",
+    "LADAKH": "LADAKH",
+    "PY": "PUDUCHERRY",
+    "PUDUCHERRY": "PUDUCHERRY",
+    "PONDICHERRY": "PUDUCHERRY",
+    "CH": "CHANDIGARH",
+    "CHANDIGARH": "CHANDIGARH",
+    "SK": "SIKKIM",
+    "SIKKIM": "SIKKIM",
+    "TR": "TRIPURA",
+    "TRIPURA": "TRIPURA",
+    "ML": "MEGHALAYA",
+    "MEGHALAYA": "MEGHALAYA",
+    "MN": "MANIPUR",
+    "MANIPUR": "MANIPUR",
+    "MZ": "MIZORAM",
+    "MIZORAM": "MIZORAM",
+    "NL": "NAGALAND",
+    "NAGALAND": "NAGALAND",
+    "AR": "ARUNACHAL_PRADESH",
+    "ARUNACHAL PRADESH": "ARUNACHAL_PRADESH",
+    "AN": "ANDAMAN_AND_NICOBAR",
+    "ANDAMAN AND NICOBAR": "ANDAMAN_AND_NICOBAR",
+    "ANDAMAN AND NICOBAR ISLANDS": "ANDAMAN_AND_NICOBAR",
+    "LD": "LAKSHADWEEP",
+    "LAKSHADWEEP": "LAKSHADWEEP",
+    "DADRA & NAGAR HAVELI AND DAMAN & DIU": "DADRA_AND_NAGAR_HAVELI_AND_DAMAN_AND_DIU",
+    "DADRA AND NAGAR HAVELI AND DAMAN AND DIU": "DADRA_AND_NAGAR_HAVELI_AND_DAMAN_AND_DIU",
+    "DAMAN & DIU": "DADRA_AND_NAGAR_HAVELI_AND_DAMAN_AND_DIU",
+    "NER": "NORTH_EAST_REGION",
+    "NORTH EAST": "NORTH_EAST_REGION",
+    "NORTH EASTERN REGION": "NORTH_EAST_REGION",
+    "NORTH EASTERN STATES": "NORTH_EAST_REGION",
+    "NORTH EAST REGION": "NORTH_EAST_REGION",
     "ALL INDIA": "ALL_INDIA",
+    "ALL_INDIA": "ALL_INDIA",
     "PAN INDIA": "ALL_INDIA",
+    "PAN_INDIA": "ALL_INDIA",
+    "ALL STATES": "ALL_INDIA",
+    "ALL STATES AND UNION TERRITORIES OF INDIA": "ALL_INDIA",
     "NATIONAL": "ALL_INDIA",
     "CENTRAL": "ALL_INDIA",
 }
+
+NORTH_EAST_STATES: Set[str] = {
+    "ASSAM", "ARUNACHAL_PRADESH", "MANIPUR", "MEGHALAYA", "MIZORAM", "NAGALAND", "SIKKIM", "TRIPURA"
+}
+
+ALL_INDIAN_STATES_AND_UTS: Set[str] = set(GEOGRAPHY_MAP.values()) - {"ALL_INDIA", "NORTH_EAST_REGION"}
+
 
 
 # ── 7. BUSINESS STAGE NORMALIZATION ──
@@ -255,17 +317,37 @@ class TaxonomyMatcher:
 
     @classmethod
     def normalize_geography(cls, geo_str: Optional[str]) -> str:
-        if not geo_str or str(geo_str).strip().upper() in ["UNKNOWN", "NONE", "NULL", ""]:
+        if not geo_str or str(geo_str).strip().upper() in ["UNKNOWN", "NONE", "NULL", "", "YES", "NO", "TRUE", "FALSE"]:
             return "UNKNOWN_GEOGRAPHY"
         clean = str(geo_str).strip().upper()
+        if clean in ("ALL INDIA", "ALL STATES", "NATIONAL", "CENTRAL", "PAN INDIA", "ALL STATES AND UNION TERRITORIES OF INDIA"):
+            return "ALL_INDIA"
         if clean in GEOGRAPHY_MAP:
             return GEOGRAPHY_MAP[clean]
         for k, v in GEOGRAPHY_MAP.items():
-            if k in clean:
+            if k == clean or f" {k} " in f" {clean} ":
                 return v
-        if "PAN INDIA" in clean or "ALL INDIA" in clean or "NATIONAL" in clean or "CENTRAL" in clean:
-            return "ALL_INDIA"
-        return cls.normalize_string(clean)
+        norm = cls.normalize_string(clean)
+        if norm in ALL_INDIAN_STATES_AND_UTS or norm in ("ALL_INDIA", "NORTH_EAST_REGION"):
+            return norm
+        return "UNKNOWN_GEOGRAPHY"
+
+    @classmethod
+    def is_recognized_geography(cls, geo_norm: str) -> bool:
+        """Returns True if the normalized geography represents a valid Indian State, UT, Region, or ALL_INDIA."""
+        if not geo_norm or geo_norm == "UNKNOWN_GEOGRAPHY":
+            return False
+        return geo_norm in ALL_INDIAN_STATES_AND_UTS or geo_norm in ("ALL_INDIA", "NORTH_EAST_REGION")
+
+    @classmethod
+    def expands_to_states(cls, norm_geo: str) -> Set[str]:
+        """Expands a normalized regional geography (e.g. NORTH_EAST_REGION) to its constituent states."""
+        if norm_geo == "NORTH_EAST_REGION":
+            return NORTH_EAST_STATES
+        if norm_geo == "ALL_INDIA":
+            return ALL_INDIAN_STATES_AND_UTS
+        return {norm_geo}
+
 
     @classmethod
     def match_sector_or_activity(
@@ -284,6 +366,31 @@ class TaxonomyMatcher:
 
         clean_input = str(user_input).strip().lower()
         norm_input = cls.normalize_string(clean_input)
+
+        # ── SUB-ACTIVITY CONFLICT DETECTION ──
+        # If user specified a specific sub-activity (e.g. dairy), schemes specialized in conflicting
+        # distinct trades/animals (e.g. pig breeding, fisheries) must not match merely because both are agriculture.
+        conflict_map = {
+            "DAIRY": {"PIGGERY", "PIG", "SWINE", "PORK", "FISHERIES", "FISH", "AQUACULTURE", "MATSYA", "SERICULTURE", "BEE_KEEPING"},
+            "DAIRY_FARMING": {"PIGGERY", "PIG", "SWINE", "PORK", "FISHERIES", "FISH", "AQUACULTURE", "MATSYA", "SERICULTURE", "BEE_KEEPING"},
+            "TAILORING": {"HEAVY_ENGINEERING", "MINING", "CHEMICALS", "METALLURGY"},
+            "FISHERIES": {"DAIRY", "PIGGERY", "SWINE", "POULTRY", "SERICULTURE", "BEE_KEEPING"},
+            "POULTRY": {"DAIRY", "PIGGERY", "SWINE", "FISHERIES", "MATSYA", "SERICULTURE"},
+        }
+        active_conflicts = set()
+        for k, conflicts in conflict_map.items():
+            if k in norm_input or k.lower() in clean_input:
+                active_conflicts.update(conflicts)
+
+        if active_conflicts:
+            scheme_sub_terms = set([cls.normalize_string(a) for a in scheme_activities] + [cls.normalize_string(s) for s in scheme_sectors])
+            for alias in scheme_aliases:
+                scheme_sub_terms.update([cls.normalize_string(w) for w in alias.split()])
+            
+            # If the scheme explicitly specializes in a conflicting sub-activity, it is a mismatch
+            conflict_hits = active_conflicts.intersection(scheme_sub_terms)
+            if conflict_hits:
+                return ("MISMATCH", 0.0, f"Specific sub-activity mismatch: '{user_input}' does not align with scheme's focus on {', '.join(conflict_hits)}.")
 
         # ── LEVEL 1: Exact Normalized Match ──
         for s in scheme_sectors:
@@ -389,9 +496,15 @@ class TaxonomyMatcher:
             return ("NOT_EVALUATED", 0.0, "Beneficiary state not specified.")
 
         user_geo = cls.normalize_geography(user_state)
-        norm_scheme_geos = [cls.normalize_geography(g) for g in scheme_geographies]
+        norm_scheme_geos = [
+            cls.normalize_geography(g) for g in scheme_geographies
+            if g and cls.normalize_geography(g) != "UNKNOWN_GEOGRAPHY"
+        ]
 
-        if "ALL_INDIA" in norm_scheme_geos or "PAN_INDIA" in norm_scheme_geos or "NATIONAL" in norm_scheme_geos or not norm_scheme_geos:
+        if not norm_scheme_geos:
+            return ("NOT_EVALUATED", 0.0, "Scheme geographical coverage not specified.")
+
+        if "ALL_INDIA" in norm_scheme_geos or "PAN_INDIA" in norm_scheme_geos or "NATIONAL" in norm_scheme_geos:
             return ("MATCH", 1.0, "Scheme is applicable nationwide across all States and UTs.")
 
         if "NO_SPECIFIC_STATE_RESTRICTION" in norm_scheme_geos:

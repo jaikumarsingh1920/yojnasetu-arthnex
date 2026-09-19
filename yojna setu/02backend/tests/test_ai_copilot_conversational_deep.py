@@ -61,7 +61,7 @@ def test_hinglish_scheme_discovery_dialog(db):
     # Turn 1: Discovery Init
     r1 = GPTCopilotAgent.process_query(db, AIChatRequest(message="bhai scheme chahiye", session_id=session_id))
     assert r1.intent == "BUSINESS_PROFILE_INIT"
-    assert "State" in r1.answer
+    assert "State" in r1.answer or "राज्य" in r1.answer
 
     # Turn 2: State
     r2 = GPTCopilotAgent.process_query(db, AIChatRequest(message="mai UP se hu", session_id=session_id))

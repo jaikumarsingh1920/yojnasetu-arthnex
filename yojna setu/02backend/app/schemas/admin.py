@@ -17,13 +17,17 @@ class SystemHealthResponse(BaseModel):
 
 
 class AdminDashboardSummaryResponse(BaseModel):
-    total_schemes: int = 90
-    verified_schemes: int = 90
-    total_rules: int = 126
-    total_documents: int = 98
+    total_schemes: int = 859
+    verified_schemes: int = 859
+    total_rules: int = 129
+    total_documents: int = 6849
     avg_parameter_completeness: float
     total_ministries: int
     total_changelogs: int
+    total_partner_institutions: int = 102
+    known_partner_locations: int = 170
+    geocoded_locations: int = 165
+    ungeocoded_locations: int = 5
     system_health: SystemHealthResponse
 
 

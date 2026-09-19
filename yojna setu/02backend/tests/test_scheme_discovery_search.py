@@ -13,7 +13,13 @@ def test_filter_options_dynamic_endpoint():
     assert response.status_code == 200
     data = response.json()
 
-    assert data["total_schemes"] == 90
+    db = SessionLocal()
+    expected_active = db.query(Scheme).filter(Scheme.scheme_status == "ACTIVE").count()
+    baseline_count = db.query(Scheme).filter(Scheme.scheme_id.like("SIH26092-%")).count()
+    db.close()
+
+    assert baseline_count >= 90, f"Catastrophic baseline data loss: expected at least 90 baseline schemes, found {baseline_count}"
+    assert data["total_schemes"] == expected_active, f"Expected total_schemes {data['total_schemes']} to match active count {expected_active}"
     assert len(data["ministries"]) > 0
     assert len(data["sectors"]) > 0
     assert len(data["financial_types"]) > 0
@@ -30,7 +36,7 @@ def test_filter_options_dynamic_endpoint():
 
     # Ensure total counts match
     total_fin_count = sum(item["count"] for item in data["financial_types"])
-    assert total_fin_count == 90
+    assert total_fin_count == data["total_schemes"]
 
 
 def test_exact_and_partial_scheme_search():

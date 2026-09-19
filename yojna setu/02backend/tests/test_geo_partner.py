@@ -464,54 +464,62 @@ def test_critical_negative_partner_exclusion_across_schemes(app_client):
         db.delete(ep)
     db.commit()
 
-    # Create Partner X exclusively mapped to Scheme A
-    px = Partner(
-        partner_id="p-neg-test-x",
-        name="Exclusive Term Loan Partner X",
-        code="NEG-TEST-X",
-        partner_type="PSB",
-        latitude=28.6139,
-        longitude=77.2090,
-        verification_status="VERIFIED_OFFICIAL",
-        coordinates_verified=True,
-        is_active=True,
-        is_accepting_applications=True
-    )
-    db.add(px)
-    db.commit()
+    try:
+        # Create Partner X exclusively mapped to Scheme A
+        px = Partner(
+            partner_id="p-neg-test-x",
+            name="Exclusive Term Loan Partner X",
+            code="NEG-TEST-X",
+            partner_type="PSB",
+            latitude=28.6139,
+            longitude=77.2090,
+            verification_status="VERIFIED_OFFICIAL",
+            coordinates_verified=True,
+            is_active=True,
+            is_accepting_applications=True
+        )
+        db.add(px)
+        db.commit()
 
-    # Map Partner X strictly to Scheme A (SIH26092-053)
-    mx = PartnerSchemeMapping(
-        partner_id=px.partner_id,
-        scheme_id="SIH26092-053",
-        authorized_category="TERM_LOAN",
-        verification_status="VERIFIED_OFFICIAL",
-        verification_notes="Exclusively mapped to Scheme A"
-    )
-    db.add(mx)
-    db.commit()
+        # Map Partner X strictly to Scheme A (SIH26092-053)
+        mx = PartnerSchemeMapping(
+            partner_id=px.partner_id,
+            scheme_id="SIH26092-053",
+            authorized_category="TERM_LOAN",
+            verification_status="VERIFIED_OFFICIAL",
+            verification_notes="Exclusively mapped to Scheme A"
+        )
+        db.add(mx)
+        db.commit()
 
-    # 1. Query Scheme A (SIH26092-053) -> Partner X MUST appear
-    results_a = GeoPartnerLocatorService.find_nearest_partners(
-        db, 28.6139, 77.2090, radius_km=10.0, scheme_id="SIH26092-053"
-    )
-    p_ids_a = [r["partner"].partner_id for r in results_a]
-    assert "p-neg-test-x" in p_ids_a, "Partner X must appear when querying Scheme A"
+        # 1. Query Scheme A (SIH26092-053) -> Partner X MUST appear
+        results_a = GeoPartnerLocatorService.find_nearest_partners(
+            db, 28.6139, 77.2090, radius_km=10.0, scheme_id="SIH26092-053"
+        )
+        p_ids_a = [r["partner"].partner_id for r in results_a]
+        assert "p-neg-test-x" in p_ids_a, "Partner X must appear when querying Scheme A"
 
-    # 2. Query Scheme B (SIH26092-052) -> Partner X MUST NOT appear
-    results_b = GeoPartnerLocatorService.find_nearest_partners(
-        db, 28.6139, 77.2090, radius_km=10.0, scheme_id="SIH26092-052"
-    )
-    p_ids_b = [r["partner"].partner_id for r in results_b]
-    assert "p-neg-test-x" not in p_ids_b, "Partner X must NOT appear when querying Scheme B"
+        # 2. Query Scheme B (SIH26092-052) -> Partner X MUST NOT appear
+        results_b = GeoPartnerLocatorService.find_nearest_partners(
+            db, 28.6139, 77.2090, radius_km=10.0, scheme_id="SIH26092-052"
+        )
+        p_ids_b = [r["partner"].partner_id for r in results_b]
+        assert "p-neg-test-x" not in p_ids_b, "Partner X must NOT appear when querying Scheme B"
 
-    # 3. Query Direct Portal Scheme (SIH26092-049) -> 0 partners must appear
-    results_direct = GeoPartnerLocatorService.find_nearest_partners(
-        db, 28.6139, 77.2090, radius_km=50.0, scheme_id="SIH26092-049"
-    )
-    assert len(results_direct) == 0, "Direct portal scheme must have 0 channel partner results"
-
-    db.close()
+        # 3. Query Direct Portal Scheme (SIH26092-049) -> 0 partners must appear
+        results_direct = GeoPartnerLocatorService.find_nearest_partners(
+            db, 28.6139, 77.2090, radius_km=50.0, scheme_id="SIH26092-049"
+        )
+        assert len(results_direct) == 0, "Direct portal scheme must have 0 channel partner results"
+    finally:
+        # Guarantee cleanup of test fixture
+        db.expunge_all()
+        to_clean = db.query(Partner).filter((Partner.partner_id == "p-neg-test-x") | (Partner.code == "NEG-TEST-X")).all()
+        for ep in to_clean:
+            db.query(PartnerSchemeMapping).filter(PartnerSchemeMapping.partner_id == ep.partner_id).delete(synchronize_session=False)
+            db.delete(ep)
+        db.commit()
+        db.close()
 
 
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Text, Integer, ForeignKey, DateTime
+from sqlalchemy import String, Text, Integer, ForeignKey, DateTime, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
 
@@ -23,3 +23,7 @@ class SchemeChangelog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     scheme = relationship("Scheme", back_populates="changelogs")
+
+    __table_args__ = (
+        Index("ix_scheme_changelogs_scheme_created", "scheme_id", "created_at"),
+    )

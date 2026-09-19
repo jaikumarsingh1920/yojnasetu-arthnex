@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { adminApi, AdminDashboardSummaryResponse, SchemeAuditItem } from '../api/adminApi';
 import { SystemHealthCard } from '../components/admin/SystemHealthCard';
@@ -9,6 +10,9 @@ import { AIHealthCard } from '../components/admin/AIHealthCard';
 import { SchemeDetailAuditModal } from '../components/admin/SchemeDetailAuditModal';
 import { SchemeFormModal } from '../components/admin/SchemeFormModal';
 import { PartnerManagementTable } from '../components/admin/PartnerManagementTable';
+import { CandidateStagingTable } from '../components/admin/CandidateStagingTable';
+import { PendingUpdatesTable } from '../components/admin/PendingUpdatesTable';
+import { IngestionGovernanceView } from '../components/admin/IngestionGovernanceView';
 import {
   ShieldAlert,
   Building2,
@@ -32,14 +36,37 @@ import {
   PowerOff,
   RotateCcw,
   Check,
-  X
+  X,
+  Inbox,
+  GitCompare,
+  Cpu
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab') as any;
+  const validTabs = ['OVERVIEW', 'CANDIDATES', 'PENDING_UPDATES', 'INGESTION_RUNS', 'SCHEME_MANAGEMENT', 'PARTNER_MANAGEMENT', 'SCHEMES', 'RULES', 'DOCUMENTS', 'CHANGELOG', 'AI_HEALTH'];
   const [activeMainTab, setActiveMainTab] = useState<
-    'OVERVIEW' | 'SCHEME_MANAGEMENT' | 'PARTNER_MANAGEMENT' | 'SCHEMES' | 'RULES' | 'DOCUMENTS' | 'CHANGELOG' | 'AI_HEALTH'
-  >('OVERVIEW');
+    'OVERVIEW' | 'CANDIDATES' | 'PENDING_UPDATES' | 'INGESTION_RUNS' | 'SCHEME_MANAGEMENT' | 'PARTNER_MANAGEMENT' | 'SCHEMES' | 'RULES' | 'DOCUMENTS' | 'CHANGELOG' | 'AI_HEALTH'
+  >(validTabs.includes(urlTab) ? urlTab : 'OVERVIEW');
+
+  useEffect(() => {
+    if (urlTab && validTabs.includes(urlTab)) {
+      setActiveMainTab(urlTab);
+    }
+  }, [urlTab]);
+
+  const handleTabChange = (tabId: string) => {
+    setActiveMainTab(tabId as any);
+    const updated = new URLSearchParams(searchParams);
+    if (tabId !== 'OVERVIEW') {
+      updated.set('tab', tabId);
+    } else {
+      updated.delete('tab');
+    }
+    setSearchParams(updated, { replace: true });
+  };
   const [summary, setSummary] = useState<AdminDashboardSummaryResponse | null>(null);
   const [schemes, setSchemes] = useState<SchemeAuditItem[]>([]);
   const [selectedSchemeId, setSelectedSchemeId] = useState<string | null>(null);
@@ -58,6 +85,7 @@ export const AdminDashboard: React.FC = () => {
   const [deactivateReason, setDeactivateReason] = useState('');
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
   const [actionSuccessBanner, setActionSuccessBanner] = useState<string | null>(null);
+  const [pendingDiffsCount, setPendingDiffsCount] = useState<number>(0);
 
   useEffect(() => {
     fetchDashboardData();
@@ -77,6 +105,11 @@ export const AdminDashboard: React.FC = () => {
         page_size: 100,
       });
       setSchemes(schData.items);
+
+      const schedulerData = await adminApi.getSchedulerStatus().catch(() => null);
+      if (schedulerData) {
+        setPendingDiffsCount(schedulerData.pending_updates_count ?? 0);
+      }
     } catch (err) {
       console.error('Failed to load admin dashboard:', err);
     } finally {
@@ -138,34 +171,37 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-950 via-rose-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-md border-b-4 border-rose-500 space-y-2">
-        <div className="inline-flex items-center gap-2 bg-rose-900/60 text-rose-200 text-xs font-bold px-3 py-1 rounded-full border border-rose-700/50">
-          <ShieldAlert className="w-4 h-4 text-rose-400" />
+      <div className="bg-gradient-to-br from-[#4A2525] via-[#3B2522] to-[#4A2525] text-white p-6 sm:p-8 rounded-3xl shadow-warm-md border border-[#E8D8D2]/20 space-y-2">
+        <div className="inline-flex items-center gap-2 bg-white/10 text-[#F7AE56] text-xs font-bold px-3 py-1 rounded-full border border-white/20">
+          <ShieldAlert className="w-4 h-4 text-[#F7AE56]" />
           Global System Admin Control & Data Quality Center
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold">YojnaSetu System Admin Dashboard</h1>
-        <p className="text-xs sm:text-sm text-slate-300 max-w-3xl">
+        <h1 className="text-2xl sm:text-3xl font-black text-white">YojnaSetu System Admin Dashboard</h1>
+        <p className="text-xs sm:text-sm text-[#FFFBF0]/85 max-w-3xl">
           Data Governance Center: manage verified schemes dynamically, configure deterministic statutory rules, inspect preparation documents, monitor AI/RAG health, and review audit changelogs.
         </p>
       </div>
 
       {/* Action Success Alert Banner */}
       {actionSuccessBanner && (
-        <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center justify-between gap-3 text-emerald-900 text-xs font-medium animate-fadeIn">
+        <div className="p-4 bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 rounded-2xl flex items-center justify-between gap-3 text-[#2D6A4F] text-xs font-medium animate-fadeIn">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-[#2D6A4F] shrink-0" />
             <span>{actionSuccessBanner}</span>
           </div>
-          <button onClick={() => setActionSuccessBanner(null)} className="text-emerald-700 hover:text-emerald-900 p-1">
+          <button onClick={() => setActionSuccessBanner(null)} className="text-[#2D6A4F] hover:opacity-75 p-1">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Main Navigation Tabs */}
-      <div className="flex border-b border-slate-200 bg-white rounded-xl p-2 shadow-sm overflow-x-auto gap-2">
+      <div className="flex border border-[#E8D8D2] bg-white rounded-2xl p-2 shadow-warm-xs overflow-x-auto gap-2">
         {[
           { id: 'OVERVIEW', label: t('admin.dashboardTitle', 'Dashboard Overview'), icon: Layers },
+          { id: 'CANDIDATES', label: 'Candidate Staging', icon: Inbox },
+          { id: 'PENDING_UPDATES', label: 'Pending Diffs', icon: GitCompare },
+          { id: 'INGESTION_RUNS', label: 'Ingestion & Sources', icon: Cpu },
           { id: 'SCHEME_MANAGEMENT', label: t('admin.schemeManagement', 'Scheme Management'), icon: SlidersHorizontal },
           { id: 'PARTNER_MANAGEMENT', label: 'Channel Partners', icon: Building2 },
           { id: 'SCHEMES', label: t('admin.schemesAudit', 'Schemes Audit'), icon: ShieldCheck },
@@ -178,15 +214,20 @@ export const AdminDashboard: React.FC = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveMainTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-extrabold transition whitespace-nowrap ${
+              onClick={() => handleTabChange(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition whitespace-nowrap cursor-pointer ${
                 activeMainTab === tab.id
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#EA717B] text-white shadow-warm-xs'
+                  : 'text-[#765E59] hover:bg-[#FFF4EC] hover:text-[#3B2522]'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {tab.label}
+              <span>{tab.label}</span>
+              {tab.id === 'PENDING_UPDATES' && pendingDiffsCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.2 bg-[#F7AE56] text-[#4A2525] font-black text-[10px] rounded-full">
+                  {pendingDiffsCount}
+                </span>
+              )}
             </button>
           );
         })}
@@ -236,7 +277,7 @@ export const AdminDashboard: React.FC = () => {
                 <p className="text-xs text-slate-500 mt-0.5">Authoritative metrics verified against government gazette notices and official ministry portals.</p>
               </div>
               <span className="text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1 rounded-lg border border-slate-200">
-                Data Catalog: {summary?.total_schemes ?? 90} Schemes
+                Data Catalog: {summary?.total_schemes ? `${summary.total_schemes} Schemes` : 'Loading...'}
               </span>
             </div>
 
@@ -246,16 +287,18 @@ export const AdminDashboard: React.FC = () => {
                 <span className="text-[11px] font-bold text-slate-500 uppercase block">Union Ministries</span>
               </div>
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
-                <span className="text-2xl font-extrabold text-rose-700 block">{summary?.total_changelogs ?? 212}</span>
+                <span className="text-2xl font-extrabold text-rose-700 block">{summary?.total_changelogs ?? 0}</span>
                 <span className="text-[11px] font-bold text-slate-500 uppercase block">Changelog Audit Entries</span>
               </div>
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
-                <span className="text-2xl font-extrabold text-sky-700 block">12</span>
-                <span className="text-[11px] font-bold text-slate-500 uppercase block">Supported Languages</span>
+                <span className="text-2xl font-extrabold text-sky-700 block">{summary?.total_partner_institutions ?? 0}</span>
+                <span className="text-[11px] font-bold text-slate-500 uppercase block">Canonical Institutions</span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">{summary?.total_partner_institutions ? `${summary.total_partner_institutions} Institutions in Registry` : 'Statutory Registry'}</span>
               </div>
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
-                <span className="text-2xl font-extrabold text-indigo-700 block">56</span>
-                <span className="text-[11px] font-bold text-slate-500 uppercase block">Geocoded Partner Centers</span>
+                <span className="text-2xl font-extrabold text-indigo-700 block">{summary?.geocoded_locations ?? 0}</span>
+                <span className="text-[11px] font-bold text-slate-500 uppercase block">Geocoded Locations</span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">of {summary?.known_partner_locations ?? 0} Centers ({summary?.ungeocoded_locations ?? 0} Ungeocoded)</span>
               </div>
             </div>
           </div>
@@ -615,6 +658,24 @@ export const AdminDashboard: React.FC = () => {
 
       {/* 7. AI & RAG HEALTH TAB */}
       {activeMainTab === 'AI_HEALTH' && <AIHealthCard health={summary?.system_health ?? null} />}
+
+      {/* 8. CANDIDATE STAGING TAB */}
+      {activeMainTab === 'CANDIDATES' && <CandidateStagingTable />}
+
+      {/* 9. PENDING UPDATES TAB */}
+      {activeMainTab === 'PENDING_UPDATES' && (
+        <PendingUpdatesTable
+          schemes={schemes}
+          onNavigateToChangelog={() => setActiveMainTab('CHANGELOG')}
+        />
+      )}
+
+      {/* 10. INGESTION & SOURCES GOVERNANCE TAB */}
+      {activeMainTab === 'INGESTION_RUNS' && (
+        <IngestionGovernanceView
+          onNavigateToPending={() => setActiveMainTab('PENDING_UPDATES')}
+        />
+      )}
 
       {/* Scheme Detail Audit Modal */}
       {selectedSchemeId && (

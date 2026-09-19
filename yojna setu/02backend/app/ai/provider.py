@@ -73,20 +73,40 @@ class GeminiProvider(AIProvider):
           "parts": [{"text": system_prompt}]
       }
 
-    try:
-      with httpx.Client(timeout=15.0) as client:
-        response = client.post(url, json=payload)
-        response.raise_for_status()
-        data = response.json()
-        candidates = data.get("candidates", [])
-        if candidates and "content" in candidates[0]:
-          parts = candidates[0]["content"].get("parts", [])
-          if parts:
-            return parts[0].get("text", "").strip()
-        return ""
-    except Exception as err:
-      logger.error("Gemini API generate error: %s", err)
-      raise RuntimeError(f"Gemini API request failed: {err}")
+    max_retries = 2
+    last_err: Optional[Exception] = None
+
+    for attempt in range(max_retries + 1):
+      try:
+        with httpx.Client(timeout=15.0) as client:
+          response = client.post(url, json=payload)
+          if response.status_code in (429, 503) and attempt < max_retries:
+            import time
+            time.sleep(0.4 * (2 ** attempt))
+            continue
+          response.raise_for_status()
+          data = response.json()
+          candidates = data.get("candidates", [])
+          if candidates and "content" in candidates[0]:
+            parts = candidates[0]["content"].get("parts", [])
+            if parts:
+              from app.ai.observability import RAGObservabilityTracker
+              RAGObservabilityTracker.record_gemini_success()
+              return parts[0].get("text", "").strip()
+          return ""
+      except Exception as err:
+        last_err = err
+        is_timeout = isinstance(err, (httpx.TimeoutException, TimeoutError))
+        if attempt < max_retries and not is_timeout:
+          import time
+          time.sleep(0.4 * (2 ** attempt))
+          continue
+        from app.ai.observability import RAGObservabilityTracker
+        RAGObservabilityTracker.record_gemini_failure(is_timeout=is_timeout)
+        logger.warning("Gemini API generate error (attempt %d/%d): %s", attempt + 1, max_retries + 1, err)
+        break
+
+    raise RuntimeError(f"Gemini API request failed: {last_err}")
 
   def structured_output(
       self,
@@ -99,12 +119,16 @@ class GeminiProvider(AIProvider):
         f" schema:\n{json.dumps(json_schema)}"
     )
     text_out = self.generate(full_prompt, system_prompt)
-    match = re.search(r"\{.*\}", text_out, re.DOTALL)
+    clean_text = re.sub(r"^```(?:json)?", "", text_out.strip(), flags=re.MULTILINE)
+    clean_text = re.sub(r"```$", "", clean_text.strip(), flags=re.MULTILINE).strip()
+    match = re.search(r"\{.*\}", clean_text, re.DOTALL)
     if match:
       try:
         return json.loads(match.group(0))
       except json.JSONDecodeError:
         pass
+    from app.ai.observability import RAGObservabilityTracker
+    RAGObservabilityTracker.record_malformed_output()
     raise ValueError(f"Failed to parse structured JSON from Gemini: {text_out}")
 
   def embed(self, text: str) -> List[float]:

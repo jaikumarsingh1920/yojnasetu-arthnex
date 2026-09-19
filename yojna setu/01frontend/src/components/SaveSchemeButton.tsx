@@ -11,6 +11,7 @@ interface SaveSchemeButtonProps {
   onToggle?: (isSaved: boolean) => void;
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
+  className?: string;
 }
 
 export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
@@ -19,6 +20,7 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
   onToggle,
   size = 'md',
   showLabel = true,
+  className = '',
 }) => {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
@@ -109,11 +111,11 @@ export const SaveSchemeButton: React.FC<SaveSchemeButtonProps> = ({
                 'Save Scheme for Later'
               )
         }
-        className={`inline-flex items-center font-semibold rounded-lg border transition shadow-sm ${buttonSizeClasses} ${
+        className={`inline-flex items-center font-semibold rounded-lg border transition shadow-xs ${buttonSizeClasses} ${
           isSaved
             ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
             : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:text-slate-900'
-        }`}
+        } ${className}`}
       >
         <Bookmark
           className={`w-4 h-4 ${

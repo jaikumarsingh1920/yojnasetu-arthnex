@@ -28,7 +28,7 @@ def client():
         User(user_id="blog-user", email="user@blogs.test", role=UserRole.BENEFICIARY, is_active=True),
     ])
     session.commit()
-    app.dependency_overrides[get_db] = lambda: iter([session])
+    app.dependency_overrides[get_db] = lambda: session
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()

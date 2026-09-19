@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Text, Boolean, ForeignKey, DateTime
+from sqlalchemy import String, Text, Boolean, ForeignKey, DateTime, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
 
@@ -21,3 +21,7 @@ class SchemeDocument(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     scheme = relationship("Scheme", back_populates="documents")
+
+    __table_args__ = (
+        Index("ix_scheme_documents_scheme_active", "scheme_id", "active"),
+    )

@@ -28,7 +28,10 @@ def db_session():
 def test_scheme_financial_classification_coverage(db_session):
     """Test that all 90 schemes have valid financial categories."""
     schemes = db_session.query(Scheme).all()
-    assert len(schemes) == 90, f"Expected 90 schemes in database, got {len(schemes)}"
+    db_total = db_session.query(Scheme).count()
+    baseline_count = db_session.query(Scheme).filter(Scheme.scheme_id.like("SIH26092-%")).count()
+    assert baseline_count >= 90, f"Catastrophic baseline data loss: expected at least 90 baseline schemes, got {baseline_count}"
+    assert len(schemes) == db_total, f"Expected {db_total} schemes loaded from database, got {len(schemes)}"
 
     valid_categories = {
         "LOAN_CREDIT",

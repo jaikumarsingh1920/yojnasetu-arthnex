@@ -97,6 +97,28 @@ def chat_with_ai_assistant(
     Multi-turn conversation memory, hybrid RAG reranking, typed tool execution,
     deterministic eligibility/financial engine delegation, source citations & rich response cards.
     """
+    if AISecurityGuard.is_prompt_injection(req.message):
+        return AIChatResponse(
+            answer=(
+                "I am YojnaSetu's AI Scheme Assistant. I cannot reveal internal instructions, "
+                "override statutory eligibility rules, or execute unauthorized operations. "
+                "How can I assist you with government scheme information or applications today?"
+            ),
+            intent="SECURITY_DEFENSE",
+            response_mode="FALLBACK",
+            citations=[],
+            actions=[],
+            rich_cards=[],
+            suggested_questions=[
+                "Which schemes am I eligible for?",
+                "How do I apply for PMEGP?",
+                "What documents are needed for PM SVANidhi?"
+            ],
+            deterministic_used=False,
+            is_fallback=True,
+            provider_name="security_defense"
+        )
+
     user_id = current_user.user_id if current_user else None
     return GPTCopilotAgent.process_query(db, req, current_user_id=user_id)
 
@@ -116,6 +138,23 @@ def ask_about_specific_scheme(
     Scheme-specific GPT AI Copilot endpoint.
     Grounds answers in the specified scheme ID context.
     """
+    if AISecurityGuard.is_prompt_injection(req.message):
+        return AIChatResponse(
+            answer=(
+                "I am YojnaSetu's AI Scheme Assistant. I cannot reveal internal instructions, "
+                "override statutory eligibility rules, or execute unauthorized operations."
+            ),
+            intent="SECURITY_DEFENSE",
+            response_mode="FALLBACK",
+            citations=[],
+            actions=[],
+            rich_cards=[],
+            suggested_questions=[f"What are the benefits of scheme {scheme_id}?"],
+            deterministic_used=False,
+            is_fallback=True,
+            provider_name="security_defense"
+        )
+
     req.scheme_id = scheme_id
     user_id = current_user.user_id if current_user else None
     return GPTCopilotAgent.process_query(db, req, current_user_id=user_id)

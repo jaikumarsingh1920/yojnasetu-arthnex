@@ -1,4 +1,16 @@
 import { apiClient } from './client';
+import {
+  CandidateScheme,
+  CandidateReviewInput,
+  CandidateReviewResponse,
+  PendingSchemeUpdate,
+  PendingUpdateReviewInput,
+  IngestionRun,
+  SourceResponse,
+  IngestionQualityMetricsResponse,
+  DiscoveryBatchRunResponse,
+  SchedulerStatusResponse,
+} from '../types';
 
 export interface SystemHealthComponent {
   name: string;
@@ -21,6 +33,10 @@ export interface AdminDashboardSummaryResponse {
   avg_parameter_completeness: number;
   total_ministries: number;
   total_changelogs: number;
+  total_partner_institutions?: number;
+  known_partner_locations?: number;
+  geocoded_locations?: number;
+  ungeocoded_locations?: number;
   system_health: SystemHealthResponse;
 }
 
@@ -303,4 +319,110 @@ export const adminApi = {
     const res = await apiClient.get<SystemHealthResponse>('/admin/system-health');
     return res.data;
   },
+
+  // ─────────────────────────────────────────────────────────────
+  // Ingestion & Candidate Governance Methods
+  // ─────────────────────────────────────────────────────────────
+
+  getCandidates: async (params?: {
+    status_filter?: string;
+    relevance_filter?: string;
+    ministry_filter?: string;
+    duplicate_filter?: string;
+    limit?: number;
+  }): Promise<CandidateScheme[]> => {
+    const res = await apiClient.get<CandidateScheme[]>('/ingestion/candidates', { params });
+    return res.data;
+  },
+
+  getCandidateDetail: async (candidateId: string): Promise<CandidateScheme> => {
+    const res = await apiClient.get<CandidateScheme>(`/ingestion/candidates/${candidateId}`);
+    return res.data;
+  },
+
+  reviewCandidate: async (candidateId: string, payload: CandidateReviewInput): Promise<CandidateReviewResponse> => {
+    const res = await apiClient.post<CandidateReviewResponse>(`/ingestion/candidates/${candidateId}/review`, payload);
+    return res.data;
+  },
+
+  getPendingUpdates: async (params?: {
+    status?: string;
+    status_filter?: string;
+    scheme_id?: string;
+    page_size?: number;
+    limit?: number;
+  }): Promise<PendingSchemeUpdate[]> => {
+    const queryParams = params ? {
+      status_filter: params.status_filter || params.status,
+      scheme_id: params.scheme_id,
+      limit: params.limit || params.page_size,
+    } : undefined;
+    const res = await apiClient.get<PendingSchemeUpdate[]>('/ingestion/pending-updates', { params: queryParams });
+    return res.data;
+  },
+
+  getPendingUpdateDetail: async (updateId: string): Promise<PendingSchemeUpdate> => {
+    const res = await apiClient.get<PendingSchemeUpdate>(`/ingestion/pending-updates/${updateId}`);
+    return res.data;
+  },
+
+  reviewPendingUpdate: async (updateId: string, payload: PendingUpdateReviewInput): Promise<PendingSchemeUpdate> => {
+    const backendPayload = {
+      action: payload.action,
+      reason: payload.reason || payload.notes || undefined,
+    };
+    const res = await apiClient.post<PendingSchemeUpdate>(`/ingestion/pending-updates/${updateId}/review`, backendPayload);
+    return res.data;
+  },
+
+  getSchedulerStatus: async (): Promise<SchedulerStatusResponse> => {
+    const res = await apiClient.get<SchedulerStatusResponse>('/ingestion/scheduler/status');
+    return res.data;
+  },
+
+  triggerSchedulerRun: async (forceUpdate: boolean = false): Promise<any> => {
+    const res = await apiClient.post('/ingestion/scheduler/trigger', null, {
+      params: { force_update: forceUpdate },
+    });
+    return res.data;
+  },
+
+  getIngestionRuns: async (limit: number = 20): Promise<IngestionRun[]> => {
+    const res = await apiClient.get<IngestionRun[]>('/ingestion/runs', { params: { limit } });
+    return res.data;
+  },
+
+  getIngestionMetrics: async (): Promise<IngestionQualityMetricsResponse> => {
+    const res = await apiClient.get<IngestionQualityMetricsResponse>('/ingestion/metrics');
+    return res.data;
+  },
+
+  getQualityMetrics: async (): Promise<IngestionQualityMetricsResponse> => {
+    const res = await apiClient.get<IngestionQualityMetricsResponse>('/ingestion/metrics');
+    return res.data;
+  },
+
+  getSources: async (activeOnly: boolean = false): Promise<SourceResponse[]> => {
+    const res = await apiClient.get<SourceResponse[]>('/ingestion/sources', { params: { active_only: activeOnly } });
+    return res.data;
+  },
+
+  runSourcePipeline: async (sourceId: string): Promise<any> => {
+    const res = await apiClient.post(`/ingestion/sources/${sourceId}/run`);
+    return res.data;
+  },
+
+  runIngestion: async (sourceId: string): Promise<any> => {
+    const res = await apiClient.post(`/ingestion/sources/${sourceId}/run`);
+    return res.data;
+  },
+
+  runDiscoveryBatch: async (payload?: {
+    target_source?: string;
+    max_candidates?: number;
+  }): Promise<DiscoveryBatchRunResponse> => {
+    const res = await apiClient.post<DiscoveryBatchRunResponse>('/ingestion/discovery/run', payload || {});
+    return res.data;
+  },
 };
+

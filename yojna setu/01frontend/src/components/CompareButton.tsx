@@ -5,12 +5,14 @@ import { Scale, Check } from 'lucide-react';
 
 interface CompareButtonProps {
   schemeId: string;
+  schemeName?: string;
   variant?: 'button' | 'compact' | 'icon' | 'badge';
   className?: string;
 }
 
 export const CompareButton: React.FC<CompareButtonProps> = ({
   schemeId,
+  schemeName,
   variant = 'button',
   className = '',
 }) => {
@@ -21,7 +23,7 @@ export const CompareButton: React.FC<CompareButtonProps> = ({
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    toggleComparison(schemeId);
+    toggleComparison(schemeId, schemeName);
   };
 
   if (variant === 'compact') {

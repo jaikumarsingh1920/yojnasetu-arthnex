@@ -47,11 +47,11 @@ export const SourceCitationCard: React.FC<Props> = ({ citation, onNavigate }) =>
     >
       <div className="flex justify-between items-center text-[10px] font-bold text-sky-700">
         <span className="flex items-center gap-1">
-          <FileText className="w-3 h-3 text-sky-500" />
+          <FileText className="w-3 h-3 text-sky-500" aria-hidden="true" />
           {t('copilot.verifiedInformation', 'Verified Information')}
         </span>
         <span className="flex items-center gap-0.5 text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-          <CheckCircle className="w-2.5 h-2.5" /> {t('copilot.officialSource', 'Official Source')}
+          <CheckCircle className="w-2.5 h-2.5" aria-hidden="true" /> {t('copilot.officialSource', 'Official Source')}
         </span>
       </div>
 
@@ -66,7 +66,7 @@ export const SourceCitationCard: React.FC<Props> = ({ citation, onNavigate }) =>
       )}
 
       <div className="pt-0.5 text-[10px] font-bold text-sky-700 flex items-center gap-1">
-        {t('copilot.viewDetails', 'View Scheme Details')} <ArrowRight className="w-2.5 h-2.5" />
+        {t('copilot.viewDetails', 'View Scheme Details')} <ArrowRight className="w-2.5 h-2.5" aria-hidden="true" />
       </div>
     </div>
   );

@@ -47,6 +47,10 @@ class Partner(Base):
         String(100),
         nullable=True
     )
+    parent_organization: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True
+    )
     partner_category: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
@@ -55,6 +59,10 @@ class Partner(Base):
     )
     address: Mapped[Optional[str]] = mapped_column(
         String(500),
+        nullable=True
+    )
+    city: Mapped[Optional[str]] = mapped_column(
+        String(100),
         nullable=True
     )
     district: Mapped[Optional[str]] = mapped_column(
@@ -101,6 +109,12 @@ class Partner(Base):
         default="VERIFIED",
         server_default="VERIFIED"
     )
+    coordinate_precision: Mapped[Optional[str]] = mapped_column(
+        String(50),
+        nullable=True,
+        default="EXACT_ADDRESS",
+        server_default="EXACT_ADDRESS"
+    )
     latitude: Mapped[Optional[float]] = mapped_column(
         Float,
         nullable=True
@@ -127,6 +141,28 @@ class Partner(Base):
         Boolean,
         nullable=False,
         default=True
+    )
+    record_status: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="ACTIVE",
+        server_default="ACTIVE"
+    )
+    validation_status: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="VALID",
+        server_default="VALID"
+    )
+    quarantine_reason: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        nullable=True
+    )
+    nsfdc_authorized: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="UNKNOWN",
+        server_default="UNKNOWN"
     )
     source_url: Mapped[Optional[str]] = mapped_column(
         String(1024),

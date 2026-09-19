@@ -89,6 +89,8 @@ class Scheme(Base):
     beneficiary_contribution_percentage_raw: Mapped[Optional[str]] = mapped_column(String(50))
 
     subsidy_available: Mapped[Optional[str]] = mapped_column(String(50))
+    subsidy_amount: Mapped[Optional[float]] = mapped_column(Numeric(14, 2), nullable=True)
+    subsidy_amount_raw: Mapped[Optional[str]] = mapped_column(String(50))
     subsidy_percentage: Mapped[Optional[float]] = mapped_column(Numeric(8, 2), nullable=True)
     subsidy_percentage_raw: Mapped[Optional[str]] = mapped_column(String(50))
     subsidy_details: Mapped[Optional[str]] = mapped_column(Text)
@@ -102,6 +104,8 @@ class Scheme(Base):
     interest_rate_max: Mapped[Optional[float]] = mapped_column(Numeric(8, 2), nullable=True)
     interest_rate_max_raw: Mapped[Optional[str]] = mapped_column(String(50))
     interest_rate_type: Mapped[Optional[str]] = mapped_column(String(50))
+    interest_subsidy: Mapped[Optional[float]] = mapped_column(Numeric(8, 2), nullable=True)
+    interest_subsidy_raw: Mapped[Optional[str]] = mapped_column(String(50))
 
     repayment_period_min_months: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     repayment_period_min_months_raw: Mapped[Optional[str]] = mapped_column(String(50))
@@ -117,6 +121,8 @@ class Scheme(Base):
 
     collateral_required: Mapped[Optional[str]] = mapped_column(String(50))
     security_required: Mapped[Optional[str]] = mapped_column(Text)
+    guarantee_requirement: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    processing_fee: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Non-Financial Supports
     training_available: Mapped[Optional[str]] = mapped_column(String(50))
@@ -126,6 +132,7 @@ class Scheme(Base):
 
     # Application Route & Portal
     application_mode: Mapped[Optional[str]] = mapped_column(String(100))
+    application_channel: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     application_url: Mapped[Optional[str]] = mapped_column(Text)
     official_portal: Mapped[Optional[str]] = mapped_column(Text)
     application_steps: Mapped[Optional[str]] = mapped_column(Text)
@@ -158,6 +165,27 @@ class Scheme(Base):
     documents = relationship("SchemeDocument", back_populates="scheme", cascade="all, delete-orphan")
     changelogs = relationship("SchemeChangelog", back_populates="scheme", cascade="all, delete-orphan")
     partner_mappings = relationship("PartnerSchemeMapping", back_populates="scheme", cascade="all, delete-orphan")
+    faqs = relationship("SchemeFAQ", back_populates="scheme", cascade="all, delete-orphan")
+    knowledge_profile = relationship("SchemeKnowledgeProfile", back_populates="scheme", uselist=False, cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_schemes_state_restriction", "state_restriction"),
+        Index("ix_schemes_sc_required", "sc_required"),
+        Index("ix_schemes_marginalized_group", "marginalized_group"),
+        Index("ix_schemes_business_stage", "business_stage"),
+        Index("ix_schemes_max_loan_amount", "max_loan_amount"),
+        Index("ix_schemes_created_at", "created_at"),
+        Index("ix_schemes_status_sector", "scheme_status", "sector"),
+        Index("ix_schemes_status_type", "scheme_status", "scheme_type"),
+    )
+
+    @property
+    def is_active(self) -> bool:
+        return str(self.scheme_status or "ACTIVE").upper() == "ACTIVE"
+
+    @is_active.setter
+    def is_active(self, value: bool) -> None:
+        self.scheme_status = "ACTIVE" if value else "INACTIVE"
 
     @property
     def verification_status(self) -> str:
@@ -187,6 +215,30 @@ class Scheme(Base):
         if self.interest_rate_min is not None:
             return float(self.interest_rate_min)
         return None
+
+    @interest_rate.setter
+    def interest_rate(self, value: Optional[float]) -> None:
+        self.interest_rate_max = value
+        self.interest_rate_min = value
+
+    @property
+    def repayment_period(self) -> Optional[int]:
+        if self.repayment_period_max_months is not None:
+            return self.repayment_period_max_months
+        return self.repayment_period_min_months
+
+    @repayment_period.setter
+    def repayment_period(self, value: Optional[int]) -> None:
+        self.repayment_period_max_months = value
+        self.repayment_period_min_months = value
+
+    @property
+    def margin_money_percentage(self) -> Optional[float]:
+        return float(self.beneficiary_contribution_percentage) if self.beneficiary_contribution_percentage is not None else None
+
+    @margin_money_percentage.setter
+    def margin_money_percentage(self, value: Optional[float]) -> None:
+        self.beneficiary_contribution_percentage = value
 
     @property
     def financial_category(self) -> str:

@@ -37,6 +37,10 @@ class NaturalLanguageExtractResponse(BaseModel):
   is_fallback: bool
   provider_name: str
 
+  @property
+  def profile(self) -> BeneficiaryProfileInput:
+      return self.extracted_profile
+
 
 class ClarificationQuestion(BaseModel):
   """A targeted follow-up question to clarify a high-impact missing profile attribute."""
@@ -73,6 +77,8 @@ class SourceCitation(BaseModel):
   rule_id: Optional[str] = None
   snippet: str
   relevance_score: float = Field(..., ge=0.0, le=1.0)
+  official_source_url: Optional[str] = None
+  quality_score: Optional[float] = None
 
 
 class AICopilotAction(BaseModel):
@@ -104,7 +110,7 @@ class RichCard(BaseModel):
 class AIChatResponse(BaseModel):
     """Grounding AI response backed by deterministic engines and RAG retrieval."""
     answer: str
-    intent: Optional[str] = "GENERAL_SCHEME_QUERY"
+    intent: Optional[Any] = "GENERAL_SCHEME_QUERY"
     response_mode: Optional[str] = "GROUNDED"
     citations: List[SourceCitation]
     actions: List[AICopilotAction] = []
@@ -115,6 +121,7 @@ class AIChatResponse(BaseModel):
     financial_calculation: Optional[Dict[str, Any]] = None
     is_fallback: bool
     provider_name: str
+    language: Optional[str] = "en"
 
 
 class AIExplainableRecommendationRequest(BaseModel):

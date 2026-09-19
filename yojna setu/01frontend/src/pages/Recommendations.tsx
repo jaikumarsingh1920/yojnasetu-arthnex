@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +27,7 @@ import {
   Award,
   Send,
   PenTool,
+  ClipboardList,
   Check,
   ChevronDown,
   ChevronUp,
@@ -47,7 +48,29 @@ import {
 } from 'lucide-react';
 
 type InputMode = 'PROFILE' | 'TYPE' | 'FORM';
-type TabFilter = 'ELIGIBLE' | 'INSUFFICIENT' | 'INELIGIBLE' | 'ALL';
+type TabFilter = 'ELIGIBLE' | 'CONDITIONAL' | 'INSUFFICIENT' | 'INELIGIBLE' | 'ALL';
+
+const formatFinancialCategory = (category?: string | null): string => {
+  if (!category) return 'Financial Assistance';
+  switch (category.toUpperCase()) {
+    case 'LOAN_CREDIT':
+      return 'Term Loan / Credit Facility';
+    case 'GRANT_SUBSIDY':
+      return 'Direct Subsidy / Grant';
+    case 'SCHOLARSHIP':
+      return 'Education Scholarship';
+    case 'TRAINING_SKILL':
+      return 'Skill Development & Stipend';
+    case 'GUARANTEE_CREDIT_SUPPORT':
+      return 'Credit Guarantee Coverage';
+    case 'DIRECT_BENEFIT':
+      return 'Direct Benefit Transfer';
+    case 'NON_FINANCIAL':
+      return 'Welfare & Advisory Support';
+    default:
+      return category.replace(/_/g, ' ');
+  }
+};
 
 const cleanReasonText = (text?: string): string => {
   if (!text) return '';
@@ -97,6 +120,11 @@ const calculateClientProfileCompletion = (profile: BeneficiaryProfileInput | nul
 export const Recommendations: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user, isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
+  const urlQuery = searchParams.get('q');
+
+  // Read restored history state if available (from Back/Forward navigation)
+  const historyState = (typeof window !== 'undefined' && window.history.state?.yojnasetu_rec_state) || null;
 
   // Canonical Citizen Profile State
   const [canonicalProfile, setCanonicalProfile] = useState<BeneficiaryProfileInput | null>(null);
@@ -105,12 +133,12 @@ export const Recommendations: React.FC = () => {
 
   // Mode Selection State
   const [inputMode, setInputMode] = useState<InputMode>(
-  isAuthenticated ? 'PROFILE' : 'TYPE'
-);
+    historyState?.inputMode || (urlQuery ? 'TYPE' : (isAuthenticated ? 'PROFILE' : 'TYPE'))
+  );
   // Text Input State
   const DEFAULT_USER_TEXT =
     'I am a 28 year old woman from Uttar Pradesh. I belong to SC category. My annual income is around 1.8 lakh. I want to start a small tailoring business with a project cost of 1 lakh.';
-  const [userText, setUserText] = useState(DEFAULT_USER_TEXT);
+  const [userText, setUserText] = useState<string>(historyState?.userText ?? (urlQuery || ''));
 
   // Speech Recognition State for Natural Language / Voice Input
   const [isListening, setIsListening] = useState<boolean>(false);
@@ -351,48 +379,23 @@ export const Recommendations: React.FC = () => {
     }
   };
 
-  // Quick Form State
-  const [formAge, setFormAge] = useState<number>(28);
-  const [formGender, setFormGender] = useState<string>('FEMALE');
-  const [formState, setFormState] = useState<string>('UTTAR_PRADESH');
-  const [formSocialCategory, setFormSocialCategory] = useState<string>('SC');
-  const [formIncomeSlab, setFormIncomeSlab] = useState<number>(180000);
-  const [formNeed, setFormNeed] = useState<string>('START_BUSINESS');
-  const [formBusinessStage, setFormBusinessStage] = useState<string>('NEW');
-  const [formProjectCostSlab, setFormProjectCostSlab] = useState<number>(100000);
-  const [formLoanRequired, setFormLoanRequired] = useState<boolean>(true);
+  // Quick Form State (Restored from history navigation if available)
+  const [formAge, setFormAge] = useState<number>(historyState?.formAge ?? 28);
+  const [formGender, setFormGender] = useState<string>(historyState?.formGender ?? 'FEMALE');
+  const [formState, setFormState] = useState<string>(historyState?.formState ?? 'UTTAR_PRADESH');
+  const [formSocialCategory, setFormSocialCategory] = useState<string>(historyState?.formSocialCategory ?? 'SC');
+  const [formIncomeSlab, setFormIncomeSlab] = useState<number>(historyState?.formIncomeSlab ?? 180000);
+  const [formNeed, setFormNeed] = useState<string>(historyState?.formNeed ?? 'START_BUSINESS');
+  const [formBusinessStage, setFormBusinessStage] = useState<string>(historyState?.formBusinessStage ?? 'NEW');
+  const [formProjectCostSlab, setFormProjectCostSlab] = useState<number>(historyState?.formProjectCostSlab ?? 100000);
+  const [formLoanRequired, setFormLoanRequired] = useState<boolean>(historyState?.formLoanRequired ?? true);
 
-  // Multi-step Quick Eligibility Form
-const [formStep, setFormStep] = useState<number>(1);
-const TOTAL_FORM_STEPS = 6;
-
-const goToNextFormStep = () => {
-  setFormStep((prev) => Math.min(TOTAL_FORM_STEPS, prev + 1));
-};
-
-const goToPreviousFormStep = () => {
-  setFormStep((prev) => Math.max(1, prev - 1));
-};
-
-const resetMultiStepForm = () => {
-  setFormStep(1);
-  setFormAge(28);
-  setFormGender('FEMALE');
-  setFormState('UTTAR_PRADESH');
-  setFormSocialCategory('SC');
-  setFormIncomeSlab(180000);
-  setFormNeed('START_BUSINESS');
-  setFormBusinessStage('NEW');
-  setFormProjectCostSlab(100000);
-  setFormLoanRequired(true);
-};
-
-  // Recommendation Results State
+  // Recommendation Results State (Restored from history navigation if available)
   const [topK] = useState(10);
-  const [activeTab, setActiveTab] = useState<TabFilter>('ELIGIBLE');
-  const [aiResult, setAiResult] = useState<AIExplainableRecommendationResponse | null>(null);
-  const [standardResult, setStandardResult] = useState<RecommendationResponse | null>(null);
-  const [extractionResult, setExtractionResult] = useState<NaturalLanguageExtractResponse | null>(null);
+  const [activeTab, setActiveTab] = useState<TabFilter>(historyState?.activeTab ?? 'ELIGIBLE');
+  const [aiResult, setAiResult] = useState<AIExplainableRecommendationResponse | null>(historyState?.aiResult ?? null);
+  const [standardResult, setStandardResult] = useState<RecommendationResponse | null>(historyState?.standardResult ?? null);
+  const [extractionResult, setExtractionResult] = useState<NaturalLanguageExtractResponse | null>(historyState?.extractionResult ?? null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -401,14 +404,118 @@ const resetMultiStepForm = () => {
   // Modal State for Official Portal Redirection
   const [selectedSchemeForModal, setSelectedSchemeForModal] = useState<{ name: string; url?: string | null } | null>(null);
 
-  // Track expanded transparency details per scheme
-  const [expandedDetails, setExpandedDetails] = useState<Record<string, boolean>>({});
+  // Track expanded transparency details per scheme (Restored from history navigation if available)
+  const [expandedDetails, setExpandedDetails] = useState<Record<string, boolean>>(historyState?.expandedDetails ?? {});
+
+  // Track latest form/input state for saving on unmount
+  const stateRef = useRef({
+    inputMode,
+    userText,
+    formAge,
+    formGender,
+    formState,
+    formSocialCategory,
+    formIncomeSlab,
+    formNeed,
+    formBusinessStage,
+    formProjectCostSlab,
+    formLoanRequired,
+    activeTab,
+    standardResult,
+    aiResult,
+    extractionResult,
+    expandedDetails,
+  });
+
+  useEffect(() => {
+    stateRef.current = {
+      inputMode,
+      userText,
+      formAge,
+      formGender,
+      formState,
+      formSocialCategory,
+      formIncomeSlab,
+      formNeed,
+      formBusinessStage,
+      formProjectCostSlab,
+      formLoanRequired,
+      activeTab,
+      standardResult,
+      aiResult,
+      extractionResult,
+      expandedDetails,
+    };
+  }, [
+    inputMode,
+    userText,
+    formAge,
+    formGender,
+    formState,
+    formSocialCategory,
+    formIncomeSlab,
+    formNeed,
+    formBusinessStage,
+    formProjectCostSlab,
+    formLoanRequired,
+    activeTab,
+    standardResult,
+    aiResult,
+    extractionResult,
+    expandedDetails,
+  ]);
+
+  // Persist transient recommendation UI/results state into browser history state
+  const persistRecommendationState = (overrides?: Record<string, any>) => {
+    if (typeof window === 'undefined') return;
+    const currentSaved = window.history.state?.yojnasetu_rec_state || {};
+    const updated = {
+      ...currentSaved,
+      inputMode,
+      userText,
+      formAge,
+      formGender,
+      formState,
+      formSocialCategory,
+      formIncomeSlab,
+      formNeed,
+      formBusinessStage,
+      formProjectCostSlab,
+      formLoanRequired,
+      activeTab,
+      standardResult,
+      aiResult,
+      extractionResult,
+      expandedDetails,
+      ...overrides,
+    };
+    window.history.replaceState({ ...window.history.state, yojnasetu_rec_state: updated }, '');
+  };
+
+  // Save current input/form/result state to history state on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        const currentSaved = window.history.state?.yojnasetu_rec_state || {};
+        window.history.replaceState(
+          {
+            ...window.history.state,
+            yojnasetu_rec_state: {
+              ...currentSaved,
+              ...stateRef.current,
+            },
+          },
+          ''
+        );
+      }
+    };
+  }, []);
 
   // Refs for dynamic auto-scrolling to results
   const resultsRef = useRef<HTMLDivElement>(null);
   const searchTriggeredRef = useRef<boolean>(false);
 
-  // When search or evaluation results arrive after a user action, scroll smoothly to the results section
+  // When search or evaluation results arrive after an explicit user action, scroll smoothly to the results section
   useEffect(() => {
     if (searchTriggeredRef.current && standardResult && resultsRef.current) {
       searchTriggeredRef.current = false;
@@ -426,14 +533,65 @@ const resetMultiStepForm = () => {
     }
   }, [standardResult]);
 
-  // On mount, auto-load canonical citizen profile and trigger recommendation evaluation
+  // On mount: distinguish between History Restoration, Explicit URL Query, and Clean Fresh Navigation
   useEffect(() => {
-    loadAndEvaluateProfile();
-  }, [isAuthenticated]);
+    if (historyState?.standardResult) {
+      // 1. History restoration: State already hydrated from window.history.state
+      // Load user profile silently for metadata chips, NEVER re-trigger evaluation API
+      loadProfileMetadata(false);
+    } else if (urlQuery && urlQuery.trim()) {
+      // 2. Explicit query parameter in URL (e.g. from search navigation)
+      evaluateNaturalLanguage(urlQuery.trim());
+      loadProfileMetadata(false);
+    } else {
+      // 3. Fresh navigation (e.g. from Home CTA or Navbar):
+      // Load user profile for prefilling form fields if available, but NEVER auto-evaluate
+      loadProfileMetadata(false);
+    }
+  }, [urlQuery, isAuthenticated]);
 
-  const loadAndEvaluateProfile = async () => {
+  const evaluateNaturalLanguage = async (text: string) => {
+    searchTriggeredRef.current = true;
     setIsLoading(true);
     setErrorMsg(null);
+    setAiResult(null);
+    setStandardResult(null);
+
+    try {
+      const ext = await aiApi.extractProfile(text);
+      setExtractionResult(ext);
+
+      const formProfile = ext.extracted_profile;
+      const res = await recommendationApi.getRecommendations(formProfile, topK);
+      setStandardResult(res);
+
+      let aiRes: AIExplainableRecommendationResponse | null = null;
+      try {
+        aiRes = await aiApi.getAIRecommendations({
+          user_text: text,
+          profile: ext.extracted_profile,
+          top_k: topK,
+        });
+        setAiResult(aiRes);
+      } catch (aiErr) {
+        console.warn('AI explainability optional layer warning:', aiErr);
+      }
+
+      // Persist results to browser history state so Back navigation retains evaluation
+      persistRecommendationState({
+        userText: text,
+        standardResult: res,
+        aiResult: aiRes,
+        extractionResult: ext,
+      });
+    } catch (err: any) {
+      setErrorMsg(t('recommendations.evalError', 'Could not find recommendations: ') + (err.response?.data?.detail || err.message));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadProfileMetadata = async (autoEvaluate = false) => {
     try {
       let activeProf: BeneficiaryProfileInput | null = null;
 
@@ -461,22 +619,23 @@ const resetMultiStepForm = () => {
       }
 
       if (activeProf && (activeProf.age || activeProf.annual_income || activeProf.social_category)) {
-        // Populate quick form state
-        if (activeProf.age) setFormAge(activeProf.age);
-        if (activeProf.gender) setFormGender(activeProf.gender);
-        if (activeProf.state) setFormState(activeProf.state);
-        if (activeProf.social_category) setFormSocialCategory(activeProf.social_category);
-        if (activeProf.annual_income) setFormIncomeSlab(activeProf.annual_income);
-        if (activeProf.project_cost) setFormProjectCostSlab(activeProf.project_cost);
+        // Populate quick form state only if not already restored from history
+        if (!historyState?.formAge && activeProf.age) setFormAge(activeProf.age);
+        if (!historyState?.formGender && activeProf.gender) setFormGender(activeProf.gender);
+        if (!historyState?.formState && activeProf.state) setFormState(activeProf.state);
+        if (!historyState?.formSocialCategory && activeProf.social_category) setFormSocialCategory(activeProf.social_category);
+        if (!historyState?.formIncomeSlab && activeProf.annual_income) setFormIncomeSlab(activeProf.annual_income);
+        if (!historyState?.formProjectCostSlab && activeProf.project_cost) setFormProjectCostSlab(activeProf.project_cost);
 
-        // Auto evaluate smart matching
-        const res = await recommendationApi.getRecommendations(activeProf, topK);
-        setStandardResult(res);
+        // Only evaluate if explicitly requested (e.g. by direct button click)
+        if (autoEvaluate) {
+          const res = await recommendationApi.getRecommendations(activeProf, topK);
+          setStandardResult(res);
+          persistRecommendationState({ standardResult: res });
+        }
       }
     } catch (err: any) {
-      console.warn('Auto evaluation error:', err);
-    } finally {
-      setIsLoading(false);
+      console.warn('Profile metadata fetch notice:', err);
     }
   };
 
@@ -521,7 +680,21 @@ const resetMultiStepForm = () => {
   };
 
   const toggleDetails = (schemeId: string) => {
-    setExpandedDetails(prev => ({ ...prev, [schemeId]: !prev[schemeId] }));
+    setExpandedDetails(prev => {
+      const updated = { ...prev, [schemeId]: !prev[schemeId] };
+      persistRecommendationState({ expandedDetails: updated });
+      return updated;
+    });
+  };
+
+  const handleTabChange = (tab: TabFilter) => {
+    setActiveTab(tab);
+    persistRecommendationState({ activeTab: tab });
+  };
+
+  const handleInputModeChange = (mode: InputMode) => {
+    setInputMode(mode);
+    persistRecommendationState({ inputMode: mode });
   };
 
   const buildProfileFromForm = (): BeneficiaryProfileInput => {
@@ -575,26 +748,48 @@ const resetMultiStepForm = () => {
 
     try {
       if (inputMode === 'PROFILE' && canonicalProfile) {
+        setExtractionResult(null);
         const res = await recommendationApi.getRecommendations(canonicalProfile, topK);
         setStandardResult(res);
+        let aiRes: AIExplainableRecommendationResponse | null = null;
+        try {
+          aiRes = await aiApi.getAIRecommendations({
+            profile: canonicalProfile,
+            top_k: topK,
+          });
+          setAiResult(aiRes);
+        } catch (aiErr) {
+          console.warn('AI explainability optional layer warning:', aiErr);
+        }
+        persistRecommendationState({
+          inputMode: 'PROFILE',
+          standardResult: res,
+          aiResult: aiRes,
+          extractionResult: null,
+        });
       } else if (inputMode === 'FORM') {
+        setExtractionResult(null);
         const formProfile = buildProfileFromForm();
         const res = await recommendationApi.getRecommendations(formProfile, topK);
         setStandardResult(res);
-      } else {
-        const ext = await aiApi.extractProfile(userText);
-        setExtractionResult(ext);
-
-        const formProfile = ext.extracted_profile;
-        const res = await recommendationApi.getRecommendations(formProfile, topK);
-        setStandardResult(res);
-
-        const aiRes = await aiApi.getAIRecommendations({
-          user_text: userText,
-          profile: ext.extracted_profile,
-          top_k: topK,
+        let aiRes: AIExplainableRecommendationResponse | null = null;
+        try {
+          aiRes = await aiApi.getAIRecommendations({
+            profile: formProfile,
+            top_k: topK,
+          });
+          setAiResult(aiRes);
+        } catch (aiErr) {
+          console.warn('AI explainability optional layer warning:', aiErr);
+        }
+        persistRecommendationState({
+          inputMode: 'FORM',
+          standardResult: res,
+          aiResult: aiRes,
+          extractionResult: null,
         });
-        setAiResult(aiRes);
+      } else {
+        await evaluateNaturalLanguage(userText);
       }
     } catch (err: any) {
       setErrorMsg(t('recommendations.evalError', 'Could not find recommendations: ') + (err.response?.data?.detail || err.message));
@@ -619,13 +814,19 @@ const resetMultiStepForm = () => {
     if (!standardResult) return { items: [], emptyMessage: t('recommendations.noEvalYet', 'No schemes evaluated yet.') };
 
     const eligible = standardResult.recommendations || [];
+    const conditional = standardResult.conditional_schemes || [];
     const insufficient = standardResult.insufficient_info_schemes || [];
     const ineligible = standardResult.ineligible_schemes || [];
 
     if (activeTab === 'ELIGIBLE') {
       return {
         items: eligible,
-        emptyMessage: t('recommendations.noEligible', 'No schemes passed all mandatory eligibility criteria for the provided profile.')
+        emptyMessage: t('recommendations.noEligible', 'No schemes passed all mandatory statutory criteria for the provided profile.')
+      };
+    } else if (activeTab === 'CONDITIONAL') {
+      return {
+        items: conditional,
+        emptyMessage: t('recommendations.noConditional', 'No schemes with conditional statutory requirements found.')
       };
     } else if (activeTab === 'INSUFFICIENT') {
       return {
@@ -639,7 +840,7 @@ const resetMultiStepForm = () => {
       };
     } else {
       return {
-        items: [...eligible, ...insufficient, ...ineligible],
+        items: [...eligible, ...conditional, ...insufficient, ...ineligible],
         emptyMessage: t('recommendations.noSchemesFound', 'No evaluated schemes found.')
       };
     }
@@ -649,55 +850,42 @@ const resetMultiStepForm = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 sm:pb-16 space-y-8">
-      {/* ── Page Header ── */}
-      <div className="bg-gradient-to-r from-gov-navy via-gov-blue to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border-b-4 border-gov-saffron relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="relative z-10 max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 bg-gov-saffron/20 border border-gov-saffron/40 text-gov-saffron px-3.5 py-1 rounded-full text-xs font-bold tracking-wide">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            {t('recommendations.badge', 'Deterministic Smart Matching Engine')}
+      {/* ── Page Header (Matches Warm CIVIC-TECH Theme) ── */}
+      <div className="bg-gradient-to-r from-[#4A2525] via-[#3B2522] to-[#4A2525] text-white rounded-3xl p-6 sm:p-8 shadow-warm-md border border-[#E8D8D2]/20 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="relative z-10 max-w-3xl space-y-2.5">
+          <div className="inline-flex items-center gap-2 bg-[#F7AE56]/20 border border-[#F7AE56]/40 text-[#F7AE56] px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>AI-POWERED SCHEME DISCOVERY</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-            {t('recommendations.title', 'Smart Scheme Matching & Explainable Eligibility')}
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+            Find Schemes That Fit Your Situation
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            {t(
-              'recommendations.desc',
-              'Evaluates all 90 verified government schemes against your authoritative citizen profile. Displays exact, factual reasons for Why You Qualify, More Info Needed, or Why Disqualified.'
-            )}
+          <p className="text-xs sm:text-sm text-[#FFD0CA]/90 leading-relaxed max-w-xl">
+            Tell us about yourself in simple language. We'll evaluate your profile against official published guidelines to find the most relevant schemes for you.
           </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <Link
-            to="/profile"
-            className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-5 py-3 rounded-xl border border-white/20 transition"
-          >
-            <User className="w-4 h-4 text-amber-300" />
-            {t('recommendations.editProfileBtn', 'View / Edit Profile')}
-          </Link>
         </div>
       </div>
 
       {errorMsg && <Alert type="error">{errorMsg}</Alert>}
       {saveSuccessMsg && <Alert type="success">{saveSuccessMsg}</Alert>}
 
-      {/* ── Missing Profile Fields Guidance Banner (Requirement 7) ── */}
+      {/* ── Missing Profile Fields Guidance Banner (Warm Alert) ── */}
       {missingProfileFields.length > 0 && (
-        <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-2xl p-5 shadow-warm-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-[#F7AE56] shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-bold text-amber-950">
+              <h3 className="text-sm font-bold text-[#3B2522]">
                 {t('recommendations.incompleteBannerTitle', 'Complete your profile to get more accurate scheme recommendations.')}
               </h3>
-              <p className="text-xs text-amber-800 mt-0.5">
+              <p className="text-xs text-[#765E59] mt-0.5">
                 {t('recommendations.incompleteBannerSub', 'The following parameters are currently missing from your Citizen Profile:')}
               </p>
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {missingProfileFields.map((mf) => (
                   <span
                     key={mf.field}
-                    className="inline-flex items-center text-[11px] font-bold bg-white text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-md"
+                    className="inline-flex items-center text-xs font-semibold bg-white text-[#3B2522] border border-[#E8D8D2] px-2.5 py-1 rounded-lg"
                   >
                     • {mf.label}
                   </span>
@@ -708,33 +896,33 @@ const resetMultiStepForm = () => {
 
           <Link
             to="/profile"
-            className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5"
+            className="btn-secondary btn-sm shrink-0 bg-[#EA717B] hover:bg-[#d65f69] text-white border-transparent shadow-warm-xs flex items-center gap-1.5"
           >
             <User className="w-4 h-4" />
-            {t('recommendations.completeProfileBtn', 'Complete Profile →')}
+            <span>{t('recommendations.completeProfileBtn', 'Complete Profile →')}</span>
           </Link>
         </div>
       )}
 
-      {/* ── Active Profile Synchronized Bar ── */}
+      {/* ── Unified Profile Management Zone (Warm Theme) ── */}
       {canonicalProfile && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold">
+        <div className="bg-white rounded-2xl border border-[#E8D8D2] shadow-warm-xs p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-[#FFD0CA] text-[#4A2525] flex items-center justify-center font-bold shrink-0 mt-0.5">
               <User className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-900">
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-bold text-[#3B2522]">
                   {t('recommendations.activeProfileTitle', 'Prefilled from your Citizen Profile')}:
                 </span>
                 <span
-                  className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${
+                  className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                     profileCompletion >= 100
-                      ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                       : profileCompletion >= 50
-                      ? 'bg-amber-100 text-amber-800 border-amber-300'
-                      : 'bg-slate-100 text-slate-700 border-slate-300'
+                      ? 'bg-[#F7AE56]/20 text-[#3B2522] border-[#F7AE56]/40'
+                      : 'bg-[#FFF4EC] text-[#765E59] border-[#E8D8D2]'
                   }`}
                 >
                   {profileCompletion >= 100
@@ -742,7 +930,9 @@ const resetMultiStepForm = () => {
                     : `${profileCompletion}% ${t('recommendations.profileComplete', 'Profile Complete')}`}
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mt-0.5">
+
+              {/* Readable Demographic Chips */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
                 {[
                   canonicalProfile.gender || 'Any Gender',
                   canonicalProfile.age ? `Age ${canonicalProfile.age}` : null,
@@ -750,162 +940,232 @@ const resetMultiStepForm = () => {
                   canonicalProfile.annual_income ? `Income ₹${canonicalProfile.annual_income.toLocaleString('en-IN')}` : null,
                   canonicalProfile.state ? canonicalProfile.state.replace(/_/g, ' ') : null,
                   canonicalProfile.sector ? `Sector ${canonicalProfile.sector}` : null,
-                ].filter(Boolean).join(' • ')}
-              </p>
+                ].filter(Boolean).map((chip, cIdx) => (
+                  <span
+                    key={cIdx}
+                    className="inline-flex items-center text-xs font-medium bg-[#FFFBF0] text-[#765E59] border border-[#E8D8D2] px-2.5 py-0.5 rounded-lg"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+          {/* Grouped Profile Actions */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full md:w-auto shrink-0 pt-2 md:pt-0">
             <button
               onClick={() => handleFindSchemes()}
               disabled={isLoading}
-              className="bg-gov-saffron hover:bg-orange-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
+              className="btn-secondary btn-sm min-h-[40px] flex items-center justify-center gap-1.5 w-full sm:w-auto bg-[#FFD0CA] hover:bg-[#fca59d] text-[#4A2525] border-transparent"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              {t('recommendations.recalcBtn', 'Recalculate Smart Match')}
+              <span>{t('recommendations.recalcBtn', 'Re-evaluate Schemes')}</span>
             </button>
             <Link
               to="/profile"
-              className="text-xs font-bold text-gov-blue hover:underline px-2 py-1 text-center flex items-center justify-center min-h-[44px]"
+              className="btn-secondary btn-sm min-h-[40px] flex items-center justify-center gap-1.5 w-full sm:w-auto text-[#765E59] hover:text-[#EA717B] border-[#E8D8D2]"
             >
-              {t('recommendations.updateProfileLink', 'Update Profile →')}
+              <User className="w-3.5 h-3.5 text-[#765E59]" />
+              <span>{t('recommendations.updateProfileLink', 'Update Profile')}</span>
             </Link>
           </div>
         </div>
       )}
 
-      {/* ── 3-Way Input Choice Tab ── */}
+      {/* ── 3-Way Input Choice Tab (Warm Theme) ── */}
       <div className="space-y-4">
-        <h2 className="text-sm font-extrabold text-slate-900">
+        <h2 className="text-sm font-extrabold text-[#3B2522]">
           {t('recommendations.chooseInputMethod', 'Evaluation Mode / Profile Input Source')}
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <button
-  type="button"
-  disabled={!isAuthenticated}
-  onClick={() => {
-    if (isAuthenticated) {
-      setInputMode('PROFILE');
-    }
-  }}
-  className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-2 ${
-    !isAuthenticated
-      ? 'bg-slate-50 border-slate-200 opacity-70 cursor-not-allowed'
-      : inputMode === 'PROFILE'
-      ? 'bg-sky-50 border-gov-blue ring-2 ring-gov-blue shadow-md'
-      : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
-  }`}
->
-  <div className="flex items-center justify-between">
-    <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center font-bold">
-      <User className="w-4 h-4" />
-    </div>
-
-    {isAuthenticated && inputMode === 'PROFILE' && (
-      <Check className="w-4 h-4 text-gov-blue font-extrabold" />
-    )}
-  </div>
-
-  <div>
-    <h3 className="font-extrabold text-slate-900 text-xs">
-      {t('recommendations.modeProfile', '👤 Saved Citizen Profile')}
-    </h3>
-
-    {isAuthenticated ? (
-      <p className="text-[11px] text-slate-500 mt-0.5">
-        {t(
-          'recommendations.modeProfileDesc',
-          'Uses your authoritative saved profile parameters.'
-        )}
-      </p>
-    ) : (
-      <p className="text-[11px] text-rose-600 font-bold mt-0.5">
-        🔒 {t(
-          'recommendations.signInFirst',
-          'Sign in first to use this feature'
-        )}
-      </p>
-    )}
-  </div>
-</button>
-
-          <button
             type="button"
-            onClick={() => setInputMode('TYPE')}
+            disabled={!isAuthenticated}
+            onClick={() => {
+              if (isAuthenticated) {
+                handleInputModeChange('PROFILE');
+              }
+            }}
             className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-2 ${
-              inputMode === 'TYPE'
-                ? 'bg-purple-50 border-purple-600 ring-2 ring-purple-500 shadow-md'
-                : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+              !isAuthenticated
+                ? 'bg-[#FFFBF0]/60 border-[#E8D8D2] opacity-70 cursor-not-allowed'
+                : inputMode === 'PROFILE'
+                ? 'bg-[#FFF4EC] border-[#EA717B] ring-2 ring-[#EA717B]/20 shadow-warm-sm'
+                : 'bg-white border-[#E8D8D2] hover:border-[#F7AE56]/60 shadow-warm-xs'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
-                <PenTool className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-lg bg-[#FFD0CA] text-[#4A2525] flex items-center justify-center font-bold">
+                <User className="w-4 h-4" />
               </div>
-              {inputMode === 'TYPE' && <Check className="w-4 h-4 text-purple-600 font-extrabold" />}
+
+              {isAuthenticated && inputMode === 'PROFILE' && (
+                <Check className="w-4 h-4 text-[#EA717B] font-extrabold" />
+              )}
             </div>
+
             <div>
-              <h3 className="font-extrabold text-slate-900 text-xs">{t('recommendations.modeNatural', '✍️ Natural Language / Voice')}</h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">{t('recommendations.modeNaturalDesc', 'Describe your situation in everyday sentences or Hindi.')}</p>
+              <h3 className="font-extrabold text-[#3B2522] text-xs">
+                {t('recommendations.modeProfile', '👤 Saved Citizen Profile')}
+              </h3>
+
+              {isAuthenticated ? (
+                <p className="text-[11px] text-[#765E59] mt-0.5">
+                  {t(
+                    'recommendations.modeProfileDesc',
+                    'Uses your authoritative saved profile parameters.'
+                  )}
+                </p>
+              ) : (
+                <p className="text-[11px] text-[#EA717B] font-bold mt-0.5">
+                  🔒 {t(
+                    'recommendations.signInFirst',
+                    'Sign in first to use this feature'
+                  )}
+                </p>
+              )}
             </div>
           </button>
 
           <button
             type="button"
-            onClick={() => setInputMode('FORM')}
+            onClick={() => handleInputModeChange('TYPE')}
             className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-2 ${
-              inputMode === 'FORM'
-                ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500 shadow-md'
-                : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+              inputMode === 'TYPE'
+                ? 'bg-[#FFF4EC] border-[#EA717B] ring-2 ring-[#EA717B]/20 shadow-warm-sm'
+                : 'bg-white border-[#E8D8D2] hover:border-[#F7AE56]/60 shadow-warm-xs'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                <CheckCircle2 className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-lg bg-[#FFD0CA] text-[#4A2525] flex items-center justify-center font-bold">
+                <PenTool className="w-4 h-4" />
               </div>
-              {inputMode === 'FORM' && <Check className="w-4 h-4 text-emerald-600 font-extrabold" />}
+              {inputMode === 'TYPE' && <Check className="w-4 h-4 text-[#EA717B] font-extrabold" />}
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 text-xs">{t('recommendations.modeQuickForm', '📋 Quick Override Form')}</h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">{t('recommendations.modeQuickFormDesc', 'Temporarily simulate another age, category, or loan amount.')}</p>
+              <h3 className="font-extrabold text-[#3B2522] text-xs">{t('recommendations.modeNatural', '✍️ Natural Language / Voice')}</h3>
+              <p className="text-[11px] text-[#765E59] mt-0.5">{t('recommendations.modeNaturalDesc', 'Describe your situation in everyday sentences or Hindi.')}</p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleInputModeChange('FORM')}
+            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-2 ${
+              inputMode === 'FORM'
+                ? 'bg-[#FFF4EC] border-[#EA717B] ring-2 ring-[#EA717B]/20 shadow-warm-sm'
+                : 'bg-white border-[#E8D8D2] hover:border-[#F7AE56]/60 shadow-warm-xs'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-lg bg-[#FFD0CA] text-[#4A2525] flex items-center justify-center font-bold">
+                <ClipboardList className="w-4 h-4" />
+              </div>
+              {inputMode === 'FORM' && <Check className="w-4 h-4 text-[#EA717B] font-extrabold" />}
+            </div>
+            <div>
+              <h3 className="font-extrabold text-[#3B2522] text-xs">{t('recommendations.modeQuickForm', '📋 Quick Override Form')}</h3>
+              <p className="text-xs text-[#765E59] mt-0.5">{t('recommendations.modeQuickFormDesc', 'Temporarily simulate another age, category, or loan amount.')}</p>
             </div>
           </button>
         </div>
       </div>
 
-      {/* INPUT INTERFACE 1: TEXT INPUT */}
+      {/* INPUT INTERFACE 1: TEXT INPUT (Warm Theme) */}
       {inputMode === 'TYPE' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-6">
-          <form onSubmit={handleFindSchemes} className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <label htmlFor="user-text-input" className="block font-extrabold text-slate-900 text-xs uppercase tracking-wider">
-                {t('recommendations.describeLabel', 'Describe your background and project requirements:')}
-              </label>
-            </div>
+        <div className="bg-white rounded-2xl border border-[#E8D8D2] shadow-warm-xs p-6 sm:p-8 space-y-6">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#E8D8D2]/60">
+            <PenTool className="w-5 h-5 text-[#EA717B]" />
+            <h2 className="text-base sm:text-lg font-bold text-[#3B2522]">
+              {t('recommendations.nlSearchTitle', 'Natural Language Search')}
+            </h2>
+          </div>
 
-            <div className="relative">
+          <form onSubmit={handleFindSchemes} className="space-y-4">
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <label htmlFor="user-text-input" className="block text-sm font-semibold text-[#3B2522]">
+                  {t('recommendations.describeLabel', 'Describe yourself, your work, family income, caste category, and goals in plain language.')}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setUserText(DEFAULT_USER_TEXT)}
+                  className="text-xs text-[#EA717B] hover:text-[#d65f69] font-semibold underline decoration-dotted transition flex items-center gap-1"
+                  title="Insert sample profile text to test evaluation"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#F7AE56]" />
+                  <span>{t('recommendations.insertSample', 'Insert Sample Profile')}</span>
+                </button>
+              </div>
+
               <textarea
                 id="user-text-input"
                 value={userText}
                 onChange={(e) => setUserText(e.target.value)}
                 rows={4}
                 placeholder={t('recommendations.typePlaceholder', 'e.g. I am a 28 year old woman from Uttar Pradesh belonging to SC category. My annual family income is ₹1.8 lakh. I want to start a small tailoring unit with a project cost of ₹1 lakh...')}
-                className={`w-full rounded-xl border text-xs p-4 pb-14 sm:pb-4 sm:pr-36 border-slate-300 shadow-sm focus:border-gov-blue focus:ring-gov-blue outline-none leading-relaxed transition ${
-                  isListening ? 'border-rose-400 ring-2 ring-rose-300/60 bg-rose-50/20' : ''
+                className={`w-full rounded-xl border text-sm p-4 border-[#E8D8D2] bg-[#FFFBF0]/40 text-[#3B2522] placeholder:text-[#9B817A] shadow-warm-xs focus:border-[#EA717B] focus:ring-2 focus:ring-[#EA717B]/20 outline-none leading-relaxed transition ${
+                  isListening ? 'border-[#EA717B] ring-2 ring-[#EA717B]/30 bg-[#FFF4EC]' : ''
                 }`}
               />
+            </div>
 
-              {/* Intuitive Voice-to-Text Microphone Button inside bottom-right corner of textarea */}
-              <div className="absolute right-3 bottom-3 z-10 flex items-center gap-1.5">
+            {/* Clear Listening Status Banner */}
+            {isListening && (
+              <div className="bg-[#FFF4EC] border border-[#EA717B]/40 rounded-xl p-3 flex items-center justify-between gap-3 text-xs text-[#4A2525] animate-in fade-in duration-200">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-3 w-3 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#EA717B] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#EA717B]"></span>
+                  </span>
+                  <div>
+                    <span className="font-bold">
+                      {t('voice.listeningTitle', 'Listening... Speak now')}
+                    </span>
+                    <p className="text-xs text-[#765E59] mt-0.5">
+                      {t('voice.listeningDesc', 'Speak naturally to describe your background, occupation, and financial requirements.')}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={stopListening}
+                  className="px-3 py-1 bg-[#EA717B] hover:bg-[#d65f69] text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-warm-xs"
+                >
+                  <Square className="w-3 h-3 fill-current" />
+                  <span>{t('common.stop', 'Stop')}</span>
+                </button>
+              </div>
+            )}
+
+            {/* Graceful Microphone Error Banner */}
+            {voiceError && (
+              <div className="text-xs text-[#EA717B] bg-[#FFF4EC] border border-[#EA717B]/30 rounded-xl p-3 flex items-center justify-between gap-2">
+                <span>{voiceError}</span>
+                <button
+                  type="button"
+                  onClick={() => setVoiceError(null)}
+                  className="text-[#765E59] hover:text-[#3B2522] font-bold px-1"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Dedicated Action Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+              <div className="flex flex-wrap items-center gap-3">
                 {isSpeechSupported ? (
                   <button
                     type="button"
                     onClick={toggleListening}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 ${
+                    className={`btn-secondary btn-sm min-h-[40px] flex items-center gap-2 bg-[#FFF4EC] text-[#4A2525] border-[#E8D8D2] hover:border-[#EA717B] ${
                       isListening
-                        ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse ring-2 ring-rose-300'
-                        : 'bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-gov-blue border border-slate-200 hover:border-sky-300'
+                        ? '!bg-[#EA717B] !hover:bg-[#d65f69] !text-white animate-pulse !border-[#EA717B] ring-2 ring-[#EA717B]/30'
+                        : ''
                     }`}
                     title={
                       isListening
@@ -916,13 +1176,13 @@ const resetMultiStepForm = () => {
                   >
                     {isListening ? (
                       <>
-                        <MicOff className="w-3.5 h-3.5 text-white" />
+                        <MicOff className="w-4 h-4 text-white" />
                         <span>{t('voice.listeningBtn', 'Listening...')}</span>
                       </>
                     ) : (
                       <>
-                        <Mic className="w-3.5 h-3.5 text-gov-blue" />
-                        <span className="hidden sm:inline">{t('voice.voiceBtn', 'Voice Input')}</span>
+                        <Mic className="w-4 h-4 text-[#EA717B]" />
+                        <span>{t('voice.voiceBtn', 'Voice Input')}</span>
                       </>
                     )}
                   </button>
@@ -930,76 +1190,33 @@ const resetMultiStepForm = () => {
                   <button
                     type="button"
                     disabled
-                    className="px-2.5 py-1.5 rounded-lg text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center gap-1.5"
+                    className="btn-ghost btn-sm min-h-[40px] opacity-60 cursor-not-allowed flex items-center gap-2"
                     title={t('voice.unavailable', 'Voice input is not supported in this browser')}
                     aria-label="Voice input unsupported"
                   >
-                    <MicOff className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{t('voice.unavailableShort', 'Voice N/A')}</span>
+                    <MicOff className="w-4 h-4" />
+                    <span>{t('voice.unavailableShort', 'Voice N/A')}</span>
                   </button>
                 )}
-              </div>
-            </div>
 
-            {/* Clear Listening Status Banner */}
-            {isListening && (
-              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center justify-between gap-3 text-xs text-rose-800 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2.5">
-                  <span className="relative flex h-3 w-3 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
-                  </span>
-                  <div>
-                    <span className="font-bold">
-                      {t('voice.listeningTitle', 'Listening... Speak now')}
-                    </span>
-                    <p className="text-[11px] text-rose-600 mt-0.5">
-                      {t('voice.listeningDesc', 'Speak naturally to describe your background, occupation, and financial requirements.')}
-                    </p>
-                  </div>
+                <div className="flex items-center gap-1.5 text-xs text-[#765E59]">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{t('recommendations.noStorageGuarantee', 'Natural language is parsed on-the-fly and never retained.')}</span>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={stopListening}
-                  className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-xs"
-                >
-                  <Square className="w-3 h-3 fill-current" />
-                  <span>{t('common.stop', 'Stop')}</span>
-                </button>
-              </div>
-            )}
-
-            {/* Graceful Microphone Error Banner */}
-            {voiceError && (
-              <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center justify-between gap-2">
-                <span>{voiceError}</span>
-                <button
-                  type="button"
-                  onClick={() => setVoiceError(null)}
-                  className="text-slate-400 hover:text-slate-600 font-bold px-1"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>{t('recommendations.noStorageGuarantee', 'Natural language is parsed on-the-fly and never retained.')}</span>
               </div>
 
+              {/* Primary Evaluate Matching Schemes CTA */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="bg-gov-blue hover:bg-sky-900 text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow transition flex items-center gap-2 disabled:opacity-50"
+                className="btn-primary min-h-[44px] px-6 text-sm font-bold flex items-center justify-center gap-2 shadow-warm-xs bg-[#EA717B] hover:bg-[#d65f69] text-white"
               >
                 {isLoading ? (
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Send className="w-4 h-4" /> {t('recommendations.evaluateBtn', 'Evaluate Eligibility & Rank')}
+                    <Send className="w-4 h-4" />
+                    <span>{t('recommendations.evaluateBtn', 'Evaluate Matching Schemes')}</span>
                   </>
                 )}
               </button>
@@ -1008,836 +1225,357 @@ const resetMultiStepForm = () => {
         </div>
       )}
 
-      {/* INPUT INTERFACE 2: QUICK FORM */}
-      {/* INPUT INTERFACE 2: QUICK FORM - MYSCHEME STYLE MULTI STEP */}
-{inputMode === 'FORM' && (
-  <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
-
-    {/* ─────────────────────────────────────────────
-        FORM HEADER
-    ───────────────────────────────────────────── */}
-    <div className="bg-gradient-to-r from-[#7f1424] via-[#8f1729] to-[#6f1020] px-5 sm:px-8 py-6 text-white">
-      <div className="max-w-3xl mx-auto text-center">
-
-        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-[10px] sm:text-xs font-bold mb-3">
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          {t(
-            'recommendations.quickFormBadge',
-            'Quick Eligibility Form'
-          )}
-        </div>
-
-        <h2 className="text-xl sm:text-2xl font-extrabold">
-          {t(
-            'recommendations.quickFormTitle',
-            'Help us find the best schemes for you'
-          )}
-        </h2>
-
-        <p className="text-[11px] sm:text-xs text-white/75 mt-1.5">
-          {t(
-            'recommendations.quickFormDesc',
-            'Answer a few simple questions to discover schemes you may be eligible for.'
-          )}
-        </p>
-      </div>
-    </div>
-
-    {/* ─────────────────────────────────────────────
-        PROGRESS STEPS
-    ───────────────────────────────────────────── */}
-    <div className="px-5 sm:px-10 pt-7 pb-3">
-      <div className="max-w-2xl mx-auto">
-
-        <div className="flex items-center justify-center">
-          {Array.from({ length: TOTAL_FORM_STEPS }).map((_, index) => {
-            const stepNumber = index + 1;
-            const isCompleted = stepNumber < formStep;
-            const isCurrent = stepNumber === formStep;
-
-            return (
-              <React.Fragment key={stepNumber}>
-
-                <div
-                  className={`relative flex items-center justify-center shrink-0 transition-all duration-300 ${
-                    isCurrent
-                      ? 'w-8 h-8'
-                      : 'w-6 h-6'
-                  }`}
-                >
-                  <div
-                    className={`rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
-                      isCompleted
-                        ? 'w-6 h-6 bg-emerald-600 border-emerald-600 text-white'
-                        : isCurrent
-                        ? 'w-8 h-8 bg-white border-emerald-600 text-emerald-700 ring-4 ring-emerald-100'
-                        : 'w-6 h-6 bg-white border-slate-300 text-slate-400'
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <Check className="w-3.5 h-3.5" />
-                    ) : (
-                      <span className="text-[9px] font-extrabold">
-                        {stepNumber}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {stepNumber < TOTAL_FORM_STEPS && (
-                  <div
-                    className={`h-0.5 w-8 sm:w-14 md:w-20 transition-all duration-300 ${
-                      stepNumber < formStep
-                        ? 'bg-emerald-600'
-                        : 'bg-slate-200'
-                    }`}
-                  />
-                )}
-
-              </React.Fragment>
-            );
-          })}
-        </div>
-
-        {/* Step label */}
-        <div className="text-center mt-3">
-          <span className="text-[10px] sm:text-xs font-bold text-slate-500">
-            {t('recommendations.stepLabel', 'Step')} {formStep} {t('recommendations.ofLabel', 'of')} {TOTAL_FORM_STEPS}
-          </span>
-        </div>
-
-      </div>
-    </div>
-
-    {/* ─────────────────────────────────────────────
-        FORM BODY
-    ───────────────────────────────────────────── */}
-    <div className="px-5 sm:px-10 pb-8">
-
-      {/* Temporary Profile Notice */}
-      <div className="max-w-4xl mx-auto mb-5 bg-sky-50 border border-sky-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-
-        <div className="flex items-start gap-2 text-[11px] sm:text-xs text-sky-900">
-          <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-
-          <span>
-            {t(
-              'recommendations.simulatingNotice',
-              'Temporary simulation: Modifying these fields evaluates schemes without overwriting your saved profile.'
-            )}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-
-          <button
-            type="button"
-            onClick={resetMultiStepForm}
-            className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold transition flex items-center gap-1 text-[10px] sm:text-[11px]"
-          >
-            <RefreshCw className="w-3 h-3 text-slate-500" />
-            {t(
-              'recommendations.resetForm',
-              'Reset Form'
-            )}
-          </button>
-
-        </div>
-      </div>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-
-          if (formStep < TOTAL_FORM_STEPS) {
-            goToNextFormStep();
-          } else {
-            handleFindSchemes(e);
-          }
-        }}
-        className="max-w-3xl mx-auto"
-      >
-
-        {/* ═══════════════════════════════════════════
-            STEP 1 — ABOUT YOURSELF
-        ═══════════════════════════════════════════ */}
-        {formStep === 1 && (
-          <div className="min-h-[300px] flex flex-col justify-center">
-
-            <div className="text-center mb-7">
-              <div className="w-11 h-11 mx-auto rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3">
-                <User className="w-5 h-5" />
-              </div>
-
-              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
-                {t(
-                  'recommendations.step1Title',
-                  'Tell us about yourself'
-                )}
-              </h3>
-
-              <p className="text-xs text-slate-500 mt-1">
-                {t(
-                  'recommendations.step1Desc',
-                  'Let us know your age and gender.'
-                )}
-              </p>
+      {/* INPUT INTERFACE 2: QUICK FORM (Warm Theme) */}
+      {inputMode === 'FORM' && (
+        <div className="bg-white rounded-2xl border border-[#E8D8D2] shadow-warm-xs p-6 sm:p-8 space-y-6">
+          {/* Temporary Simulation Indicator & Profile Sync Options */}
+          <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#4A2525]">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-[#F7AE56] shrink-0" />
+              <span>
+                {t('recommendations.simulatingNotice', 'Temporary simulation: Modifying these fields evaluates schemes without overwriting your saved profile.')}
+              </span>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-              {/* Gender */}
-              <div>
-                <label className="block font-bold text-slate-700 text-xs mb-2">
-                  {t('profile.gender', 'Gender')}
-                </label>
-
-                <select
-                  value={formGender}
-                  onChange={(e) => setFormGender(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium bg-white"
-                >
-                  <option value="FEMALE">
-                    {t('gender.female', 'Female')}
-                  </option>
-
-                  <option value="MALE">
-                    {t('gender.male', 'Male')}
-                  </option>
-
-                  <option value="TRANSGENDER">
-                    {t('gender.transgender', 'Transgender')}
-                  </option>
-
-                  <option value="OTHER">
-                    {t('gender.other', 'Other')}
-                  </option>
-                </select>
-              </div>
-
-              {/* Age */}
-              <div>
-                <label className="block font-bold text-slate-700 text-xs mb-2">
-                  {t('profile.age', 'Applicant Age')} ({t('common.years', 'years')})
-                </label>
-
-                <input
-                  type="number"
-                  min={14}
-                  max={120}
-                  value={formAge}
-                  onChange={(e) => setFormAge(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium"
-                  required
-                />
-              </div>
-
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleResetToStoredProfile}
+                className="btn-secondary btn-sm min-h-[36px] bg-white text-[#765E59] border-[#E8D8D2] flex items-center gap-1"
+              >
+                <RefreshCw className="w-3 h-3 text-[#765E59]" />
+                <span>{t('recommendations.resetToStored', 'Reset to Stored')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveFormToProfile}
+                disabled={isSavingProfile}
+                className="btn-secondary btn-sm min-h-[36px] bg-[#FFD0CA] hover:bg-[#fca59d] text-[#4A2525] border-transparent flex items-center gap-1 disabled:opacity-50"
+              >
+                {isSavingProfile ? (
+                  <span className="w-3 h-3 border-2 border-[#4A2525] border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <User className="w-3 h-3 text-[#EA717B]" />
+                )}
+                <span>{t('recommendations.updateMyProfileBtn', 'Update My Profile')}</span>
+              </button>
             </div>
           </div>
-        )}
 
-        {/* ═══════════════════════════════════════════
-            STEP 2 — LOCATION
-        ═══════════════════════════════════════════ */}
-        {formStep === 2 && (
-          <div className="min-h-[300px] flex flex-col justify-center">
-
-            <div className="text-center mb-7">
-              <div className="w-11 h-11 mx-auto rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center mb-3">
-                <MapPin className="w-5 h-5" />
-              </div>
-
-              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
-                {t(
-                  'recommendations.step2Title',
-                  'Where do you live?'
-                )}
-              </h3>
-
-              <p className="text-xs text-slate-500 mt-1">
-                {t(
-                  'recommendations.step2Desc',
-                  'Your state helps us find state-specific and central government schemes.'
-                )}
-              </p>
+          <form onSubmit={handleFindSchemes} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-xs">
+            <div>
+              <label className="block font-semibold text-[#3B2522] mb-1.5">{t('profile.age', 'Applicant Age')}</label>
+              <input
+                type="number"
+                min={14}
+                max={120}
+                value={formAge}
+                onChange={(e) => setFormAge(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D8D2] text-xs focus:ring-2 focus:ring-[#EA717B]/20 focus:border-[#EA717B] outline-none font-medium text-[#3B2522] bg-white"
+                required
+              />
             </div>
 
-            <div className="max-w-xl mx-auto w-full">
+            <div>
+              <label className="block font-semibold text-[#3B2522] mb-1.5">{t('profile.gender', 'Gender')}</label>
+              <select
+                value={formGender}
+                onChange={(e) => setFormGender(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D8D2] text-xs focus:ring-2 focus:ring-[#EA717B]/20 focus:border-[#EA717B] outline-none font-medium text-[#3B2522] bg-white"
+              >
+                <option value="FEMALE">{t('gender.female', 'Female')}</option>
+                <option value="MALE">{t('gender.male', 'Male')}</option>
+                <option value="TRANSGENDER">{t('gender.transgender', 'Transgender')}</option>
+                <option value="OTHER">{t('gender.other', 'Other')}</option>
+              </select>
+            </div>
 
-              <label className="block font-bold text-slate-700 text-xs mb-2">
-                {t('profile.state', 'State of Residence')}
-              </label>
-
+            <div>
+              <label className="block font-semibold text-[#3B2522] mb-1.5">{t('profile.state', 'State')}</label>
               <select
                 value={formState}
                 onChange={(e) => setFormState(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D8D2] text-xs focus:ring-2 focus:ring-[#EA717B]/20 focus:border-[#EA717B] outline-none font-medium text-[#3B2522] bg-white"
               >
-                <option value="ALL_INDIA">
-                  {t(
-                    'states.allIndia',
-                    'All India / Central Scheme'
-                  )}
-                </option>
-
-                <option value="UTTAR_PRADESH">Uttar Pradesh</option>
-                <option value="MAHARASHTRA">Maharashtra</option>
-                <option value="BIHAR">Bihar</option>
-                <option value="WEST_BENGAL">West Bengal</option>
-                <option value="MADHYA_PRADESH">Madhya Pradesh</option>
-                <option value="TAMIL_NADU">Tamil Nadu</option>
-                <option value="RAJASTHAN">Rajasthan</option>
-                <option value="KARNATAKA">Karnataka</option>
-                <option value="GUJARAT">Gujarat</option>
-                <option value="DELHI">Delhi</option>
+                <option value="ALL_INDIA">{t('states.allIndia', 'All India / Central Scheme')}</option>
+                <option value="UTTAR_PRADESH">{t('states.uttarPradesh', 'Uttar Pradesh')}</option>
+                <option value="MAHARASHTRA">{t('states.maharashtra', 'Maharashtra')}</option>
+                <option value="BIHAR">{t('states.bihar', 'Bihar')}</option>
+                <option value="WEST_BENGAL">{t('states.westBengal', 'West Bengal')}</option>
+                <option value="MADHYA_PRADESH">{t('states.madhyaPradesh', 'Madhya Pradesh')}</option>
+                <option value="TAMIL_NADU">{t('states.tamilNadu', 'Tamil Nadu')}</option>
+                <option value="RAJASTHAN">{t('states.rajasthan', 'Rajasthan')}</option>
+                <option value="KARNATAKA">{t('states.karnataka', 'Karnataka')}</option>
+                <option value="GUJARAT">{t('states.gujarat', 'Gujarat')}</option>
+                <option value="DELHI">{t('states.delhi', 'Delhi')}</option>
               </select>
-
-            </div>
-          </div>
-        )}
-
-        {/* ═══════════════════════════════════════════
-            STEP 3 — SOCIAL CATEGORY
-        ═══════════════════════════════════════════ */}
-        {formStep === 3 && (
-          <div className="min-h-[300px] flex flex-col justify-center">
-
-            <div className="text-center mb-7">
-              <div className="w-11 h-11 mx-auto rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-
-              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
-                {t(
-                  'recommendations.step3Title',
-                  'What is your social category?'
-                )}
-              </h3>
-
-              <p className="text-xs text-slate-500 mt-1">
-                {t(
-                  'recommendations.step3Desc',
-                  'Some government schemes are designed for specific communities.'
-                )}
-              </p>
             </div>
 
-            <div className="max-w-xl mx-auto w-full">
-
-              <label className="block font-bold text-slate-700 text-xs mb-2">
-                {t(
-                  'profile.socialCategory',
-                  'Social Category'
-                )}
-              </label>
-
+            <div>
+              <label className="block font-semibold text-[#3B2522] mb-1.5">{t('profile.socialCategory', 'Social Category')}</label>
               <select
                 value={formSocialCategory}
                 onChange={(e) => setFormSocialCategory(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D8D2] text-xs focus:ring-2 focus:ring-[#EA717B]/20 focus:border-[#EA717B] outline-none font-medium text-[#3B2522] bg-white"
               >
-                <option value="SC">
-                  {t(
-                    'category.sc',
-                    'Scheduled Caste (SC - NSFDC Concessional Loans)'
-                  )}
-                </option>
-
-                <option value="OBC">
-                  {t(
-                    'category.obc',
-                    'Other Backward Class (OBC - NBCFDC Loans)'
-                  )}
-                </option>
-
-                <option value="ST">
-                  {t(
-                    'category.st',
-                    'Scheduled Tribe (ST - NSTFDC Concessional Loans)'
-                  )}
-                </option>
-
-                <option value="MINORITY">
-                  {t(
-                    'category.minority',
-                    'Notified Minority Community (NMDFC Schemes)'
-                  )}
-                </option>
-
-                <option value="GENERAL">
-                  {t(
-                    'category.general',
-                    'General / Unreserved'
-                  )}
-                </option>
+                <option value="SC">{t('category.sc', 'Scheduled Caste (SC - NSFDC Concessional Loans)')}</option>
+                <option value="OBC">{t('category.obc', 'Other Backward Class (OBC - NBCFDC Loans)')}</option>
+                <option value="ST">{t('category.st', 'Scheduled Tribe (ST - NSTFDC Concessional Loans)')}</option>
+                <option value="MINORITY">{t('category.minority', 'Notified Minority Community (NMDFC Schemes)')}</option>
+                <option value="GENERAL">{t('category.general', 'General / Unreserved')}</option>
               </select>
-
-            </div>
-          </div>
-        )}
-
-        {/* ═══════════════════════════════════════════
-            STEP 4 — INCOME
-        ═══════════════════════════════════════════ */}
-        {formStep === 4 && (
-          <div className="min-h-[300px] flex flex-col justify-center">
-
-            <div className="text-center mb-7">
-              <div className="w-11 h-11 mx-auto rounded-xl bg-green-50 text-green-700 flex items-center justify-center mb-3 text-lg font-black">
-                ₹
-              </div>
-
-              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
-                {t(
-                  'recommendations.step4Title',
-                  'What is your annual family income?'
-                )}
-              </h3>
-
-              <p className="text-xs text-slate-500 mt-1">
-                {t(
-                  'recommendations.step4Desc',
-                  'Income is an important eligibility factor for many welfare schemes.'
-                )}
-              </p>
             </div>
 
-            <div className="max-w-xl mx-auto w-full">
-
-              <label className="block font-bold text-slate-700 text-xs mb-2">
-                {t(
-                  'profile.annualIncome',
-                  'Annual Family Income (₹)'
-                )}
-              </label>
-
+            <div>
+              <label className="block font-semibold text-[#3B2522] mb-1.5">{t('profile.annualIncome', 'Annual Family Income (₹)')}</label>
               <select
                 value={formIncomeSlab}
-                onChange={(e) =>
-                  setFormIncomeSlab(Number(e.target.value))
-                }
-                className="w-full px-4 py-3.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium bg-white"
+                onChange={(e) => setFormIncomeSlab(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D8D2] text-xs focus:ring-2 focus:ring-[#EA717B]/20 focus:border-[#EA717B] outline-none font-medium text-[#3B2522] bg-white"
               >
-                <option value={90000}>
-                  Below ₹1 Lakh (₹90,000)
-                </option>
-
-                <option value={180000}>
-                  ₹1 Lakh – ₹2 Lakh (₹1,80,000)
-                </option>
-
-                <option value={300000}>
-                  ₹2 Lakh – ₹3 Lakh (₹3,00,000)
-                </option>
-
-                <option value={500000}>
-                  ₹3 Lakh – ₹5 Lakh (₹5,00,000)
-                </option>
-
-                <option value={1000000}>
-                  Above ₹5 Lakh (₹10,00,000)
-                </option>
+                <option value={90000}>{t('recommendations.incomeSlabBelow1L', 'Below ₹1 Lakh (₹90,000)')}</option>
+                <option value={180000}>{t('recommendations.incomeSlab1to2L', '₹1 Lakh – ₹2 Lakh (₹1,80,000)')}</option>
+                <option value={300000}>{t('recommendations.incomeSlab2to3L', '₹2 Lakh – ₹3 Lakh (₹3,00,000)')}</option>
+                <option value={500000}>{t('recommendations.incomeSlab3to5L', '₹3 Lakh – ₹5 Lakh (₹5,00,000)')}</option>
+                <option value={1000000}>{t('recommendations.incomeSlabAbove5L', 'Above ₹5 Lakh (₹10,00,000)')}</option>
               </select>
-
             </div>
-          </div>
-        )}
 
-        {/* ═══════════════════════════════════════════
-            STEP 5 — REQUIREMENT
-        ═══════════════════════════════════════════ */}
-        {formStep === 5 && (
-          <div className="min-h-[300px] flex flex-col justify-center">
+            <div>
+              <label className="block font-semibold text-[#3B2522] mb-1.5">{t('profile.projectCost', 'Project Cost')}</label>
+              <select
+                value={formProjectCostSlab}
+                onChange={(e) => setFormProjectCostSlab(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8D8D2] text-xs focus:ring-2 focus:ring-[#EA717B]/20 focus:border-[#EA717B] outline-none font-medium text-[#3B2522] bg-white"
+              >
+                <option value={50000}>{t('recommendations.projectCostUpTo50k', 'Up to ₹50,000')}</option>
+                <option value={100000}>{t('recommendations.projectCost1L', '₹1,00,000 (Micro Loan)')}</option>
+                <option value={500000}>{t('recommendations.projectCost5L', '₹5,00,000 (Term Loan / Vikas)')}</option>
+                <option value={1500000}>{t('recommendations.projectCost15L', '₹15,00,000 (Major Unit)')}</option>
+                <option value={5000000}>{t('recommendations.projectCostAbove50L', 'Above ₹50,00,000')}</option>
+              </select>
+            </div>
 
-            <div className="text-center mb-6">
-              <div className="w-11 h-11 mx-auto rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center mb-3">
-                <Sparkles className="w-5 h-5" />
-              </div>
-
-              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
-                {t(
-                  'recommendations.step5Title',
-                  'What kind of support do you need?'
+            <div className="sm:col-span-2 lg:col-span-3 pt-2">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full btn-primary min-h-[44px] justify-center text-sm font-bold shadow-warm-sm transition flex items-center gap-2 bg-[#EA717B] hover:bg-[#d65f69] text-white"
+              >
+                {isLoading ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>{t('recommendations.evaluateBtn', 'Evaluate Matching Schemes')}</span>
+                  </>
                 )}
-              </h3>
-
-              <p className="text-xs text-slate-500 mt-1">
-                {t(
-                  'recommendations.step5Desc',
-                  'Choose the option that best describes what you want to achieve.'
-                )}
-              </p>
+              </button>
             </div>
-
-            <div className="space-y-5">
-
-              <div>
-                <label className="block font-bold text-slate-700 text-xs mb-2">
-                  {t(
-                    'recommendations.needLabel',
-                    'I need support for'
-                  )}
-                </label>
-
-                <select
-                  value={formNeed}
-                  onChange={(e) => setFormNeed(e.target.value)}
-                  className="w-full px-4 py-3.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium bg-white"
-                >
-                  <option value="START_BUSINESS">
-                    {t(
-                      'recommendations.needStartBusiness',
-                      'Starting a new business'
-                    )}
-                  </option>
-
-                  <option value="EXPAND_BUSINESS">
-                    {t(
-                      'recommendations.needExpandBusiness',
-                      'Expanding an existing business'
-                    )}
-                  </option>
-
-                  <option value="EDUCATION">
-                    {t(
-                      'recommendations.needEducation',
-                      'Education / Higher Education'
-                    )}
-                  </option>
-
-                  <option value="SKILL_TRAINING">
-                    {t(
-                      'recommendations.needSkillTraining',
-                      'Skill Training / Vocational Training'
-                    )}
-                  </option>
-
-                  <option value="AGRICULTURE">
-                    {t(
-                      'recommendations.needAgriculture',
-                      'Agriculture / Allied Activities'
-                    )}
-                  </option>
-
-                  <option value="HOUSING">
-                    {t(
-                      'recommendations.needHousing',
-                      'Housing / Home Improvement'
-                    )}
-                  </option>
-                </select>
-              </div>
-
-              {/* Business Stage */}
-              {(formNeed === 'START_BUSINESS' ||
-                formNeed === 'EXPAND_BUSINESS') && (
-                <div>
-                  <label className="block font-bold text-slate-700 text-xs mb-2">
-                    {t(
-                      'recommendations.businessStageLabel',
-                      'Business Stage'
-                    )}
-                  </label>
-
-                  <select
-                    value={formBusinessStage}
-                    onChange={(e) =>
-                      setFormBusinessStage(e.target.value)
-                    }
-                    className="w-full px-4 py-3.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium bg-white"
-                  >
-                    <option value="CONCEPT">
-                      {t(
-                        'recommendations.stageConcept',
-                        'Just an idea / planning stage'
-                      )}
-                    </option>
-
-                    <option value="NEW">
-                      {t(
-                        'recommendations.stageNew',
-                        'Starting a new unit'
-                      )}
-                    </option>
-
-                    <option value="EXISTING">
-                      {t(
-                        'recommendations.stageExisting',
-                        'Existing business'
-                      )}
-                    </option>
-                  </select>
-                </div>
-              )}
-
-            </div>
-          </div>
-        )}
-
-        {/* ═══════════════════════════════════════════
-            STEP 6 — PROJECT COST
-        ═══════════════════════════════════════════ */}
-        {formStep === 6 && (
-          <div className="min-h-[300px] flex flex-col justify-center">
-
-            <div className="text-center mb-7">
-              <div className="w-11 h-11 mx-auto rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3">
-                <CalcIcon className="w-5 h-5" />
-              </div>
-
-              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
-                {t(
-                  'recommendations.step6Title',
-                  'Tell us about your financial requirement'
-                )}
-              </h3>
-
-              <p className="text-xs text-slate-500 mt-1">
-                {t(
-                  'recommendations.step6Desc',
-                  'This helps us match you with suitable loan, subsidy and support schemes.'
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-5 max-w-xl mx-auto w-full">
-
-              {/* Project Cost */}
-              <div>
-                <label className="block font-bold text-slate-700 text-xs mb-2">
-                  {t(
-                    'profile.projectCost',
-                    'Estimated Project Cost'
-                  )}
-                </label>
-
-                <select
-                  value={formProjectCostSlab}
-                  onChange={(e) =>
-                    setFormProjectCostSlab(Number(e.target.value))
-                  }
-                  className="w-full px-4 py-3.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium bg-white"
-                >
-                  <option value={50000}>
-                    Up to ₹50,000
-                  </option>
-
-                  <option value={100000}>
-                    ₹1,00,000 (Micro Loan)
-                  </option>
-
-                  <option value={500000}>
-                    ₹5,00,000 (Term Loan / Vikas)
-                  </option>
-
-                  <option value={1500000}>
-                    ₹15,00,000 (Major Unit)
-                  </option>
-
-                  <option value={5000000}>
-                    Above ₹50,00,000
-                  </option>
-                </select>
-              </div>
-
-              {/* Loan Required */}
-              <div>
-                <label className="block font-bold text-slate-700 text-xs mb-2">
-                  {t(
-                    'recommendations.loanRequiredLabel',
-                    'Do you need a loan / financial assistance?'
-                  )}
-                </label>
-
-                <div className="grid grid-cols-2 gap-3">
-
-                  <button
-                    type="button"
-                    onClick={() => setFormLoanRequired(true)}
-                    className={`py-3.5 rounded-xl border-2 text-sm font-bold transition ${
-                      formLoanRequired
-                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-100'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    ✓ {t('common.yes', 'Yes')}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setFormLoanRequired(false)}
-                    className={`py-3.5 rounded-xl border-2 text-sm font-bold transition ${
-                      !formLoanRequired
-                        ? 'border-slate-600 bg-slate-50 text-slate-800 ring-2 ring-slate-100'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    {t('common.no', 'No')}
-                  </button>
-
-                </div>
-              </div>
-
-            </div>
-          </div>
-        )}
-
-        {/* ─────────────────────────────────────────────
-            NAVIGATION BUTTONS
-        ───────────────────────────────────────────── */}
-        <div className="border-t border-slate-100 pt-5 mt-2 flex items-center justify-between gap-3">
-
-          {/* Back */}
-          <button
-            type="button"
-            onClick={goToPreviousFormStep}
-            disabled={formStep === 1 || isLoading}
-            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 min-h-[42px] ${
-              formStep === 1
-                ? 'text-slate-300 cursor-not-allowed'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-            }`}
-          >
-            <span>←</span>
-            {t('common.back', 'Back')}
-          </button>
-
-          {/* Step-specific Next / Final Button */}
-          {formStep < TOTAL_FORM_STEPS ? (
-            <button
-              type="submit"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 sm:px-8 rounded-xl text-xs shadow-md transition flex items-center gap-2 min-h-[42px]"
-            >
-              {t('common.next', 'Next')}
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 sm:px-8 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2 min-h-[42px] disabled:opacity-50"
-            >
-              {isLoading ? (
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  {t(
-                    'recommendations.evaluateBtn',
-                    'Find Matching Schemes'
-                  )}
-                </>
-              )}
-            </button>
-          )}
-
+          </form>
         </div>
+      )}
 
-      </form>
-
-    </div>
-  </div>
-)}
-
-      {/* RESULTS LIST SECTION */}
+      {/* RESULTS LIST SECTION (Warm Theme) */}
       {standardResult && (
         <div ref={resultsRef} id="scheme-results" className="space-y-6 pt-4 scroll-mt-24">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
+          {/* ── Extracted Natural Language Profile Grounding Banner ── */}
+          {extractionResult && (
+            <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-2xl p-4 sm:p-5 shadow-warm-xs space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#FFD0CA]/70 pb-2.5">
+                <div className="flex items-center gap-2 text-[#3B2522] font-extrabold text-xs sm:text-sm">
+                  <Sparkles className="w-4 h-4 text-[#F7AE56] shrink-0" />
+                  <span>{t('recommendations.extractedProfileTitle', 'Extracted Profile Parameters (Grounded Input)')}</span>
+                </div>
+                <span className="text-[11px] font-bold text-[#4A2525] bg-[#FFD0CA] px-2.5 py-0.5 rounded-full border border-[#EA717B]/30">
+                  Direct Statutory Grounding
+                </span>
+              </div>
+
+              <p className="text-xs text-[#765E59] leading-relaxed">
+                {t(
+                  'recommendations.extractedProfileDesc',
+                  'The following demographic and financial attributes were extracted directly from your input and evaluated deterministically against official scheme criteria:'
+                )}
+              </p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-1">
+                <div className="bg-white p-2.5 rounded-xl border border-[#E8D8D2] text-xs shadow-warm-xs">
+                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">Age</span>
+                  <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
+                    {extractionResult.extracted_profile.age ? `${extractionResult.extracted_profile.age} yrs` : 'Unspecified'}
+                  </span>
+                </div>
+
+                <div className="bg-white p-2.5 rounded-xl border border-[#E8D8D2] text-xs shadow-warm-xs">
+                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">Gender</span>
+                  <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm capitalize">
+                    {extractionResult.extracted_profile.gender ? extractionResult.extracted_profile.gender.toLowerCase() : 'Unspecified'}
+                  </span>
+                </div>
+
+                <div className="bg-white p-2.5 rounded-xl border border-[#E8D8D2] text-xs shadow-warm-xs">
+                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">State</span>
+                  <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm truncate block" title={extractionResult.extracted_profile.state || 'All India'}>
+                    {extractionResult.extracted_profile.state ? extractionResult.extracted_profile.state.replace(/_/g, ' ') : 'All India'}
+                  </span>
+                </div>
+
+                <div className="bg-white p-2.5 rounded-xl border border-[#E8D8D2] text-xs shadow-warm-xs">
+                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">Category</span>
+                  <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
+                    {extractionResult.extracted_profile.social_category || 'General'}
+                  </span>
+                </div>
+
+                <div className="bg-white p-2.5 rounded-xl border border-[#E8D8D2] text-xs shadow-warm-xs">
+                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">Annual Income</span>
+                  <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
+                    {extractionResult.extracted_profile.annual_income
+                      ? `₹${extractionResult.extracted_profile.annual_income.toLocaleString('en-IN')}`
+                      : 'Unspecified'}
+                  </span>
+                </div>
+
+                <div className="bg-white p-2.5 rounded-xl border border-[#E8D8D2] text-xs shadow-warm-xs">
+                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">Project Cost / Loan</span>
+                  <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
+                    {extractionResult.extracted_profile.project_cost
+                      ? `₹${extractionResult.extracted_profile.project_cost.toLocaleString('en-IN')}`
+                      : extractionResult.extracted_profile.requested_loan_amount
+                      ? `₹${extractionResult.extracted_profile.requested_loan_amount.toLocaleString('en-IN')}`
+                      : 'Standard Unit'}
+                  </span>
+                </div>
+              </div>
+
+              {extractionResult.missing_high_priority_fields && extractionResult.missing_high_priority_fields.length > 0 && (
+                <div className="flex items-center gap-2 pt-1 text-[11px] text-[#765E59]">
+                  <Info className="w-3.5 h-3.5 text-[#EA717B] shrink-0" />
+                  <span>
+                    Additional parameters not specified in text: <strong>{extractionResult.missing_high_priority_fields.join(', ')}</strong> (evaluated under standard baseline rules).
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E8D8D2] pb-4">
             <div>
-              <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-                <Award className="w-6 h-6 text-gov-saffron" />
+              <h2 className="text-xl font-extrabold text-[#3B2522] flex items-center gap-2">
+                <Award className="w-6 h-6 text-[#F7AE56]" />
                 {t('recommendations.resultsTitle', 'Deterministic Scheme Eligibility & Rankings')}
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-[#765E59] mt-0.5">
                 {t('recommendations.evalCount', { count: standardResult.evaluated_scheme_count, defaultValue: `Evaluated ${standardResult.evaluated_scheme_count} official schemes against your profile rules.` })}
               </p>
             </div>
 
             {/* Scheme Evaluation Summary Counters */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold">
-              <span className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
+              <span className="bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 {standardResult.eligible_scheme_count} {t('recommendations.tabEligible', 'Eligible')}
               </span>
-              <span className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-xl border border-amber-200 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+              {(standardResult.conditional_scheme_count || 0) > 0 && (
+                <span className="bg-[#FFD0CA] text-[#4A2525] px-3 py-1.5 rounded-xl border border-[#EA717B]/30 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#EA717B]" />
+                  {standardResult.conditional_scheme_count} {t('recommendations.conditional', 'Conditional')}
+                </span>
+              )}
+              <span className="bg-[#F7AE56]/20 text-[#3B2522] px-3 py-1.5 rounded-xl border border-[#F7AE56]/40 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-[#F7AE56]" />
                 {standardResult.insufficient_info_scheme_count} {t('recommendations.tabInfoNeeded', 'Info Needed')}
               </span>
-              <span className="bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200 flex items-center gap-1.5">
-                <XCircle className="w-3.5 h-3.5 text-rose-600" />
-                {standardResult.excluded_scheme_count} {t('recommendations.tabExcluded', 'Excluded')}
+              <span className="bg-[#EA717B]/15 text-[#4A2525] px-3 py-1.5 rounded-xl border border-[#EA717B]/30 flex items-center gap-1.5">
+                <XCircle className="w-3.5 h-3.5 text-[#EA717B]" />
+                {standardResult.excluded_scheme_count} {t('recommendations.tabIneligible', 'Ineligible')}
               </span>
             </div>
           </div>
 
           {/* Status Tabs Filter */}
-          <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+          <div className="flex flex-wrap gap-2 border-b border-[#E8D8D2] pb-3">
             <button
               onClick={() => setActiveTab('ELIGIBLE')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                 activeTab === 'ELIGIBLE'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  ? 'bg-emerald-600 text-white shadow-warm-xs'
+                  : 'bg-[#FFF4EC] hover:bg-[#FFD0CA]/40 text-[#765E59] border border-[#E8D8D2]'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              {t('recommendations.filterWhyQualify', 'Why You Qualify')} ({standardResult.eligible_scheme_count})
+              {t('recommendations.filterEligible', 'Eligible Schemes')} ({standardResult.eligible_scheme_count})
             </button>
+
+            {(standardResult.conditional_scheme_count || 0) > 0 && (
+              <button
+                onClick={() => setActiveTab('CONDITIONAL')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                  activeTab === 'CONDITIONAL'
+                    ? 'bg-[#4A2525] text-white shadow-warm-xs'
+                    : 'bg-[#FFF4EC] hover:bg-[#FFD0CA]/40 text-[#765E59] border border-[#E8D8D2]'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                {t('recommendations.filterConditional', 'Conditional Schemes')} ({standardResult.conditional_scheme_count})
+              </button>
+            )}
 
             <button
               onClick={() => setActiveTab('INSUFFICIENT')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                 activeTab === 'INSUFFICIENT'
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  ? 'bg-[#F7AE56] text-[#3B2522] shadow-warm-xs'
+                  : 'bg-[#FFF4EC] hover:bg-[#FFD0CA]/40 text-[#765E59] border border-[#E8D8D2]'
               }`}
             >
               <AlertTriangle className="w-3.5 h-3.5" />
-              {t('recommendations.filterMoreInfo', 'More Info Required')} ({standardResult.insufficient_info_scheme_count})
+              {t('recommendations.filterMoreInfo', 'Needs More Information')} ({standardResult.insufficient_info_scheme_count})
             </button>
 
             <button
               onClick={() => setActiveTab('INELIGIBLE')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                 activeTab === 'INELIGIBLE'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  ? 'bg-[#EA717B] text-white shadow-warm-xs'
+                  : 'bg-[#FFF4EC] hover:bg-[#FFD0CA]/40 text-[#765E59] border border-[#E8D8D2]'
               }`}
             >
               <XCircle className="w-3.5 h-3.5" />
-              {t('recommendations.filterWhyNotQualify', "Why You Don't Qualify")} ({standardResult.excluded_scheme_count})
+              {t('recommendations.filterIneligible', 'Ineligible Schemes')} ({standardResult.excluded_scheme_count})
             </button>
 
             <button
               onClick={() => setActiveTab('ALL')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                 activeTab === 'ALL'
-                  ? 'bg-slate-800 text-white shadow-sm'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  ? 'bg-[#4A2525] text-white shadow-warm-xs'
+                  : 'bg-[#FFF4EC] hover:bg-[#FFD0CA]/40 text-[#765E59] border border-[#E8D8D2]'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              {t('recommendations.filterAll', 'All Evaluated')} ({standardResult.evaluated_scheme_count})
+              {t('recommendations.filterAll', 'All Evaluated Schemes')} ({standardResult.evaluated_scheme_count})
             </button>
           </div>
 
           {/* Recommendation / Evaluation Cards */}
           {displayedItems.length === 0 ? (
-            <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-8 text-center text-slate-600 text-sm">
-              <Info className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+            <div className="bg-[#FFF4EC] border border-dashed border-[#FFD0CA] rounded-2xl p-8 text-center text-[#765E59] text-sm">
+              <Info className="w-8 h-8 text-[#F7AE56] mx-auto mb-2" />
               {emptyMessage}
             </div>
           ) : (
             <div className="space-y-6">
               {displayedItems.map((rec: RecommendationItem, idx: number) => {
-                const matchPct = Math.round(rec.score || 50);
-                const matchLabel = getMatchLabel(matchPct);
+                const isEligible = rec.eligibility_status === 'ELIGIBLE';
+                const isConditional = rec.eligibility_status === 'CONDITIONAL';
+                const isInsufficient = rec.eligibility_status === 'INSUFFICIENT_INFORMATION';
+                const isIneligible = rec.eligibility_status === 'INELIGIBLE' || rec.eligibility_status === 'NOT_APPLICABLE';
+
+                const matchPct = isIneligible ? 0 : Math.round(rec.score ?? 0);
+                const matchLabel = isIneligible ? 'Ineligible' : getMatchLabel(matchPct);
                 const isExpanded = !!expandedDetails[rec.scheme_id];
                 const officialUrl = rec.application_url || rec.official_portal || rec.official_source_url;
-
-                const isEligible = rec.eligibility_status === 'ELIGIBLE';
-                const isInsufficient = rec.eligibility_status === 'INSUFFICIENT_INFORMATION';
-                const isIneligible = rec.eligibility_status === 'INELIGIBLE';
 
                 // Pre-fill amount for calculator
                 const requestedAmount = canonicalProfile?.requested_loan_amount || canonicalProfile?.project_cost || formProjectCostSlab || '';
@@ -1849,6 +1587,14 @@ const resetMultiStepForm = () => {
                 ].map(cleanReasonText).filter(Boolean);
                 const defaultEligible = allEligibleReasons.slice(0, 3);
                 const remainingEligible = allEligibleReasons.slice(3);
+
+                const allConditionalReasons = [
+                  ...(rec.key_conditions && rec.key_conditions.length > 0 ? rec.key_conditions : []),
+                  ...(rec.eligibility_reasons && rec.eligibility_reasons.length > 0 ? rec.eligibility_reasons : []),
+                  ...(rec.matched_rules || [])
+                ].map(cleanReasonText).filter(Boolean);
+                const defaultConditional = allConditionalReasons.slice(0, 3);
+                const remainingConditional = allConditionalReasons.slice(3);
 
                 const allFailedReasons = (rec.failed_rules && rec.failed_rules.length > 0 ? rec.failed_rules : rec.eligibility_reasons || [])
                   .map(cleanReasonText).filter(Boolean);
@@ -1865,51 +1611,62 @@ const resetMultiStepForm = () => {
                 return (
                   <div
                     key={rec.scheme_id || idx}
-                    className={`bg-white rounded-2xl border shadow-sm p-4 sm:p-5 hover:shadow-md transition space-y-4 ${
+                    className={`bg-white rounded-2xl border shadow-warm-xs p-4 sm:p-5 hover:shadow-warm-md transition space-y-4 ${
                       isEligible
                         ? 'border-emerald-200 ring-1 ring-emerald-100'
+                        : isConditional
+                        ? 'border-[#FFD0CA] ring-1 ring-[#FFD0CA]/50'
                         : isInsufficient
-                        ? 'border-amber-200 ring-1 ring-amber-100'
-                        : 'border-slate-200 opacity-95'
+                        ? 'border-[#F7AE56]/40 ring-1 ring-[#F7AE56]/20'
+                        : 'border-[#E8D8D2] opacity-95'
                     }`}
                   >
                     {/* ── 1. SCHEME HEADER & COMPACT FIT SCORE ── */}
                     <div className="flex items-start gap-3">
                       {/* Rank Badge on Left */}
                       <div
-                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-xs ${
+                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-warm-xs ${
                           isEligible
                             ? 'bg-emerald-600 text-white'
+                            : isConditional
+                            ? 'bg-[#4A2525] text-white'
                             : isInsufficient
-                            ? 'bg-amber-500 text-white'
-                            : 'bg-slate-500 text-white'
+                            ? 'bg-[#F7AE56] text-[#3B2522]'
+                            : 'bg-[#765E59] text-white'
                         }`}
                       >
                         #{rec.rank || idx + 1}
                       </div>
 
                       {/* Main Header Info Area */}
-                      <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex-1 min-w-0 space-y-1.5">
                         <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
-                          <h3 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug hover:text-gov-blue transition">
+                          <h3 className="text-sm sm:text-base font-extrabold text-[#3B2522] leading-snug hover:text-[#EA717B] transition">
                             <Link to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}>
                               {rec.scheme_name}
                             </Link>
                           </h3>
                         </div>
 
+                        {/* Short Purpose / Objective */}
+                        {(rec.purpose || rec.short_description || rec.financial_assistance_summary) && (
+                          <p className="text-xs sm:text-sm text-[#765E59] line-clamp-2 leading-relaxed">
+                            {rec.purpose || rec.short_description || rec.financial_assistance_summary}
+                          </p>
+                        )}
+
                         {/* Secondary Details: Scheme ID & Ministry */}
-                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
-                          <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-slate-600">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[#765E59] pt-0.5">
+                          <span className="font-mono text-xs bg-[#FFFBF0] px-2 py-0.5 rounded border border-[#E8D8D2] text-[#765E59] font-semibold">
                             {rec.scheme_id}
                           </span>
                           {rec.is_direct_portal_scheme && (
-                            <span className="text-[10px] font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full">
+                            <span className="text-xs font-bold bg-[#FFD0CA] text-[#4A2525] px-2.5 py-0.5 rounded-full">
                               Direct Govt Portal
                             </span>
                           )}
                           {rec.ministry && (
-                            <span className="hidden sm:inline text-slate-400 truncate max-w-xs">
+                            <span className="hidden sm:inline text-xs text-[#765E59] font-medium truncate max-w-sm">
                               • {rec.ministry}
                             </span>
                           )}
@@ -1918,30 +1675,128 @@ const resetMultiStepForm = () => {
                         {/* Eligibility + Compact Fit Badges directly alongside */}
                         <div className="flex flex-wrap items-center gap-2 pt-1">
                           {isEligible && (
-                            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              
+                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                               <span>✓ {t('recommendations.tabEligible', 'Eligible')}</span>
                             </span>
                           )}
+                          {isConditional && (
+                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#FFD0CA] text-[#4A2525] border border-[#EA717B]/40">
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#EA717B]" />
+                              <span>⚡ {t('recommendations.conditional', 'Conditional')}</span>
+                            </span>
+                          )}
                           {isInsufficient && (
-                            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40">
+                              <AlertTriangle className="w-3.5 h-3.5 text-[#F7AE56]" />
                               <span>⚠ {t('recommendations.moreInfoRequired', 'More Info Needed')}</span>
                             </span>
                           )}
                           {isIneligible && (
-                            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800 border border-rose-300">
-                              <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#EA717B]/15 text-[#4A2525] border border-[#EA717B]/30">
+                              <XCircle className="w-3.5 h-3.5 text-[#EA717B]" />
                               <span>✕ {t('recommendations.notEligible', 'Not Eligible')}</span>
                             </span>
                           )}
 
                           {/* Compact Fit Score Badge */}
-                          <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-extrabold bg-sky-50 text-sky-900 border border-sky-200">
-                            <span className="font-mono text-sky-700 font-black">{matchPct}% Fit</span>
-                            <span className="text-[10px] font-semibold text-slate-500">• {matchLabel}</span>
+                          <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-extrabold bg-[#FFF4EC] text-[#3B2522] border border-[#E8D8D2]">
+                            <span className="font-mono text-[#EA717B] font-black">{matchPct}% Fit</span>
+                            <span className="text-xs font-medium text-[#765E59]">• {matchLabel}</span>
                           </span>
+
+                          {/* Scheme Financial Health / Fit Badge */}
+                          {rec.is_credit_scheme === false || rec.financial_suitability === 'NOT_APPLICABLE' ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-[#FFFBF0] text-[#765E59] border border-[#E8D8D2]"
+                              title="Non-credit scheme: Direct subsidy/welfare assistance with zero debt repayment obligations"
+                            >
+                              <span>{t('recommendations.fitNonCredit', 'Financial Fit: Non-Credit Scheme')}</span>
+                            </span>
+                          ) : rec.financial_suitability === 'STRONG_FIT' ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-900 border border-emerald-300"
+                              title={rec.financial_suitability_reason || 'Comfortable debt service capacity'}
+                            >
+                              <span>{t('recommendations.fitComfortable', '🟢 Financial Fit: Comfortable')}</span>
+                            </span>
+                          ) : rec.financial_suitability === 'POSSIBLE_FIT' ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40"
+                              title={rec.financial_suitability_reason || 'Manageable repayment burden'}
+                            >
+                              <span>{t('recommendations.fitManageable', '🟡 Financial Fit: Manageable')}</span>
+                            </span>
+                          ) : rec.financial_suitability === 'FINANCIALLY_UNSUITABLE' ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-[#EA717B]/15 text-[#4A2525] border border-[#EA717B]/30"
+                              title={rec.financial_suitability_reason || 'High repayment burden detected'}
+                            >
+                              <span>{t('recommendations.fitHighBurden', '🔴 Financial Fit: High Repayment Burden')}</span>
+                            </span>
+                          ) : rec.financial_suitability_reason && rec.financial_suitability_reason.includes('specified') ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-[#FFFBF0] text-[#765E59] border border-[#E8D8D2]"
+                              title={rec.financial_suitability_reason}
+                            >
+                              <span>{t('recommendations.fitUnspecified', '⚪ Financial Fit: Lender Rate Unspecified')}</span>
+                            </span>
+                          ) : null}
                         </div>
+                      </div>
+                    </div>
+
+                    {/* ── VERIFIED FINANCIAL CATEGORY & ASSISTANCE OVERVIEW ── */}
+                    <div className="bg-[#FFFBF0] rounded-xl p-3 sm:p-3.5 border border-[#E8D8D2] grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                      <div>
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-[#765E59] block">
+                          {t('recommendations.financialCategoryLabel', 'Financial Category')}
+                        </span>
+                        <span className="font-bold text-[#3B2522] text-xs sm:text-[13px] truncate block mt-0.5" title={formatFinancialCategory(rec.financial_category)}>
+                          {formatFinancialCategory(rec.financial_category)}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-[#765E59] block">
+                          {rec.max_loan_amount ? 'Max Assistance Limit' : rec.grant_amount ? 'Grant Amount' : 'Assistance Mode'}
+                        </span>
+                        <span className="font-bold text-[#3B2522] font-mono text-xs sm:text-[13px] block mt-0.5">
+                          {rec.max_loan_amount
+                            ? `₹${rec.max_loan_amount >= 100000 ? `${(rec.max_loan_amount / 100000).toFixed(1)} Lakh` : rec.max_loan_amount.toLocaleString('en-IN')}`
+                            : rec.grant_amount
+                            ? `₹${rec.grant_amount.toLocaleString('en-IN')}`
+                            : rec.is_credit_scheme === false
+                            ? 'Direct Benefit'
+                            : 'Per Scheme Rules'}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-[#765E59] block">
+                          {rec.interest_rate !== undefined && rec.interest_rate !== null ? 'Interest Rate' : rec.subsidy_percentage ? 'Capital Subsidy' : 'Repayment Period'}
+                        </span>
+                        <span className="font-bold text-emerald-700 font-mono text-xs sm:text-[13px] block mt-0.5">
+                          {rec.interest_rate !== undefined && rec.interest_rate !== null
+                            ? `${rec.interest_rate > 0 ? `${rec.interest_rate}% p.a.` : 'Concessional / 0%'}`
+                            : rec.subsidy_percentage
+                            ? `${rec.subsidy_percentage}% of Project`
+                            : rec.repayment_period_max_months
+                            ? `${rec.repayment_period_max_months} Months`
+                            : 'Concessional Terms'}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-[#765E59] block">
+                          {rec.estimated_monthly_installment ? 'Est. Repayment EMI' : rec.available_subsidy_amount ? 'Available Subsidy' : 'Verification'}
+                        </span>
+                        <span className="font-bold text-[#3B2522] font-mono text-xs sm:text-[13px] block mt-0.5">
+                          {rec.estimated_monthly_installment
+                            ? `₹${Math.round(rec.estimated_monthly_installment).toLocaleString('en-IN')}/mo`
+                            : rec.available_subsidy_amount
+                            ? `₹${Math.round(rec.available_subsidy_amount).toLocaleString('en-IN')}`
+                            : 'Verified Authoritative'}
+                        </span>
                       </div>
                     </div>
 
@@ -1963,7 +1818,7 @@ const resetMultiStepForm = () => {
                         {/* Top 3 concise reasons */}
                         <ul className="space-y-1.5 pt-0.5">
                           {defaultEligible.map((reason, rIdx) => (
-                            <li key={rIdx} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
+                            <li key={rIdx} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
                               <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
                               <span>{reason}</span>
                             </li>
@@ -1974,7 +1829,7 @@ const resetMultiStepForm = () => {
                         {isExpanded && remainingEligible.length > 0 && (
                           <ul className="space-y-1.5 pt-1 border-t border-emerald-200/60">
                             {remainingEligible.map((reason, rIdx) => (
-                              <li key={`rem-${rIdx}`} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
+                              <li key={`rem-${rIdx}`} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
                                 <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
                                 <span>{reason}</span>
                               </li>
@@ -1982,60 +1837,147 @@ const resetMultiStepForm = () => {
                           </ul>
                         )}
 
+                        {/* Non-guaranteed approval disclaimer */}
+                        <p className="text-[11px] text-[#765E59] italic pt-1 border-t border-emerald-200/50">
+                          Satisfies statutory eligibility criteria. Final loan sanction and disbursement depend on channel partner verification and underwriting. Approval is not guaranteed.
+                        </p>
+
                         {/* Toggle button */}
                         {(remainingEligible.length > 0 || (rec.score_breakdown && rec.score_breakdown.length > 0)) && (
-                          <button
-                            type="button"
-                            onClick={() => toggleDetails(rec.scheme_id)}
-                            className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1 pt-1 transition"
-                          >
-                            {isExpanded ? (
-                              <>
-                                <ChevronUp className="w-3.5 h-3.5" />
-                                <span>{t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')}</span>
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="w-3.5 h-3.5" />
+                          <div className="pt-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleDetails(rec.scheme_id)}
+                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-white/90 hover:bg-white border border-emerald-200 text-xs font-semibold text-emerald-900 transition shadow-warm-xs focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
+                              aria-expanded={isExpanded}
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                                 <span>
-                                  {t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
-                                  {remainingEligible.length > 0 ? ` (+${remainingEligible.length} more)` : ''}
+                                  {isExpanded
+                                    ? t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')
+                                    : t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
                                 </span>
-                              </>
-                            )}
-                          </button>
+                                {!isExpanded && remainingEligible.length > 0 && (
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    +{remainingEligible.length} more
+                                  </span>
+                                )}
+                              </span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-4 h-4 text-emerald-700" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-emerald-700" />
+                              )}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ── CONDITIONAL STATUTORY ELIGIBILITY ── */}
+                    {isConditional && (
+                      <div className="bg-[#FFF4EC] rounded-xl p-3 sm:p-4 border border-[#FFD0CA] text-xs space-y-2 text-[#3B2522]">
+                        <div className="flex items-center justify-between">
+                          <div className="font-extrabold text-[#4A2525] flex items-center gap-1.5 text-xs sm:text-sm">
+                            <ShieldCheck className="w-4 h-4 text-[#EA717B] shrink-0" />
+                            <span>{t('recommendations.statutoryConditionsRequired', 'Statutory Conditions Required')}</span>
+                          </div>
+                          {allConditionalReasons.length > 0 && (
+                            <span className="text-[10px] font-bold text-[#4A2525] bg-[#FFD0CA] px-2 py-0.5 rounded-full border border-[#EA717B]/30">
+                              {allConditionalReasons.length} Statutory Condition{allConditionalReasons.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-[11px] sm:text-xs text-[#765E59] leading-snug">
+                          Applicant satisfies baseline profile parameters, subject to verifying the following statutory condition(s):
+                        </p>
+
+                        <ul className="space-y-1.5 pt-0.5">
+                          {defaultConditional.map((reason, rIdx) => (
+                            <li key={rIdx} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
+                              <span className="text-[#EA717B] font-bold shrink-0 mt-0.5">⚡</span>
+                              <span>{reason}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        {isExpanded && remainingConditional.length > 0 && (
+                          <ul className="space-y-1.5 pt-1 border-t border-[#FFD0CA]/60">
+                            {remainingConditional.map((reason, rIdx) => (
+                              <li key={`rem-c-${rIdx}`} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
+                                <span className="text-[#EA717B] font-bold shrink-0 mt-0.5">⚡</span>
+                                <span>{reason}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {(remainingConditional.length > 0 || (rec.score_breakdown && rec.score_breakdown.length > 0)) && (
+                          <div className="pt-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleDetails(rec.scheme_id)}
+                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-white/90 hover:bg-white border border-[#FFD0CA] text-xs font-semibold text-[#4A2525] transition shadow-warm-xs focus:outline-hidden focus:ring-2 focus:ring-[#EA717B]/20"
+                              aria-expanded={isExpanded}
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <ShieldCheck className="w-3.5 h-3.5 text-[#EA717B] shrink-0" />
+                                <span>
+                                  {isExpanded
+                                    ? t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')
+                                    : t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
+                                </span>
+                                {!isExpanded && remainingConditional.length > 0 && (
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#FFD0CA] text-[#4A2525] border border-[#EA717B]/30">
+                                    +{remainingConditional.length} more
+                                  </span>
+                                )}
+                              </span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-4 h-4 text-[#4A2525]" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-[#4A2525]" />
+                              )}
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}
 
                     {isIneligible && (
-                      <div className="bg-rose-50/70 rounded-xl p-3 sm:p-4 border border-rose-200/80 text-xs space-y-2 text-slate-800">
+                      <div className="bg-[#EA717B]/10 rounded-xl p-3 sm:p-4 border border-[#EA717B]/20 text-xs space-y-2 text-[#3B2522]">
                         <div className="flex items-center justify-between">
-                          <div className="font-extrabold text-rose-950 flex items-center gap-1.5 text-xs sm:text-sm">
-                            <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                            <span>{t('recommendations.whyNotQualifyTitle', "Why You Don't Qualify")}</span>
+                          <div className="font-extrabold text-[#4A2525] flex items-center gap-1.5 text-xs sm:text-sm">
+                            <XCircle className="w-4 h-4 text-[#EA717B] shrink-0" />
+                            <span>{t('recommendations.statutoryCriteriaNotMet', 'Statutory Criteria Not Met')}</span>
                           </div>
                           {allFailedReasons.length > 0 && (
-                            <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full border border-rose-200">
+                            <span className="text-[10px] font-bold text-[#EA717B] bg-white px-2 py-0.5 rounded-full border border-[#EA717B]/30">
                               {allFailedReasons.length} Unmet Criteria
                             </span>
                           )}
                         </div>
 
+                        <p className="text-[11px] sm:text-xs text-[#765E59] leading-snug">
+                          Deterministic statutory check determined that the applicant does not satisfy the following mandatory requirement(s):
+                        </p>
+
                         <ul className="space-y-1.5 pt-0.5">
                           {defaultFailed.map((reason, rIdx) => (
-                            <li key={rIdx} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
-                              <span className="text-rose-600 font-bold shrink-0 mt-0.5">✕</span>
+                            <li key={rIdx} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
+                              <span className="text-[#EA717B] font-bold shrink-0 mt-0.5">✕</span>
                               <span>{reason}</span>
                             </li>
                           ))}
                         </ul>
 
                         {isExpanded && remainingFailed.length > 0 && (
-                          <ul className="space-y-1.5 pt-1 border-t border-rose-200/60">
+                          <ul className="space-y-1.5 pt-1 border-t border-[#EA717B]/20">
                             {remainingFailed.map((reason, rIdx) => (
-                              <li key={`rem-f-${rIdx}`} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
-                                <span className="text-rose-600 font-bold shrink-0 mt-0.5">✕</span>
+                              <li key={`rem-f-${rIdx}`} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
+                                <span className="text-[#EA717B] font-bold shrink-0 mt-0.5">✕</span>
                                 <span>{reason}</span>
                               </li>
                             ))}
@@ -2043,64 +1985,71 @@ const resetMultiStepForm = () => {
                         )}
 
                         {(remainingFailed.length > 0 || (rec.score_breakdown && rec.score_breakdown.length > 0)) && (
-                          <button
-                            type="button"
-                            onClick={() => toggleDetails(rec.scheme_id)}
-                            className="text-[11px] font-bold text-rose-800 hover:text-rose-950 flex items-center gap-1 pt-1 transition"
-                          >
-                            {isExpanded ? (
-                              <>
-                                <ChevronUp className="w-3.5 h-3.5" />
-                                <span>{t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')}</span>
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="w-3.5 h-3.5" />
+                          <div className="pt-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleDetails(rec.scheme_id)}
+                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-white/90 hover:bg-white border border-[#EA717B]/30 text-xs font-semibold text-[#4A2525] transition shadow-warm-xs focus:outline-hidden focus:ring-2 focus:ring-[#EA717B]/20"
+                              aria-expanded={isExpanded}
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <XCircle className="w-3.5 h-3.5 text-[#EA717B] shrink-0" />
                                 <span>
-                                  {t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
-                                  {remainingFailed.length > 0 ? ` (+${remainingFailed.length} more)` : ''}
+                                  {isExpanded
+                                    ? t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')
+                                    : t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
                                 </span>
-                              </>
-                            )}
-                          </button>
+                                {!isExpanded && remainingFailed.length > 0 && (
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EA717B]/20 text-[#4A2525] border border-[#EA717B]/30">
+                                    +{remainingFailed.length} more
+                                  </span>
+                                )}
+                              </span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-4 h-4 text-[#4A2525]" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-[#4A2525]" />
+                              )}
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}
 
                     {isInsufficient && (
-                      <div className="bg-amber-50/70 rounded-xl p-3 sm:p-4 border border-amber-200/80 text-xs space-y-2 text-slate-800">
+                      <div className="bg-[#F7AE56]/15 rounded-xl p-3 sm:p-4 border border-[#F7AE56]/30 text-xs space-y-2 text-[#3B2522]">
                         <div className="flex items-center justify-between">
-                          <div className="font-extrabold text-amber-950 flex items-center gap-1.5 text-xs sm:text-sm">
-                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                          <div className="font-extrabold text-[#3B2522] flex items-center gap-1.5 text-xs sm:text-sm">
+                            <AlertTriangle className="w-4 h-4 text-[#F7AE56] shrink-0" />
                             <span>{t('recommendations.missingInfoTitle', 'Missing Information Required')}</span>
                           </div>
                           <Link
                             to="/profile"
-                            className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] sm:text-[11px] px-2.5 py-1 rounded-lg shadow-xs transition flex items-center gap-1"
+                            className="bg-[#EA717B] hover:bg-[#d65f69] text-white font-bold text-[10px] sm:text-[11px] px-2.5 py-1 rounded-lg shadow-warm-xs transition flex items-center gap-1"
                           >
                             <User className="w-3 h-3" />
                             <span>{t('recommendations.completeProfileBtn', 'Complete Profile →')}</span>
                           </Link>
                         </div>
 
-                        <p className="text-[11px] sm:text-xs text-slate-600 leading-snug">
-                          {t('recommendations.missingInfoDesc', 'The following required eligibility attributes were not provided on your profile:')}
+                        <p className="text-[11px] sm:text-xs text-[#765E59] leading-snug">
+                          To evaluate statutory eligibility, please provide the following missing profile information:
                         </p>
 
                         <ul className="space-y-1.5 pt-0.5">
                           {defaultMissing.map((msg, rIdx) => (
-                            <li key={rIdx} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
-                              <span className="text-amber-600 font-bold shrink-0 mt-0.5">⚠</span>
+                            <li key={rIdx} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
+                              <span className="text-[#F7AE56] font-bold shrink-0 mt-0.5">⚠</span>
                               <span>{msg}</span>
                             </li>
                           ))}
                         </ul>
 
                         {isExpanded && remainingMissing.length > 0 && (
-                          <ul className="space-y-1.5 pt-1 border-t border-amber-200/60">
+                          <ul className="space-y-1.5 pt-1 border-t border-[#F7AE56]/30">
                             {remainingMissing.map((msg, rIdx) => (
-                              <li key={`rem-i-${rIdx}`} className="flex items-start gap-2 text-slate-800 text-[11px] sm:text-xs leading-relaxed">
-                                <span className="text-amber-600 font-bold shrink-0 mt-0.5">⚠</span>
+                              <li key={`rem-i-${rIdx}`} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
+                                <span className="text-[#F7AE56] font-bold shrink-0 mt-0.5">⚠</span>
                                 <span>{msg}</span>
                               </li>
                             ))}
@@ -2108,39 +2057,46 @@ const resetMultiStepForm = () => {
                         )}
 
                         {(remainingMissing.length > 0 || (rec.score_breakdown && rec.score_breakdown.length > 0)) && (
-                          <button
-                            type="button"
-                            onClick={() => toggleDetails(rec.scheme_id)}
-                            className="text-[11px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 pt-1 transition"
-                          >
-                            {isExpanded ? (
-                              <>
-                                <ChevronUp className="w-3.5 h-3.5" />
-                                <span>{t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')}</span>
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="w-3.5 h-3.5" />
+                          <div className="pt-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleDetails(rec.scheme_id)}
+                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-white/90 hover:bg-white border border-[#F7AE56]/30 text-xs font-semibold text-[#3B2522] transition shadow-warm-xs focus:outline-hidden focus:ring-2 focus:ring-[#F7AE56]/20"
+                              aria-expanded={isExpanded}
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <AlertTriangle className="w-3.5 h-3.5 text-[#F7AE56] shrink-0" />
                                 <span>
-                                  {t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
-                                  {remainingMissing.length > 0 ? ` (+${remainingMissing.length} more)` : ''}
+                                  {isExpanded
+                                    ? t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')
+                                    : t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
                                 </span>
-                              </>
-                            )}
-                          </button>
+                                {!isExpanded && remainingMissing.length > 0 && (
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40">
+                                    +{remainingMissing.length} more
+                                  </span>
+                                )}
+                              </span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-4 h-4 text-[#3B2522]" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-[#3B2522]" />
+                              )}
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}
 
                     {/* ── 3. COLLAPSIBLE CRITERIA BREAKDOWN ── */}
                     {isExpanded && rec.score_breakdown && rec.score_breakdown.length > 0 && (
-                      <div className="p-3 sm:p-4 bg-slate-50/90 rounded-xl border border-slate-200 text-xs space-y-3">
-                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                          <span className="font-extrabold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
-                            <ShieldCheck className="w-4 h-4 text-gov-blue" />
-                            <span>Full Eligibility & Scoring Breakdown</span>
+                      <div className="p-3 sm:p-4 bg-[#FFFBF0] rounded-xl border border-[#E8D8D2] text-xs space-y-3">
+                        <div className="flex items-center justify-between border-b border-[#E8D8D2] pb-2">
+                          <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm flex items-center gap-1.5">
+                            <ShieldCheck className="w-4 h-4 text-[#EA717B]" />
+                            <span>{t('recommendations.fullBreakdown', 'Full Eligibility & Scoring Breakdown')}</span>
                           </span>
-                          <span className="font-mono font-bold text-slate-600 text-[11px]">
+                          <span className="font-mono font-bold text-[#765E59] text-xs">
                             Total: {rec.score.toFixed(1)} / 100
                           </span>
                         </div>
@@ -2157,41 +2113,41 @@ const resetMultiStepForm = () => {
                                 key={bIdx}
                                 className={`p-2.5 rounded-lg border flex items-start justify-between gap-2.5 text-xs transition ${
                                   isMatch
-                                    ? 'bg-emerald-50/50 border-emerald-200 text-slate-800'
+                                    ? 'bg-emerald-50/50 border-emerald-200 text-[#3B2522]'
                                     : isUnmet
-                                    ? 'bg-rose-50/50 border-rose-200 text-slate-800'
-                                    : 'bg-amber-50/50 border-amber-200 text-slate-800'
+                                    ? 'bg-[#EA717B]/10 border-[#EA717B]/30 text-[#3B2522]'
+                                    : 'bg-[#F7AE56]/10 border-[#F7AE56]/30 text-[#3B2522]'
                                 }`}
                               >
                                 <div className="space-y-0.5 min-w-0">
                                   <div className="flex flex-wrap items-center gap-1.5">
                                     {isMatch && (
-                                      <span className="inline-flex items-center text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded">
+                                      <span className="inline-flex items-center text-xs font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
                                         ✓ Matched
                                       </span>
                                     )}
                                     {isUnmet && (
-                                      <span className="inline-flex items-center text-[10px] font-extrabold text-rose-800 bg-rose-100 px-1.5 py-0.2 rounded">
+                                      <span className="inline-flex items-center text-xs font-bold text-[#EA717B] bg-[#EA717B]/15 px-1.5 py-0.5 rounded">
                                         ! Unmet
                                       </span>
                                     )}
                                     {isPending && (
-                                      <span className="inline-flex items-center text-[10px] font-extrabold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded">
+                                      <span className="inline-flex items-center text-xs font-bold text-[#3B2522] bg-[#F7AE56]/20 px-1.5 py-0.5 rounded">
                                         ○ Verification Needed
                                       </span>
                                     )}
-                                    <span className="text-slate-900 text-xs font-bold capitalize">
+                                    <span className="text-[#3B2522] text-xs font-bold capitalize">
                                       {b.dimension.replace(/_/g, ' ')}
                                     </span>
                                   </div>
-                                  <p className="text-[11px] text-slate-600 pl-0.5 leading-snug">{cleanReason}</p>
+                                  <p className="text-xs text-[#765E59] pl-0.5 leading-snug">{cleanReason}</p>
                                 </div>
 
-                                <div className="text-right shrink-0 font-mono text-[11px] pt-0.5">
-                                  <span className={`font-bold ${isMatch ? 'text-emerald-700' : isUnmet ? 'text-rose-600' : 'text-amber-700'}`}>
+                                <div className="text-right shrink-0 font-mono text-xs pt-0.5">
+                                  <span className={`font-bold ${isMatch ? 'text-emerald-700' : isUnmet ? 'text-[#EA717B]' : 'text-[#F7AE56]'}`}>
                                     +{b.score.toFixed(1)}
                                   </span>
-                                  <span className="text-slate-400"> / {b.max_weight.toFixed(1)}</span>
+                                  <span className="text-[#765E59]/60"> / {b.max_weight.toFixed(1)}</span>
                                 </div>
                               </div>
                             );
@@ -2199,88 +2155,139 @@ const resetMultiStepForm = () => {
                         </div>
 
                         {rec.source_document && (
-                          <div className="pt-2 border-t border-slate-200 text-[10px] text-slate-500 flex items-center gap-1">
-                            <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <div className="pt-2 border-t border-[#E8D8D2] text-xs text-[#765E59] flex items-center gap-1">
+                            <FileText className="w-3.5 h-3.5 text-[#765E59] shrink-0" />
                             <span className="truncate">Official Rules Source: {rec.source_document}</span>
                           </div>
                         )}
+
+                        {/* RAG Knowledge Citations & Grounded Explanation if loaded */}
+                        {(() => {
+                          const aiItem = aiResult?.recommendations?.find(
+                            (a) => a.scheme_id === rec.scheme_id
+                          );
+                          if (!aiItem) return null;
+                          return (
+                            <div className="pt-2.5 border-t border-[#E8D8D2] space-y-2">
+                              {aiItem.ai_explanation && (
+                                <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-lg p-2.5 text-xs text-[#4A2525] space-y-1">
+                                  <span className="font-bold flex items-center gap-1 text-[11px] text-[#EA717B] uppercase tracking-wider">
+                                    <Sparkles className="w-3 h-3 text-[#F7AE56]" /> Grounded Statutory Summary
+                                  </span>
+                                  <p className="text-[11px] leading-relaxed text-[#765E59]">{aiItem.ai_explanation}</p>
+                                </div>
+                              )}
+                              {aiItem.citations && aiItem.citations.length > 0 && (
+                                <div className="space-y-1.5 pt-0.5">
+                                  <span className="font-bold text-[#3B2522] text-[11px] uppercase tracking-wider block">
+                                    Verified Official Source Citations ({aiItem.citations.length})
+                                  </span>
+                                  <div className="space-y-1 pl-2 border-l-2 border-[#FFD0CA]">
+                                    {aiItem.citations.map((cite, cIdx) => (
+                                      <div key={cIdx} className="text-[11px] text-[#765E59] leading-snug">
+                                        <span className="font-semibold text-[#3B2522]">
+                                          {cite.source_document || cite.source_type}
+                                          {cite.rule_id ? ` • Rule ${cite.rule_id}` : ''}:
+                                        </span>{' '}
+                                        <span className="italic">"{cite.snippet}"</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 
                     {/* Advisory notice */}
-                    <div className="bg-slate-50 rounded-xl p-2.5 text-[11px] text-slate-500 border border-slate-200/80 flex items-start gap-2">
-                      <Info className="w-3.5 h-3.5 text-sky-600 shrink-0 mt-0.5" />
+                    <div className="bg-[#FFFBF0] rounded-xl p-2.5 text-xs text-[#765E59] border border-[#E8D8D2] flex items-start gap-2">
+                      <Info className="w-3.5 h-3.5 text-[#F7AE56] shrink-0 mt-0.5" />
                       <span>{t('howToApply.disclaimer', 'Eligibility guidance only. Final eligibility and approval are determined by the concerned government authority.')}</span>
                     </div>
 
-                    {/* ── 4. ORGANIZED ACTION BUTTONS AREA ── */}
-                    <div className="pt-3 border-t border-slate-100 space-y-2">
-                      {/* Primary Action: View Scheme */}
-                      <Link
-                        to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}
-                        className="w-full bg-gov-blue hover:bg-sky-900 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-2 min-h-[42px]"
-                      >
-                        <FileText className="w-4 h-4 text-sky-200" />
-                        <span>{t('recommendations.viewScheme', 'View Scheme')}</span>
-                      </Link>
-
-                      {/* Secondary Actions: Calculate EMI & Compare */}
-                      <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2">
-                        {rec.is_credit_scheme !== false && (rec.max_loan_amount || rec.interest_rate !== undefined) ? (
-                          <Link
-                            to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}#calculator`}
-                            className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs py-2.5 px-3 rounded-xl border border-emerald-300 shadow-xs transition flex items-center justify-center gap-1.5 min-h-[42px]"
+                    {/* ── 4. REDESIGNED COMPACT ACTION AREA (Warm Theme) ── */}
+                    <div className="pt-3 border-t border-[#E8D8D2]/60 flex flex-col gap-2.5">
+                      {/* Priority Tier 1: Primary Action & Direct View */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        {officialUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => openPortalModal(rec.scheme_name, officialUrl)}
+                            className="btn-primary btn-sm min-h-[40px] flex-1 flex items-center justify-center gap-2 font-bold shadow-warm-xs bg-[#EA717B] hover:bg-[#d65f69] text-white"
                           >
-                            <CalcIcon className="w-4 h-4 text-emerald-600 shrink-0" />
-                            <span className="truncate">{t('recommendations.calculateEmi', 'Calculate EMI')}</span>
-                          </Link>
-                        ) : (
-                          <div className="flex items-center justify-center text-[11px] font-semibold text-slate-500 bg-slate-50 rounded-xl px-2 py-2 border border-slate-200 min-h-[42px] text-center">
-                            <span className="truncate">{rec.financial_category === 'GRANT_SUBSIDY' ? 'Direct Subsidy' : rec.financial_category === 'SCHOLARSHIP' ? 'Scholarship' : 'Welfare Grant'}</span>
-                          </div>
-                        )}
+                            <span>{t('howToApply.ctaPortal', 'Apply on Official Portal')}</span>
+                            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                          </button>
+                        ) : null}
 
-                        <div className="w-full flex">
-                          <CompareButton
-                            schemeId={rec.scheme_id}
-                            variant="compact"
-                            className="w-full justify-center min-h-[42px] py-2.5 px-3 rounded-xl text-xs font-bold"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Utility Actions: Save Scheme & Find Channel Partner */}
-                      <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2">
-                        <div className="w-full flex [&>button]:w-full [&>button]:justify-center [&>button]:min-h-[42px] [&>button]:rounded-xl [&>button]:text-xs [&>button]:font-bold [&>button]:border [&>button]:border-slate-300">
-                          <SaveSchemeButton schemeId={rec.scheme_id} size="sm" />
-                        </div>
-
-                        {isEligible ? (
-                          <Link
-                            to={`/channel-partners?scheme_id=${rec.scheme_id}&state=${canonicalProfile?.state || ''}`}
-                            className="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs py-2.5 px-3 rounded-xl border border-indigo-200 shadow-xs transition flex items-center justify-center gap-1.5 min-h-[42px]"
-                          >
-                            <MapPin className="w-4 h-4 text-indigo-600 shrink-0" />
-                            <span className="truncate">{t('howToApply.ctaPartner', 'Find Partner')}</span>
-                          </Link>
-                        ) : (
-                          <div className="flex items-center justify-center text-[11px] text-slate-400 bg-slate-50/50 rounded-xl px-2 border border-dashed border-slate-200 min-h-[42px] text-center">
-                            <span className="truncate">Direct Application Only</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Official Application Action */}
-                      {officialUrl && (
-                        <button
-                          type="button"
-                          onClick={() => openPortalModal(rec.scheme_name, officialUrl)}
-                          className="w-full bg-gov-saffron hover:bg-orange-600 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-2 min-h-[42px]"
+                        <Link
+                          to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}
+                          className={`btn-secondary btn-sm min-h-[40px] flex items-center justify-center gap-2 font-semibold bg-[#FFD0CA] hover:bg-[#fca59d] text-[#4A2525] border-transparent ${
+                            officialUrl ? 'sm:flex-initial' : 'flex-1'
+                          }`}
                         >
-                          <span>{t('howToApply.ctaPortal', 'Apply on Official Portal →')}</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                          <FileText className="w-4 h-4 text-[#4A2525] shrink-0" />
+                          <span>{t('schemeCard.viewDetails', 'View Details')}</span>
+                        </Link>
+                      </div>
+
+                      {/* Priority Tier 2: Compact Cohesive Secondary Controls */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                        {rec.is_credit_scheme !== false && (rec.max_loan_amount || rec.interest_rate !== undefined || rec.calculator_applicable !== false) ? (
+                          <>
+                            <Link
+                              to={`/calculator?scheme=${rec.scheme_id}&loan=${rec.max_loan_amount || requestedAmount || 100000}`}
+                              className="btn-secondary btn-sm h-8 px-2.5 text-xs text-[#765E59] hover:text-[#EA717B] flex items-center gap-1.5 rounded-lg border-[#E8D8D2] font-semibold bg-white"
+                              title="Open Scheme Financial Calculator"
+                            >
+                              <CalcIcon className="w-3.5 h-3.5 text-[#765E59] shrink-0" />
+                              <span>{t('recommendations.calculateEmi', 'Calculate')}</span>
+                            </Link>
+
+                            <Link
+                              to={`/calculator?tab=health&scheme=${rec.scheme_id}&loan=${rec.max_loan_amount || requestedAmount || 100000}`}
+                              className="btn-secondary btn-sm h-8 px-2.5 text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 flex items-center gap-1.5 rounded-lg border-emerald-200 font-bold"
+                              title="Assess loan affordability and cashflow fit for this scheme"
+                            >
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>{t('recommendations.checkFinancialHealth', 'Check Financial Health')}</span>
+                            </Link>
+                          </>
+                        ) : (
+                          <Link
+                            to={`/calculator?scheme=${rec.scheme_id}`}
+                            className="btn-secondary btn-sm h-8 px-2.5 text-xs text-[#765E59] hover:text-[#EA717B] flex items-center gap-1.5 rounded-lg border-[#E8D8D2] font-medium bg-white"
+                            title="View Financial Assistance / Subsidy Guidelines"
+                          >
+                            <CalcIcon className="w-3.5 h-3.5 text-[#765E59] shrink-0" />
+                            <span>{t('recommendations.calculateEmi', 'Calculate')}</span>
+                          </Link>
+                        )}
+
+                        <Link
+                          to={`/channel-partners?scheme_id=${rec.scheme_id}&state=${canonicalProfile?.state || formState || ''}`}
+                          className="btn-secondary btn-sm h-8 px-2.5 text-xs text-[#765E59] hover:text-[#EA717B] flex items-center gap-1.5 rounded-lg border-[#E8D8D2] font-semibold bg-white"
+                          title="Locate authorized banks and channel partners for this scheme"
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-[#765E59] shrink-0" />
+                          <span>{t('howToApply.ctaPartner', 'Find Nearby Partner')}</span>
+                        </Link>
+
+                        <CompareButton
+                          schemeId={rec.scheme_id}
+                          schemeName={rec.scheme_name}
+                          variant="compact"
+                          className="btn-secondary btn-sm h-8 px-2.5 text-xs text-[#765E59] hover:text-[#EA717B] rounded-lg border-[#E8D8D2] bg-white"
+                        />
+
+                        <SaveSchemeButton
+                          schemeId={rec.scheme_id}
+                          size="sm"
+                          className="btn-secondary btn-sm h-8 px-2.5 text-xs text-[#765E59] hover:text-[#EA717B] rounded-lg border-[#E8D8D2] bg-white"
+                        />
+                      </div>
                     </div>
                   </div>
                 );

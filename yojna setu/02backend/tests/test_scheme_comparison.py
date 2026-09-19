@@ -97,3 +97,57 @@ def test_compare_schemes_credit_vs_non_credit_fields():
         # Non-credit scheme checks
         ncs_item = next(s for s in data["compared_schemes"] if s["scheme"]["scheme_id"] == non_credit_scheme["scheme_id"])
         assert ncs_item["scheme"]["is_credit_scheme"] is False
+
+def test_compare_schemes_four_schemes():
+    """Test comparing up to 4 schemes returns all 4 schemes in requested order."""
+    schemes_resp = client.get("/api/v1/schemes?limit=4")
+    assert schemes_resp.status_code == 200
+    items = schemes_resp.json()["items"]
+    assert len(items) >= 4, "Database must have at least 4 schemes"
+
+    ids = [s["scheme_id"] for s in items[:4]]
+    response = client.get(f"/api/v1/schemes/compare?ids={','.join(ids)}")
+    assert response.status_code == 200
+    data = response.json()
+
+    assert len(data["compared_schemes"]) == 4
+    returned_ids = [item["scheme"]["scheme_id"] for item in data["compared_schemes"]]
+    assert returned_ids == ids
+
+def test_compare_schemes_alias_and_financial_params():
+    """Test comparing schemes using scheme_ids alias and financial parameters."""
+    schemes_resp = client.get("/api/v1/schemes?limit=2")
+    items = schemes_resp.json()["items"]
+    ids = [s["scheme_id"] for s in items[:2]]
+
+    response = client.get(
+        f"/api/v1/schemes/compare?scheme_ids={','.join(ids)}&project_cost=500000&requested_loan_amount=400000&own_contribution=100000"
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["compared_schemes"]) == 2
+
+def test_compare_schemes_verified_fields_presence():
+    """Verify that scheme comparison responses contain verified fields without invented data."""
+    schemes_resp = client.get("/api/v1/schemes?limit=2")
+    items = schemes_resp.json()["items"]
+    ids = [s["scheme_id"] for s in items[:2]]
+
+    response = client.get(f"/api/v1/schemes/compare?ids={','.join(ids)}")
+    assert response.status_code == 200
+    data = response.json()
+
+    for item in data["compared_schemes"]:
+        sch = item["scheme"]
+        # Required core fields
+        assert "scheme_id" in sch
+        assert "scheme_name" in sch
+        assert "financial_category" in sch
+        assert "verification_status" in sch
+        assert "rules" in sch
+        assert "documents" in sch
+        # Financial / eligibility fields present (values may be None if not specified, not invented)
+        assert "interest_rate_min" in sch
+        assert "max_loan_amount" in sch
+        assert "repayment_period_max_months" in sch
+        assert "moratorium_max_months" in sch

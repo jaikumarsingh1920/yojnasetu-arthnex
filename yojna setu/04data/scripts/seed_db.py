@@ -293,7 +293,7 @@ def seed_database(db: Session):
             "required_documents": row.get("required_documents", "").strip(),
             "helpline": row.get("helpline", "").strip(),
 
-            "official_source_url": row.get("official_source_url", "").strip(),
+            "official_source_url": OFFICIAL_URL_MAPPING.get(sid, row.get("official_source_url", "").strip()),
             "source_title": row.get("source_title", "").strip(),
             "source_document": row.get("source_document", "").strip(),
             "source_page": row.get("source_page", "").strip(),

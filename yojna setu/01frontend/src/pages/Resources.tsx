@@ -21,33 +21,33 @@ const Resources: React.FC = () => {
   const resources = [
     {
       icon: ShieldCheck,
-      iconBg: 'bg-sky-100',
-      iconColor: 'text-sky-700',
+      iconBg: 'bg-[#FFD0CA]',
+      iconColor: 'text-[#4A2525]',
       title: 'National Gazette Verification Standard',
       description:
         'All 90 welfare schemes indexed on YojnaSetu are validated against official Gazette of India notifications, statutory ministry guidelines, and RBI/NABARD master circulars.',
       tag: 'Scheme Verification',
-      tagClass: 'bg-sky-50 text-sky-700 border-sky-200',
+      tagClass: 'bg-[#FFF4EC] text-[#4A2525] border-[#FFD0CA]',
     },
     {
       icon: Calculator,
-      iconBg: 'bg-emerald-100',
-      iconColor: 'text-emerald-700',
+      iconBg: 'bg-[#FFD0CA]',
+      iconColor: 'text-[#4A2525]',
       title: 'Financial Calculator Methodology',
       description:
         'Calculators use standardized reducing balance EMI calculations and accurate category-specific margin money / back-ended capital subsidy formulas.',
       tag: 'Financial Tools',
-      tagClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      tagClass: 'bg-[#FFF4EC] text-[#4A2525] border-[#FFD0CA]',
     },
     {
       icon: Phone,
-      iconBg: 'bg-amber-100',
-      iconColor: 'text-amber-700',
+      iconBg: 'bg-[#FFD0CA]',
+      iconColor: 'text-[#4A2525]',
       title: 'Grievance Redressal & Helpdesk',
       description:
         'Toll-Free National Helpline: 1800–11–2026 (9:00 AM – 6:00 PM IST, Monday to Saturday).',
       tag: 'Citizen Support',
-      tagClass: 'bg-amber-50 text-amber-700 border-amber-200',
+      tagClass: 'bg-[#FFF4EC] text-[#4A2525] border-[#FFD0CA]',
     },
   ];
 
@@ -127,27 +127,27 @@ const Resources: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#fef9f3] text-slate-800">
+    <div className="min-h-screen bg-[#FFFBF0] text-[#3B2522]">
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#861823] via-[#5b1827] to-[#071b2b] text-white">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-gov-saffron/10 blur-3xl" />
-        <div className="absolute -bottom-32 -left-20 w-96 h-96 rounded-full bg-sky-500/10 blur-3xl" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#4A2525] via-[#3B2522] to-[#4A2525] text-white">
+        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#F7AE56]/15 blur-3xl" />
+        <div className="absolute -bottom-32 -left-20 w-96 h-96 rounded-full bg-[#EA717B]/10 blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-16 sm:py-20 lg:py-24">
           <div className="max-w-4xl">
 
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-bold tracking-wide mb-5">
-              <BookOpen className="w-4 h-4 text-gov-saffron" />
-              CITIZEN RESOURCES
+              <BookOpen className="w-4 h-4 text-[#F7AE56]" />
+              <span className="text-[#FFFBF0]">CITIZEN RESOURCES</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
               Resources &{' '}
-              <span className="text-gov-saffron">Guidelines</span>
+              <span className="text-[#F7AE56]">Guidelines</span>
             </h1>
 
-            <p className="mt-5 max-w-3xl text-sm sm:text-base lg:text-lg text-white/75 leading-relaxed">
+            <p className="mt-5 max-w-3xl text-sm sm:text-base lg:text-lg text-[#FFFBF0]/80 leading-relaxed">
               Trusted guidance, financial tools and practical resources to help
               you understand government welfare schemes and make informed
               financial decisions.
@@ -156,7 +156,7 @@ const Resources: React.FC = () => {
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#official-resources"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-[#861823] text-sm font-extrabold hover:bg-orange-50 transition shadow-lg"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#EA717B] text-white text-sm font-extrabold hover:bg-[#d65f69] transition shadow-warm-xs"
               >
                 Explore Resources
                 <ArrowRight className="w-4 h-4" />
@@ -164,7 +164,7 @@ const Resources: React.FC = () => {
 
               <a
                 href="#financial-literacy"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-bold hover:bg-white/15 transition"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-[#FFFBF0] text-sm font-bold hover:bg-white/15 transition"
               >
                 Financial Literacy
               </a>
@@ -175,47 +175,47 @@ const Resources: React.FC = () => {
       </section>
 
       {/* TRUST STRIP */}
-      <section className="border-b border-slate-200 bg-white">
+      <section className="border-b border-[#E8D8D2] bg-white">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-sky-50 text-sky-700">
-                <BadgeCheck className="w-5 h-5" />
+              <div className="p-2.5 rounded-xl bg-[#FFF4EC] text-[#4A2525]">
+                <BadgeCheck className="w-5 h-5 text-[#EA717B]" />
               </div>
               <div>
-                <p className="text-sm font-extrabold text-slate-800">
+                <p className="text-sm font-extrabold text-[#3B2522]">
                   Verified Information
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[#765E59]">
                   Government guidelines & sources
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700">
-                <Calculator className="w-5 h-5" />
+              <div className="p-2.5 rounded-xl bg-[#FFF4EC] text-[#4A2525]">
+                <Calculator className="w-5 h-5 text-[#F7AE56]" />
               </div>
               <div>
-                <p className="text-sm font-extrabold text-slate-800">
+                <p className="text-sm font-extrabold text-[#3B2522]">
                   Practical Financial Tools
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[#765E59]">
                   Understand your numbers
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-50 text-amber-700">
-                <Landmark className="w-5 h-5" />
+              <div className="p-2.5 rounded-xl bg-[#FFF4EC] text-[#4A2525]">
+                <Landmark className="w-5 h-5 text-[#4A2525]" />
               </div>
               <div>
-                <p className="text-sm font-extrabold text-slate-800">
+                <p className="text-sm font-extrabold text-[#3B2522]">
                   Citizen First
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[#765E59]">
                   Simple and accessible guidance
                 </p>
               </div>
@@ -231,15 +231,15 @@ const Resources: React.FC = () => {
         className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-14 sm:py-18"
       >
         <div className="max-w-3xl mb-9">
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#861823]">
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#EA717B]">
             Official Guidance
           </p>
 
-          <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-slate-900">
+          <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-[#3B2522]">
             Citizen Welfare Resources
           </h2>
 
-          <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed">
+          <p className="mt-3 text-sm sm:text-base text-[#765E59] leading-relaxed">
             Key standards, methodologies and support information used to make
             YojnaSetu more transparent and useful for citizens.
           </p>
@@ -253,7 +253,7 @@ const Resources: React.FC = () => {
             return (
               <article
                 key={resource.title}
-                className="group bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+                className="group bg-white border border-[#E8D8D2] rounded-2xl p-6 shadow-warm-xs hover:shadow-warm-md hover:border-[#FFD0CA] transition-all duration-200"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className={`p-3 rounded-xl ${resource.iconBg}`}>
@@ -267,15 +267,15 @@ const Resources: React.FC = () => {
                   </span>
                 </div>
 
-                <h3 className="mt-5 text-lg font-extrabold text-slate-900 leading-snug">
+                <h3 className="mt-5 text-lg font-extrabold text-[#3B2522] leading-snug">
                   {resource.title}
                 </h3>
 
-                <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+                <p className="mt-3 text-sm text-[#765E59] leading-relaxed">
                   {resource.description}
                 </p>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-bold text-[#861823]">
+                <div className="mt-6 pt-4 border-t border-[#E8D8D2]/60 flex items-center gap-2 text-xs font-bold text-[#EA717B]">
                   <CheckCircleIcon />
                   YojnaSetu Resource
                 </div>
@@ -289,21 +289,21 @@ const Resources: React.FC = () => {
       {/* FINANCIAL LITERACY */}
       <section
         id="financial-literacy"
-        className="bg-white border-y border-slate-200"
+        className="bg-[#FFF4EC]/60 border-y border-[#E8D8D2]"
       >
         <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-14 sm:py-18">
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-9">
             <div className="max-w-3xl">
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-gov-saffron">
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#EA717B]">
                 Learn Before You Borrow
               </p>
 
-              <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-slate-900">
+              <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-[#3B2522]">
                 Financial Literacy
               </h2>
 
-              <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-[#765E59] leading-relaxed">
                 Simple guides to help citizens understand loans, EMIs,
                 subsidies, savings and responsible financial planning.
               </p>
@@ -311,7 +311,7 @@ const Resources: React.FC = () => {
 
             <Link
               to="/calculator"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#861823] text-white text-sm font-bold hover:bg-[#6f1420] transition shrink-0"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#EA717B] text-white text-sm font-bold hover:bg-[#d65f69] transition shadow-warm-xs shrink-0"
             >
               Try Financial Calculator
               <Calculator className="w-4 h-4" />
@@ -326,23 +326,23 @@ const Resources: React.FC = () => {
               return (
                 <article
                   key={article.title}
-                  className="rounded-2xl border border-slate-200 bg-[#fef9f3] p-5 hover:border-[#861823]/30 hover:shadow-lg transition"
+                  className="rounded-2xl border border-[#E8D8D2] bg-white p-5 shadow-warm-xs hover:border-[#FFD0CA] hover:shadow-warm-sm transition"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <div className="p-2.5 rounded-xl bg-[#861823]/10 text-[#861823]">
+                    <div className="p-2.5 rounded-xl bg-[#FFD0CA] text-[#4A2525]">
                       <Icon className="w-5 h-5" />
                     </div>
 
-                    <span className="text-[10px] font-extrabold tracking-wider text-[#861823]">
+                    <span className="text-[10px] font-extrabold tracking-wider text-[#EA717B]">
                       {article.category}
                     </span>
                   </div>
 
-                  <h3 className="mt-5 text-lg font-extrabold text-slate-900">
+                  <h3 className="mt-5 text-lg font-extrabold text-[#3B2522]">
                     {article.title}
                   </h3>
 
-                  <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                  <p className="mt-2 text-sm text-[#765E59] leading-relaxed">
                     {article.description}
                   </p>
 
@@ -350,7 +350,7 @@ const Resources: React.FC = () => {
                     {article.points.map((point) => (
                       <div
                         key={point}
-                        className="flex items-start gap-2 text-xs text-slate-600"
+                        className="flex items-start gap-2 text-xs text-[#765E59]"
                       >
                         <CheckCircleIcon />
                         <span>{point}</span>
@@ -360,7 +360,7 @@ const Resources: React.FC = () => {
 
                   <button
                     type="button"
-                    className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#861823] hover:gap-3 transition-all"
+                    className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#EA717B] hover:gap-3 transition-all"
                   >
                     Read Guide
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -376,12 +376,12 @@ const Resources: React.FC = () => {
       {/* HOW TO USE YOJNASETU */}
       <section className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-14">
 
-        <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-[#861823] via-[#5b1827] to-[#071b2b] text-white shadow-xl">
+        <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-[#4A2525] via-[#3B2522] to-[#4A2525] text-white shadow-warm-md border border-[#E8D8D2]/20">
 
           <div className="grid lg:grid-cols-2 gap-8 items-center p-7 sm:p-10 lg:p-12">
 
             <div>
-              <div className="inline-flex items-center gap-2 text-gov-saffron text-xs font-extrabold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 text-[#F7AE56] text-xs font-extrabold uppercase tracking-wider">
                 <BookOpen className="w-4 h-4" />
                 Make Better Decisions
               </div>
@@ -390,7 +390,7 @@ const Resources: React.FC = () => {
                 Use the right resource at the right stage.
               </h2>
 
-              <p className="mt-4 text-sm sm:text-base text-white/70 leading-relaxed max-w-xl">
+              <p className="mt-4 text-sm sm:text-base text-[#FFFBF0]/80 leading-relaxed max-w-xl">
                 Start by discovering suitable schemes, understand your
                 eligibility, use the financial calculator, and then review the
                 application guidance before proceeding.
@@ -399,7 +399,7 @@ const Resources: React.FC = () => {
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link
                   to="/schemes"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-[#861823] text-sm font-extrabold hover:bg-orange-50 transition"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#EA717B] text-white text-sm font-extrabold hover:bg-[#d65f69] transition shadow-warm-xs"
                 >
                   Explore Schemes
                   <ArrowRight className="w-4 h-4" />
@@ -407,7 +407,7 @@ const Resources: React.FC = () => {
 
                 <Link
                   to="/recommendations"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/20 bg-white/10 text-white text-sm font-bold hover:bg-white/15 transition"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/20 bg-white/10 text-[#FFFBF0] text-sm font-bold hover:bg-white/15 transition"
                 >
                   Find Matching Schemes
                   <ExternalLink className="w-4 h-4" />
@@ -450,8 +450,8 @@ const Resources: React.FC = () => {
       {/* FOOTER NOTE */}
       <section className="pb-14 px-5">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 text-xs text-slate-500">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <div className="inline-flex items-center gap-2 text-xs text-[#765E59]">
+            <ShieldCheck className="w-4 h-4 text-[#2D6A4F]" />
             Always verify scheme-specific terms with the concerned official
             authority before applying.
           </div>
@@ -463,7 +463,7 @@ const Resources: React.FC = () => {
 };
 
 const CheckCircleIcon = () => (
-  <span className="mt-0.5 inline-flex shrink-0 w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 items-center justify-center">
+  <span className="mt-0.5 inline-flex shrink-0 w-4 h-4 rounded-full bg-[#2D6A4F]/15 text-[#2D6A4F] items-center justify-center">
     <span className="text-[9px] font-black">✓</span>
   </span>
 );
@@ -480,15 +480,15 @@ const JourneyCard: React.FC<JourneyCardProps> = ({
   description,
 }) => (
   <div className="rounded-2xl bg-white/10 border border-white/10 p-4">
-    <span className="text-[10px] font-black text-gov-saffron">
+    <span className="text-[10px] font-black text-[#F7AE56]">
       {number}
     </span>
 
-    <h3 className="mt-2 text-sm font-extrabold">
+    <h3 className="mt-2 text-sm font-extrabold text-white">
       {title}
     </h3>
 
-    <p className="mt-1 text-[11px] leading-relaxed text-white/60">
+    <p className="mt-1 text-[11px] leading-relaxed text-[#FFFBF0]/70">
       {description}
     </p>
   </div>

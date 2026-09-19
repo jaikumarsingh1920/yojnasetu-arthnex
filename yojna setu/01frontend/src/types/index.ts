@@ -60,6 +60,8 @@ export interface SchemeRule {
   condition_group?: string | null;
   error_message?: string | null;
   description?: string | null;
+  source_document?: string | null;
+  source_section?: string | null;
 }
 
 export interface SchemeDocument {
@@ -113,13 +115,26 @@ export interface Scheme {
   max_subsidy_amount?: number | null;
   subsidy_percentage?: number | null;
   financing_percentage?: number | null;
+  beneficiary_contribution_percentage?: number | null;
   interest_rate?: number | null;
   interest_rate_min?: number | null;
   interest_rate_max?: number | null;
+  interest_rate_type?: string | null;
+  interest_subsidy?: number | null;
   benefit_description?: string | null;
   repayment_period_months?: number | null;
+  repayment_period_min_months?: number | null;
+  repayment_period_max_months?: number | null;
+  repayment_frequency?: string | null;
   moratorium_period_months?: number | null;
+  moratorium_min_months?: number | null;
+  moratorium_max_months?: number | null;
+  moratorium_interest_mode?: string | null;
   collateral_required?: string | null;
+  security_required?: string | null;
+  guarantee_requirement?: string | null;
+  processing_fee?: string | null;
+  min_project_cost?: number | null;
   application_mode?: string | null;
   application_route?: string | null;
   partner_count?: number | null;
@@ -128,6 +143,13 @@ export interface Scheme {
   application_url?: string | null;
   official_portal?: string | null;
   official_source_url?: string | null;
+  source_title?: string | null;
+  source_document?: string | null;
+  source_page?: string | null;
+  source_section?: string | null;
+  source_published_date?: string | null;
+  last_verified_date?: string | null;
+  scheme_version?: string | null;
   short_description?: string | null;
   purpose?: string | null;
   target_beneficiary?: string | null;
@@ -137,7 +159,21 @@ export interface Scheme {
   calculator_applicable?: boolean;
   financial_assistance_summary?: string | null;
   grant_amount?: number | null;
-  repayment_period_max_months?: number | null;
+  subsidy_amount?: number | null;
+  subsidy_details?: string | null;
+  district_restriction?: string | null;
+  district_coverage?: string | null;
+  business_types?: string | null;
+  new_unit_required?: string | null;
+  existing_unit_allowed?: string | null;
+  business_registration_required?: string | null;
+  education_applicable?: string | null;
+  enterprise_size_requirement?: string | null;
+  social_category?: string | null;
+  gender_condition?: string | null;
+  gender_requirement?: string | null;
+  income_limit?: number | null;
+  income_operator?: string | null;
   verification_status: string;
   rules?: SchemeRule[];
   documents?: SchemeDocument[];
@@ -166,6 +202,7 @@ export interface FilterOptionsResponse {
   states: FilterOptionItem[];
   application_routes: FilterOptionItem[];
   total_schemes: number;
+  availability_counts?: Record<string, number>;
 }
 
 export interface SchemePersonalizedEligibility {
@@ -192,6 +229,9 @@ export interface SchemeComparisonResponse {
 export interface BeneficiaryProfileInput {
   age?: number | null;
   annual_income?: number | null;
+  monthly_income?: number | null;
+  monthly_expenses?: number | null;
+  monthly_obligations?: number | null;
   social_category?: string | null;
   is_sc?: boolean | null;
   is_pwd?: boolean | null;
@@ -252,7 +292,7 @@ export interface RecommendationItem {
   rank: number;
   scheme_id: string;
   scheme_name: string;
-  eligibility_status: "ELIGIBLE" | "INELIGIBLE" | "INSUFFICIENT_INFORMATION" | "CONDITIONAL";
+  eligibility_status: "ELIGIBLE" | "INELIGIBLE" | "INSUFFICIENT_INFORMATION" | "CONDITIONAL" | "NOT_APPLICABLE";
   score: number;
   eligible?: boolean;
   matched_rules?: string[];
@@ -273,6 +313,11 @@ export interface RecommendationItem {
   repayment_period_max_months?: number | null;
   subsidy_percentage?: number | null;
   grant_amount?: number | null;
+  financial_suitability?: string | null;
+  financial_suitability_reason?: string | null;
+  estimated_monthly_installment?: number | null;
+  available_subsidy_amount?: number | null;
+  required_own_contribution?: number | null;
   ministry?: string | null;
   source_organization?: string | null;
   official_portal?: string | null;
@@ -280,6 +325,10 @@ export interface RecommendationItem {
   official_source_url?: string | null;
   source_document?: string | null;
   is_direct_portal_scheme?: boolean;
+  short_description?: string | null;
+  purpose?: string | null;
+  key_conditions?: string[];
+  conditional_rules?: string[];
 }
 
 export interface RecommendationResponse {
@@ -288,9 +337,13 @@ export interface RecommendationResponse {
   eligible_scheme_count: number;
   excluded_scheme_count: number;
   insufficient_info_scheme_count: number;
+  conditional_scheme_count?: number;
+  not_applicable_scheme_count?: number;
   recommendations: RecommendationItem[];
+  conditional_schemes?: RecommendationItem[];
   ineligible_schemes?: RecommendationItem[];
   insufficient_info_schemes?: RecommendationItem[];
+  not_applicable_schemes?: RecommendationItem[];
   missing_profile_fields: string[];
 }
 
@@ -609,3 +662,285 @@ export interface NotificationPreference {
   push_enabled: boolean;
   updated_at: string;
 }
+
+// ─────────────────────────────────────────────────────────────
+// Financial Health Types
+// ─────────────────────────────────────────────────────────────
+
+export interface FinancialHealthInput {
+  annual_income?: number | null;
+  monthly_income?: number | null;
+  monthly_expenses?: number | null;
+  requested_loan_amount?: number | null;
+  project_cost?: number | null;
+  existing_liabilities?: number | null;
+  monthly_obligations?: number | null;
+  liquid_savings?: number | null;
+  profile?: BeneficiaryProfileInput | null;
+}
+
+export interface FinancialIndicatorResult {
+  indicator_name: string;
+  label: string;
+  value?: number | null;
+  formatted_value: string;
+  benchmark: string;
+  status: 'HEALTHY' | 'MODERATE' | 'STRESSED' | 'HIGH_RISK' | 'NOT_EVALUATED';
+  score?: number | null;
+  weight: number;
+  explanation: string;
+}
+
+export interface MissingFinancialField {
+  field: string;
+  label: string;
+  impact_reason: string;
+}
+
+export interface FinancialHealthResponse {
+  status: 'HEALTHY' | 'MODERATE' | 'STRESSED' | 'HIGH_RISK' | 'INSUFFICIENT_INFORMATION';
+  score?: number | null;
+  summary_headline: string;
+  summary_detail?: string;
+  indicators: FinancialIndicatorResult[];
+  risk_flags: string[];
+  positive_factors: string[];
+  recommendations: string[];
+  missing_fields: MissingFinancialField[];
+  monthly_income?: number | null;
+  monthly_expenses?: number | null;
+  existing_monthly_obligations?: number | null;
+  proposed_monthly_emi?: number | null;
+  total_monthly_obligations?: number | null;
+  estimated_disposable_income?: number | null;
+  debt_to_income_ratio?: number | null;
+  required_margin_money?: number | null;
+  margin_money_gap?: number | null;
+  calculation_version: string;
+  evaluated_at: string;
+  overall_status?: 'HEALTHY' | 'MODERATE' | 'STRESSED' | 'HIGH_RISK' | 'INSUFFICIENT_INFORMATION';
+  health_score?: number;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Ingestion & Candidate Governance Types
+// ─────────────────────────────────────────────────────────────
+
+export interface CandidateScheme {
+  candidate_id: string;
+  run_id?: string | null;
+  discovered_name: string;
+  scheme_name?: string;
+  normalized_name?: string | null;
+  scheme_code?: string | null;
+  discovery_source?: string | null;
+  discovery_url?: string | null;
+  source_url?: string | null;
+  official_source_url?: string | null;
+  source_document?: string | null;
+  source_type?: string | null;
+  target_source?: string | null;
+  ministry?: string | null;
+  implementing_agency?: string | null;
+  level?: string | null;
+  state?: string | null;
+  state_coverage?: string | null;
+  district_coverage?: string | null;
+  category?: string | null;
+  sector?: string | null;
+  scheme_category?: string | null;
+  target_beneficiaries?: string | null;
+  stated_benefits?: string | null;
+  relevance_status: 'HIGH_PRIORITY' | 'RELEVANT' | 'LOW_PRIORITY' | 'IRRELEVANT' | string;
+  relevance_reason?: string | null;
+  extraction_status?: string | null;
+  verification_status?: string | null;
+  duplicate_status?: 'UNIQUE' | 'DUPLICATE_CANDIDATE' | 'MERGED' | string;
+  duplicate_of_scheme_id?: string | null;
+  data_confidence?: number | null;
+  confidence_score?: number | null;
+  extracted_data?: Record<string, any>;
+  raw_parameters?: Record<string, any>;
+  missing_fields?: string[];
+  evidence?: Record<string, any>;
+  validation_status?: string | null;
+  validation_errors?: any[];
+  candidate_status: 'DISCOVERED' | 'STAGED' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVIEW' | 'ARCHIVED';
+  admin_notes?: string | null;
+  rejection_reason?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  reviewed_at?: string | null;
+  reviewed_by?: string | null;
+}
+
+export interface CandidateReviewInput {
+  action: 'APPROVE' | 'REJECT' | 'NEEDS_REVIEW';
+  notes?: string;
+  rejection_reason?: string;
+}
+
+export interface CandidateReviewResponse {
+  candidate_id: string;
+  candidate_status: string;
+  canonical_scheme_id?: string | null;
+  message: string;
+}
+
+export interface DetectedFieldChange {
+  field: string;
+  old_value?: any;
+  new_value?: any;
+}
+
+export interface FieldDiff {
+  field: string;
+  old_value?: any;
+  new_value?: any;
+  diff_category?: 'CRITICAL' | 'NON_CRITICAL' | string;
+  diff_summary?: string;
+}
+
+export interface PendingSchemeUpdate {
+  update_id: string;
+  scheme_id: string;
+  source_id?: string | null;
+  snapshot_id?: string | null;
+  proposal_type?: 'MODIFICATION' | 'NEW_SCHEME' | 'DEACTIVATION' | string;
+  change_classification?: 'MODIFIED' | 'NEW_SCHEME' | 'POSSIBLY_WITHDRAWN' | string;
+  old_version?: string;
+  extracted_data?: Record<string, any>;
+  detected_changes?: DetectedFieldChange[];
+  validation_status?: 'VALID' | 'NEEDS_REVIEW' | 'INVALID' | string;
+  validation_errors?: string[];
+  governance_classification?: 'AUTO_SAFE' | 'NEEDS_REVIEW' | 'REJECTED' | string;
+  governance_category?: string;
+  status: 'PENDING' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | string;
+  created_at?: string;
+  detected_at?: string;
+  reviewed_at?: string | null;
+  reviewed_by?: string | null;
+  review_notes?: string | null;
+  rejection_reason?: string | null;
+  // Legacy / convenience fields
+  change_type?: string;
+  old_value?: any;
+  new_value?: any;
+  proposed_data?: Record<string, any>;
+  field_diffs?: FieldDiff[];
+}
+
+export interface PendingUpdateReviewInput {
+  action: 'APPROVE' | 'REJECT';
+  reason?: string;
+  notes?: string;
+}
+
+export interface IngestionRun {
+  run_id: string;
+  started_at: string;
+  completed_at?: string | null;
+  status: 'RUNNING' | 'COMPLETED' | 'FAILED' | 'PAUSED';
+  records_seen: number;
+  records_changed: number;
+  records_unchanged: number;
+  records_failed: number;
+  records_staged: number;
+  records_promoted: number;
+  records_needing_review: number;
+  checkpoint_data?: string | null;
+  error_summary?: string | null;
+}
+
+export interface DiscoveryBatchRunResponse {
+  discovered: number;
+  staged_for_review: number;
+  duplicates_filtered: number;
+  message?: string;
+}
+
+export interface SourceResponse {
+  source_id: string;
+  scheme_id?: string | null;
+  source_name: string;
+  source_url: string;
+  base_url?: string | null;
+  authority?: string | null;
+  authority_type?: string | null;
+  source_type: string;
+  fetch_frequency?: string | null;
+  fetch_frequency_hours: number;
+  is_active: boolean;
+  last_fetched_at?: string | null;
+  last_status: string;
+  last_http_code?: number | null;
+  consecutive_failures?: number;
+  health_status?: 'HEALTHY' | 'DEGRADED' | 'FAILED' | string;
+  created_at: string;
+}
+
+export interface IngestionQualityMetricsResponse {
+  total_canonical_schemes: number;
+  total_candidates_discovered: number;
+  candidates_staged_for_review: number;
+  candidates_approved: number;
+  candidates_rejected: number;
+  candidates_officially_verified: number;
+  candidates_duplicate_flagged: number;
+  canonical_schemes_with_rules: number;
+  canonical_schemes_with_documents: number;
+  canonical_schemes_with_official_evidence: number;
+  coverage_by_level: Record<string, number>;
+  top_ministries: Record<string, number>;
+  top_categories: Record<string, number>;
+  state_coverage_count: number;
+}
+
+export interface SchedulerLastRunMetrics {
+  run_id?: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+  status?: string;
+  records_seen: number;
+  records_changed: number;
+  records_unchanged: number;
+  records_failed: number;
+  records_staged: number;
+  records_needing_review: number;
+  sources_checked: number;
+  sources_succeeded: number;
+  sources_failed: number;
+  unchanged_sources: number;
+  changed_sources: number;
+  new_schemes_detected: number;
+  modified_schemes_detected: number;
+  deactivation_candidates: number;
+  validation_failures: number;
+  pending_admin_reviews: number;
+}
+
+export interface SchedulerStatusResponse {
+  scheduler_enabled: boolean;
+  is_running: boolean;
+  is_executing_cycle: boolean;
+  cadence: string;
+  interval_hours: number;
+  interval_days: number;
+  interval_minutes: number;
+  last_run_id?: string | null;
+  last_run_status: string;
+  last_run_time?: string | null;
+  next_scheduled_run?: string | null;
+  last_successful_run_at?: string | null;
+  last_run?: SchedulerLastRunMetrics | null;
+  pending_updates_count: number;
+  sources_summary: {
+    total_sources: number;
+    active_sources: number;
+    healthy_sources: number;
+    degraded_sources: number;
+    failed_sources: number;
+  };
+  last_cycle_metrics?: Record<string, any>;
+}
+

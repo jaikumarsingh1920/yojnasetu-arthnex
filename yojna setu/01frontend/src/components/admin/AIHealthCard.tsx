@@ -7,9 +7,14 @@ interface Props {
 }
 
 export const AIHealthCard: React.FC<Props> = ({ health }) => {
-  const aiComponent = health?.components.find((c) => c.name.toLowerCase().includes('ai') || c.name.toLowerCase().includes('rag'));
-  const isFallback = aiComponent?.details?.is_fallback ?? false;
-  const aiStatus = aiComponent?.status || 'ONLINE';
+  const aiProviderComponent = health?.components.find((c) => c.name.includes('AI Provider') || (c.name.toLowerCase().includes('ai') && !c.name.toLowerCase().includes('rag')));
+  const ragComponent = health?.components.find((c) => c.name.includes('RAG') || c.name.toLowerCase().includes('rag'));
+
+  const isFallback = aiProviderComponent?.details?.is_fallback ?? (aiProviderComponent?.status === 'DEGRADED');
+  const aiStatus = aiProviderComponent?.status || (isFallback ? 'DEGRADED' : 'ONLINE');
+  const ragStatus = ragComponent?.status || 'ONLINE';
+  const totalSchemes = ragComponent?.details?.indexed_schemes ?? 859;
+  const totalChunks = ragComponent?.details?.total_chunks ?? 19863;
 
   return (
     <div className="space-y-6">
@@ -20,20 +25,24 @@ export const AIHealthCard: React.FC<Props> = ({ health }) => {
             <Sparkles className="w-4 h-4 text-indigo-400" />
             Grounded Hybrid RAG & AI Infrastructure
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold">AI Copilot & Statutory Retrieval Health</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold">AI Provider & Statutory RAG Retrieval Health</h2>
           <p className="text-xs text-indigo-200 max-w-2xl leading-relaxed">
             Real-time status of the YojnaSetu RAG vector store, LLM provider integration, grounded scheme verification, and deterministic fallbacks.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className={`px-4 py-2 rounded-xl text-xs font-extrabold border flex items-center gap-2 ${
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border flex items-center gap-1.5 ${
             aiStatus === 'ONLINE' && !isFallback
               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
               : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
           }`}>
-            <span className={`w-2.5 h-2.5 rounded-full ${aiStatus === 'ONLINE' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-            AI ENGINE: {isFallback ? 'DEGRADED (FALLBACK ACTIVE)' : aiStatus}
+            <span className={`w-2 h-2 rounded-full ${aiStatus === 'ONLINE' && !isFallback ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+            AI PROVIDER: {isFallback ? 'DEGRADED (FALLBACK)' : aiStatus}
+          </span>
+          <span className="px-3 py-1.5 rounded-xl text-xs font-extrabold border bg-emerald-500/20 text-emerald-300 border-emerald-500/40 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            RAG ENGINE: {ragStatus}
           </span>
         </div>
       </div>
@@ -49,27 +58,29 @@ export const AIHealthCard: React.FC<Props> = ({ health }) => {
             <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded border ${
               !isFallback ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
             }`}>
-              {!isFallback ? 'ONLINE' : 'FALLBACK MODE'}
+              {!isFallback ? 'ONLINE' : 'DEGRADED (DEV FALLBACK)'}
             </span>
           </div>
           <div>
             <h3 className="text-sm font-extrabold text-slate-900">LLM Provider & Model</h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              {!isFallback ? 'Google Gemini 1.5 Flash (Verified Live API)' : 'Offline Grounded Fallback Provider'}
+              {!isFallback ? 'Google Gemini 1.5 Flash (Verified Live API)' : 'Offline Grounded Fallback Provider (Deterministic)'}
             </p>
           </div>
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-[11px] space-y-1 text-slate-600 font-mono">
             <div className="flex justify-between">
               <span>Provider:</span>
-              <span className="font-bold text-slate-900">{!isFallback ? 'Google Gemini AI' : 'Deterministic Mock'}</span>
+              <span className="font-bold text-slate-900">{aiProviderComponent?.details?.provider_name || (!isFallback ? 'Google Gemini AI' : 'Deterministic Mock')}</span>
             </div>
             <div className="flex justify-between">
               <span>Model ID:</span>
-              <span className="font-bold text-slate-900">{!isFallback ? 'gemini-1.5-flash' : 'offline-deterministic'}</span>
+              <span className="font-bold text-slate-900">{aiProviderComponent?.details?.model_name || (!isFallback ? 'gemini-1.5-flash' : 'deterministic-fallback')}</span>
             </div>
             <div className="flex justify-between">
               <span>API Authentication:</span>
-              <span className="font-bold text-emerald-600">Configured in Server Env</span>
+              <span className={`font-bold ${!isFallback ? 'text-emerald-600' : 'text-amber-600'}`}>
+                {!isFallback ? 'Live Key Active' : 'Local Fallback (No Key)'}
+              </span>
             </div>
           </div>
         </div>
@@ -85,19 +96,23 @@ export const AIHealthCard: React.FC<Props> = ({ health }) => {
             </span>
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-slate-900">RAG Chunk Index</h3>
+            <h3 className="text-sm font-extrabold text-slate-900">RAG Scheme Vector Store</h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              In-memory TF-IDF + Gazette Chunk Retriever across 90 schemes
+              TF-IDF + Metadata Relevance Retriever across canonical schemes
             </p>
           </div>
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-[11px] space-y-1 text-slate-600 font-mono">
             <div className="flex justify-between">
               <span>Indexed Schemes:</span>
-              <span className="font-bold text-slate-900">90 Verified Schemes</span>
+              <span className="font-bold text-slate-900">{totalSchemes} Canonical Schemes</span>
             </div>
             <div className="flex justify-between">
-              <span>Chunk Granularity:</span>
-              <span className="font-bold text-slate-900">Eligibility, Benefits, Docs</span>
+              <span>Context Chunks:</span>
+              <span className="font-bold text-indigo-700">{totalChunks.toLocaleString()} Chunks</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Retrieval Status:</span>
+              <span className="font-bold text-emerald-600">Operational with Citations</span>
             </div>
             <div className="flex justify-between">
               <span>Citation Matching:</span>

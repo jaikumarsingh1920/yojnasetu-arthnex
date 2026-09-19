@@ -4,19 +4,11 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-
-import {
-  Link,
-  useNavigate,
-  useLocation,
-} from 'react-router-dom';
-
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
 import { useAuth } from '../context/AuthContext';
 import { useTextSize } from '../context/TextSizeContext';
 import { SUPPORTED_LANGUAGES } from '../i18n';
-
 import {
   Search,
   Sparkles,
@@ -34,26 +26,19 @@ import {
   MapPin,
   User,
   ShieldCheck,
-  Shield,
   Home,
   BookOpen,
   Info,
   ArrowRight,
   Layers,
-  Banknote,
   PhoneCall,
   Check,
-  Flame,
   FileText,
   HelpCircle,
+  ExternalLink,
+  Activity,
 } from 'lucide-react';
-
 import { NotificationBell } from './NotificationBell';
-
-
-// ─────────────────────────────────────────────────────────────
-// Real Popular Schemes from the 90-Scheme Database
-// ─────────────────────────────────────────────────────────────
 
 const POPULAR_NATIONAL_SCHEMES = [
   {
@@ -106,3497 +91,811 @@ const POPULAR_NATIONAL_SCHEMES = [
   },
 ];
 
-
 export const Navbar: React.FC = () => {
-
   const { t, i18n } = useTranslation();
-
-  const {
-    user,
-    isAuthenticated,
-    logout,
-    role,
-  } = useAuth();
-
-  const {
-    textSize,
-    setTextSize,
-    decreaseText,
-    resetText,
-    increaseText,
-  } = useTextSize();
+  const { user, isAuthenticated, logout, role } = useAuth();
+  const { textSize, decreaseText, resetText, increaseText } = useTextSize();
 
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [citizenMenuOpen, setCitizenMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  // ─────────────────────────────────────────────────────────────
-  // Navigation UI State
-  // ─────────────────────────────────────────────────────────────
+  const langMenuRef = useRef<HTMLDivElement>(null);
+  const megaMenuRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const citizenMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
-  const [mobileMenuOpen, setMobileMenuOpen] =
-    useState(false);
-
-  const [langMenuOpen, setLangMenuOpen] =
-    useState(false);
-
-  const [megaMenuOpen, setMegaMenuOpen] =
-    useState(false);
-
-  const [moreMenuOpen, setMoreMenuOpen] =
-    useState(false);
-
-  const [citizenMenuOpen, setCitizenMenuOpen] =
-    useState(false);
-
-  const [userMenuOpen, setUserMenuOpen] =
-    useState(false);
-
-  
-
-  
-
-
-  // ─────────────────────────────────────────────────────────────
-  // Dropdown Refs
-  // ─────────────────────────────────────────────────────────────
-
-  const langMenuRef =
-    useRef<HTMLDivElement>(null);
-
-  const megaMenuRef =
-    useRef<HTMLDivElement>(null);
-
-  const moreMenuRef =
-    useRef<HTMLDivElement>(null);
-
-  const citizenMenuRef =
-    useRef<HTMLDivElement>(null);
-
-  const userMenuRef =
-    useRef<HTMLDivElement>(null);
-
-  const headerRef =
-    useRef<HTMLElement>(null);
-
-
-  const [navHeight, setNavHeight] =
-    useState<number>(76);
-
-  const [schemeSearch, setSchemeSearch] =
-    useState('');
-
-
-  // ─────────────────────────────────────────────────────────────
-  // LOGOUT
-  // ─────────────────────────────────────────────────────────────
+  const [schemeSearch, setSchemeSearch] = useState('');
 
   const handleLogout = () => {
-
     logout();
-
     navigate('/login');
-
     setUserMenuOpen(false);
     setMobileMenuOpen(false);
   };
 
   const handleSchemeSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const query = schemeSearch.trim();
-
-    navigate(
-      query
-        ? `/schemes?search=${encodeURIComponent(query)}`
-        : '/schemes'
-    );
-
+    navigate(query ? `/schemes?search=${encodeURIComponent(query)}` : '/schemes');
     setSchemeSearch('');
+    setMobileMenuOpen(false);
   };
 
-
-  // ─────────────────────────────────────────────────────────────
-  // LANGUAGE
-  // ─────────────────────────────────────────────────────────────
-
   const handleLanguageChange = (code: string) => {
-
     i18n.changeLanguage(code);
-
     setLangMenuOpen(false);
   };
 
-
-  // ─────────────────────────────────────────────────────────────
-  // CLOSE MENUS ON OUTSIDE CLICK
-  // ─────────────────────────────────────────────────────────────
-
   useEffect(() => {
-
     const handleClickOutside = (e: MouseEvent) => {
-
       const target = e.target as Node;
-
-
-      if (
-        langMenuRef.current &&
-        !langMenuRef.current.contains(target)
-      ) {
-        setLangMenuOpen(false);
-      }
-
-
-      if (
-        megaMenuRef.current &&
-        !megaMenuRef.current.contains(target)
-      ) {
-        setMegaMenuOpen(false);
-      }
-
-
-      if (
-        moreMenuRef.current &&
-        !moreMenuRef.current.contains(target)
-      ) {
-        setMoreMenuOpen(false);
-      }
-
-
-      if (
-        citizenMenuRef.current &&
-        !citizenMenuRef.current.contains(target)
-      ) {
-        setCitizenMenuOpen(false);
-      }
-
-
-      if (
-        userMenuRef.current &&
-        !userMenuRef.current.contains(target)
-      ) {
-        setUserMenuOpen(false);
-      }
+      if (langMenuRef.current && !langMenuRef.current.contains(target)) setLangMenuOpen(false);
+      if (megaMenuRef.current && !megaMenuRef.current.contains(target)) setMegaMenuOpen(false);
+      if (moreMenuRef.current && !moreMenuRef.current.contains(target)) setMoreMenuOpen(false);
+      if (citizenMenuRef.current && !citizenMenuRef.current.contains(target)) setCitizenMenuOpen(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) setUserMenuOpen(false);
     };
-
-
-    document.addEventListener(
-      'mousedown',
-      handleClickOutside
-    );
-
-
-    return () => {
-
-      document.removeEventListener(
-        'mousedown',
-        handleClickOutside
-      );
-
-    };
-
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
 
-  // ─────────────────────────────────────────────────────────────
-  // ESCAPE KEY
-  // ─────────────────────────────────────────────────────────────
+      const handleTouchMove = (e: TouchEvent) => {
+        const drawer = document.getElementById('mobile-navigation-drawer');
+        if (drawer && !drawer.contains(e.target as Node)) {
+          e.preventDefault();
+        }
+      };
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      return () => {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+        document.removeEventListener('touchmove', handleTouchMove);
+      };
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  }, [mobileMenuOpen]);
 
-      if (e.key === 'Escape') {
-
-        setMegaMenuOpen(false);
-        setMoreMenuOpen(false);
-        setCitizenMenuOpen(false);
-        setUserMenuOpen(false);
-        setLangMenuOpen(false);
-        setMobileMenuOpen(false);
-      }
-
-    },
-    []
-  );
-
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setMegaMenuOpen(false);
+      setMoreMenuOpen(false);
+      setCitizenMenuOpen(false);
+      setUserMenuOpen(false);
+      setLangMenuOpen(false);
+      setMobileMenuOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
-
-    window.addEventListener(
-      'keydown',
-      handleKeyDown
-    );
-
-    return () => {
-
-      window.removeEventListener(
-        'keydown',
-        handleKeyDown
-      );
-
-    };
-
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-
-  // ─────────────────────────────────────────────────────────────
-  // CLOSE MENUS ON ROUTE CHANGE
-  // ─────────────────────────────────────────────────────────────
-
   useEffect(() => {
-
     setMobileMenuOpen(false);
     setMegaMenuOpen(false);
     setMoreMenuOpen(false);
     setCitizenMenuOpen(false);
     setUserMenuOpen(false);
     setLangMenuOpen(false);
-
   }, [location.pathname]);
 
-
-  // ─────────────────────────────────────────────────────────────
-  // NAVBAR HEIGHT
-  // ─────────────────────────────────────────────────────────────
-
   useEffect(() => {
-
-    const updateNavHeight = () => {
-
-      if (headerRef.current) {
-
-        setNavHeight(
-          headerRef.current.offsetHeight
-        );
-
-      }
-
-    };
-
-
-    updateNavHeight();
-
-    window.addEventListener(
-      'resize',
-      updateNavHeight
-    );
-
-
-    return () => {
-
-      window.removeEventListener(
-        'resize',
-        updateNavHeight
-      );
-
-    };
-
-  }, []);
-
-
-  // ─────────────────────────────────────────────────────────────
-  // MOBILE SCROLL LOCK
-  // ─────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-
     if (mobileMenuOpen) {
-
-      if (headerRef.current) {
-
-        setNavHeight(
-          headerRef.current.offsetHeight
-        );
-
-      }
-
-
-      const originalBodyOverflow =
-        document.body.style.overflow;
-
-      const originalHtmlOverflow =
-        document.documentElement.style.overflow;
-
-
       document.body.style.overflow = 'hidden';
-
-      document.documentElement.style.overflow =
-        'hidden';
-
-
-      const handleTouchMove = (
-        e: TouchEvent
-      ) => {
-
-        const drawer =
-          document.getElementById(
-            'mobile-navigation-drawer'
-          );
-
-
-        if (
-          !drawer ||
-          !drawer.contains(
-            e.target as Node
-          )
-        ) {
-
-          if (e.cancelable) {
-            e.preventDefault();
-          }
-
-        }
-
-      };
-
-
-      document.addEventListener(
-        'touchmove',
-        handleTouchMove,
-        { passive: false }
-      );
-
-
-      return () => {
-
-        document.body.style.overflow =
-          originalBodyOverflow;
-
-        document.documentElement.style.overflow =
-          originalHtmlOverflow;
-
-
-        document.removeEventListener(
-          'touchmove',
-          handleTouchMove
-        );
-
-      };
-
+      document.documentElement.style.overflow = 'hidden';
     } else {
-
       document.body.style.overflow = '';
-
       document.documentElement.style.overflow = '';
-
     }
-
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
   }, [mobileMenuOpen]);
 
-
-  // ─────────────────────────────────────────────────────────────
-  // CURRENT LANGUAGE
-  // ─────────────────────────────────────────────────────────────
-
   const currentLang =
-    SUPPORTED_LANGUAGES.find(
-      (l) => l.code === i18n.language
-    ) || SUPPORTED_LANGUAGES[0];
+    SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) || SUPPORTED_LANGUAGES[0];
 
-  // Keep the original navbar sizing for English and Hindi.
-  // Only compact translated labels for other supported languages.
-  const languageCode = i18n.language?.split('-')[0]?.toLowerCase();
-  const isCompactLanguage =
-    languageCode !== 'en' && languageCode !== 'hi';
-
-
-  // ─────────────────────────────────────────────────────────────
-  // ACTIVE STATES
-  // ─────────────────────────────────────────────────────────────
-
-  const isActive = (path: string) =>
-    location.pathname === path;
-
-
-  const isCitizenPathActive =
-    [
-      '/profile',
-      '/dashboard',
-      '/applications',
-      '/saved-schemes',
-    ].includes(location.pathname);
-
-
-  const isSchemesPathActive =
-    location.pathname.startsWith('/schemes');
-
+  const isActive = (path: string) => location.pathname === path;
+  const isCitizenPathActive = ['/profile', '/dashboard', '/applications', '/saved-schemes'].includes(
+    location.pathname
+  );
+  const isSchemesPathActive = location.pathname.startsWith('/schemes');
+  const isFinancialHealthActive = location.pathname.startsWith('/financial-health');
 
   return (
-
     <header
-  ref={headerRef}
-  className="
-    yojnasetu-navbar
-    sticky
-    top-0
-    z-[100]
-    w-full
-    max-w-full
-    overflow-visible
-    select-none
-    bg-[#861823]
-    text-white
-    border-b
-    border-white/10
-  "
->
-
+      ref={headerRef}
+      className="yojnasetu-navbar sticky top-0 z-[100] w-full max-w-full overflow-visible select-none bg-white/95 backdrop-blur-md text-[#3B2522] border-b border-[#E8D8D2] shadow-warm-xs"
+    >
       {/* =========================================================
-          TOP GOVERNMENT STRIP
+          TIER 1: GOVERNMENT OF INDIA UTILITY STRIP
+          Warm, minimal, authoritative
           ========================================================= */}
-
-      <div
-        className="
-          bg-[#6f1420]
-          w-full
-          max-w-full
-          px-3
-          sm:px-6
-          lg:px-8
-          2xl:px-10
-          py-1.5
-          sm:py-2
-          text-xs
-          font-medium
-          text-slate-300
-          flex
-          justify-between
-          items-center
-          border-b
-          border-white/5
-          gap-2
-          overflow-visible
-        "
-      >
-
-        {/* LEFT */}
-
-        <div
-          className="
-            flex
-            items-center
-            gap-2
-            sm:gap-3
-            min-w-0
-            flex-1
-            overflow-hidden
-          "
-        >
-
-          {/* Government Department */}
-
-          <span
-            className="
-              bg-[#f58220]
-              text-white
-              px-2
-              sm:px-2.5
-              py-1
-              rounded-md
-              font-extrabold
-              text-[8px]
-              sm:text-[10px]
-              tracking-wide
-              shadow-sm
-              flex
-              items-center
-              gap-1.5
-              shrink-0
-              uppercase
-              max-w-full
-            "
-          >
-
-            <ShieldCheck
-              className="
-                w-3
-                h-3
-                shrink-0
-              "
-            />
-
-            <span className="truncate">
-              {t(
-                'nav.govIndia',
-                'MINISTRY OF SOCIAL JUSTICE AND EMPOWERMENT'
-              )}
-            </span>
-
+      <div className="bg-[#FFF4EC] w-full max-w-full px-3 sm:px-6 lg:px-8 py-1.5 text-xs font-medium text-[#765E59] flex justify-between items-center border-b border-[#E8D8D2] gap-2">
+        {/* Left: Ministry & Portal Identity */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 overflow-hidden">
+          <span className="inline-flex items-center gap-1.5 bg-white text-[#EA717B] border border-[#E8D8D2] px-2.5 py-0.5 rounded-lg text-xs font-bold tracking-wide shrink-0 shadow-2xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#EA717B] shrink-0" />
+            <span>{t('nav.govIndia', 'GOVT OF INDIA')}</span>
           </span>
 
-
-          <span
-            className="
-              hidden
-              md:inline
-              font-medium
-              text-slate-300
-              text-[11px]
-              truncate
-              min-w-0
-            "
-          >
-            {t(
-              'nav.portalSub',
-              'MINISTRY OF SOCIAL JUSTICE AND EMPOWERMENT'
-            )}
+          <span className="hidden md:inline font-medium text-[#4A2525] text-xs sm:text-sm truncate min-w-0">
+            {t('nav.portalSub', 'Ministry of Social Justice and Empowerment')}
           </span>
-
-
-          
-
         </div>
 
-
-        {/* RIGHT */}
-
-        <div
-          className="
-            flex
-            items-center
-            gap-2
-            sm:gap-3
-            text-slate-300
-            shrink-0
-          "
-        >
-
-          {/* HELPLINE */}
-
+        {/* Right: Helpline, Accessibility Resizer, Language */}
+        <div className="flex items-center gap-2 sm:gap-3 text-[#765E59] shrink-0">
           <a
             href="tel:1800112026"
-            className="
-              hidden
-              xl:inline-flex
-              items-center
-              gap-1.5
-              text-[11px]
-              text-slate-300
-              hover:text-sky-300
-              transition
-              whitespace-nowrap
-            "
+            className="hidden xl:inline-flex items-center gap-1.5 text-xs text-[#765E59] hover:text-[#EA717B] transition whitespace-nowrap font-medium"
           >
-
-            <PhoneCall
-              className="
-                w-3
-                h-3
-                text-white/80
-              "
-            />
-
-            <span>
-              {t(
-                'nav.helpline',
-                'Helpline: 1800–11–2026 (Toll-Free)'
-              )}
-            </span>
-
+            <PhoneCall className="w-3.5 h-3.5 text-[#2E7D32] shrink-0" />
+            <span>1800-11-2026 (Toll-free helpline)</span>
           </a>
 
+          <span className="hidden xl:inline text-[#E8D8D2]">|</span>
 
-          <span
-            className="
-              hidden
-              xl:inline
-              text-slate-700
-            "
-          >
-            |
-          </span>
-
-
-          {/* TEXT SIZE */}
-
+          {/* Text Size Accessibility Controls */}
           <div
-            className="
-              hidden
-              sm:flex
-              items-center
-              bg-white/5
-              border
-              border-white/10
-              rounded-lg
-              p-0.5
-              gap-0.5
-              shrink-0
-            "
+            className="hidden sm:flex items-center bg-white border border-[#E8D8D2] rounded-lg p-0.5 gap-0.5 shrink-0 shadow-2xs"
             role="group"
-            aria-label={t(
-              'accessibility.textSize',
-              'Text size'
-            )}
+            aria-label={t('accessibility.textSize', 'Text size')}
           >
-
             <button
               type="button"
               onClick={decreaseText}
-              className={`
-                min-w-[22px]
-                h-[21px]
-                px-1
-                text-[10px]
-                font-bold
-                rounded
-                flex
-                items-center
-                justify-center
-                transition
-                ${
-                  textSize === 'small'
-                    ? 'bg-white/50 text-white'
-                    : 'text-slate-300 hover:bg-white/10'
-                }
-              `}
+              title="Decrease text size"
+              className={`min-w-[22px] h-[22px] px-1 text-xs font-bold rounded-md flex items-center justify-center transition ${
+                textSize === 'small'
+                  ? 'bg-[#EA717B] text-white'
+                  : 'text-[#765E59] hover:bg-[#FFF4EC]'
+              }`}
             >
               A−
             </button>
-
-
             <button
               type="button"
               onClick={resetText}
-              className={`
-                min-w-[20px]
-                h-[21px]
-                px-1
-                text-[10px]
-                font-bold
-                rounded
-                flex
-                items-center
-                justify-center
-                transition
-                ${
-                  textSize === 'default'
-                    ? 'bg-white/50 text-white'
-                    : 'text-slate-300 hover:bg-white/10'
-                }
-              `}
+              title="Normal text size"
+              className={`min-w-[20px] h-[22px] px-1 text-xs font-bold rounded-md flex items-center justify-center transition ${
+                textSize === 'default'
+                  ? 'bg-[#EA717B] text-white'
+                  : 'text-[#765E59] hover:bg-[#FFF4EC]'
+              }`}
             >
               A
             </button>
-
-
             <button
               type="button"
               onClick={increaseText}
-              className={`
-                min-w-[22px]
-                h-[21px]
-                px-1
-                text-[10px]
-                font-bold
-                rounded
-                flex
-                items-center
-                justify-center
-                transition
-                ${
-                  textSize === 'large'
-                    ? 'bg-white/50 text-white'
-                    : 'text-slate-300 hover:bg-white/10'
-                }
-              `}
+              title="Increase text size"
+              className={`min-w-[22px] h-[22px] px-1 text-xs font-bold rounded-md flex items-center justify-center transition ${
+                textSize === 'large'
+                  ? 'bg-[#EA717B] text-white'
+                  : 'text-[#765E59] hover:bg-[#FFF4EC]'
+              }`}
             >
               A+
             </button>
-
           </div>
 
+          <span className="hidden sm:inline text-[#E8D8D2]">|</span>
 
-          {/* LANGUAGE */}
-
-          <div
-            className="relative shrink-0"
-            ref={langMenuRef}
-          >
-
+          {/* Language Selector Dropdown */}
+          <div className="relative shrink-0" ref={langMenuRef}>
             <button
-              onClick={() =>
-                setLangMenuOpen(
-                  !langMenuOpen
-                )
-              }
-              className="
-                flex
-                items-center
-                gap-1.5
-                bg-transparent
-                hover:bg-white/5
-                text-white
-                px-1.5
-                py-1
-                rounded-lg
-                text-xs
-                font-semibold
-                transition
-                whitespace-nowrap
-              "
+              onClick={() => setLangMenuOpen(!langMenuOpen)}
+              className="flex items-center gap-1.5 bg-white border border-[#E8D8D2] hover:border-[#D9C4BC] text-[#3B2522] px-2.5 py-1 rounded-lg text-xs font-semibold transition shadow-2xs whitespace-nowrap"
               aria-expanded={langMenuOpen}
               aria-haspopup="true"
             >
-
-              <img
-  src="/language-icon.png"
-  alt="Language"
-  className="
-    w-7
-    h-7
-    object-contain
-    shrink-0
-  "
-/>
-
-              <span className="hidden sm:inline">
-                {currentLang.nativeName}
-              </span>
-
-              <span className="sm:hidden uppercase">
-                {currentLang.code}
-              </span>
-
+              <Globe className="w-3.5 h-3.5 text-[#EA717B] shrink-0" />
+              <span className="hidden sm:inline text-[#3B2522]">{currentLang.nativeName}</span>
+              <span className="sm:hidden uppercase">{currentLang.code}</span>
               <ChevronDown
-                className={`
-                  w-3
-                  h-3
-                  text-slate-400
-                  transition-transform
-                  ${
-                    langMenuOpen
-                      ? 'rotate-180'
-                      : ''
-                  }
-                `}
+                className={`w-3 h-3 text-[#9B817A] transition-transform ${
+                  langMenuOpen ? 'rotate-180' : ''
+                }`}
               />
-
             </button>
 
-
             {langMenuOpen && (
-
-              <div
-                className="
-                  absolute
-                  right-0
-                  mt-2
-                  w-52
-                  bg-[#6f1420]
-                  border
-                  border-white/10
-                  rounded-2xl
-                  shadow-2xl
-                  py-2
-                  z-[120]
-                  max-h-80
-                  overflow-y-auto
-                "
-              >
-
-                <div
-                  className="
-                    px-3
-                    py-1.5
-                    text-[10px]
-                    uppercase
-                    font-bold
-                    text-slate-400
-                    tracking-wider
-                  "
-                >
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-[#E8D8D2] rounded-2xl shadow-warm-lg py-2 z-[120] max-h-80 overflow-y-auto">
+                <div className="px-3.5 py-1.5 text-[10px] uppercase font-bold text-[#9B817A] tracking-wider border-b border-[#E8D8D2]">
                   Select Official Language (12)
                 </div>
-
-
-                {SUPPORTED_LANGUAGES.map(
-                  (lang) => {
-
-                    const isSelected =
-                      i18n.language ===
-                      lang.code;
-
-
-                    return (
-
-                      <button
-                        key={lang.code}
-                        onClick={() =>
-                          handleLanguageChange(
-                            lang.code
-                          )
-                        }
-                        className={`
-                          w-full
-                          text-left
-                          px-3.5
-                          py-2
-                          text-xs
-                          flex
-                          items-center
-                          justify-between
-                          transition
-                          ${
-                            isSelected
-                              ? 'bg-sky-800/80 text-white'
-                              : 'text-slate-200 hover:bg-white/5'
-                          }
-                        `}
-                      >
-
-                        <div
-                          className="
-                            flex
-                            items-center
-                            gap-2
-                          "
-                        >
-
-                          {isSelected && (
-
-                            <Check
-                              className="
-                                w-3.5
-                                h-3.5
-                                text-sky-400
-                              "
-                            />
-
-                          )}
-
-                          <span>
-                            {lang.nativeName}
-                          </span>
-
-                        </div>
-
-
-                        <span
-                          className="
-                            text-[10px]
-                            text-slate-400
-                            font-mono
-                            uppercase
-                          "
-                        >
-                          {lang.code}
-                        </span>
-
-                      </button>
-
-                    );
-
-                  }
-                )}
-
+                {SUPPORTED_LANGUAGES.map((lang) => {
+                  const isSelected = i18n.language === lang.code;
+                  return (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between transition ${
+                        isSelected
+                          ? 'bg-[#FFF0EE] text-[#EA717B] font-bold'
+                          : 'text-[#3B2522] hover:bg-[#FFF4EC]'
+                      }`}
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{lang.nativeName}</span>
+                        <span className="text-[10px] text-[#765E59]">{lang.name}</span>
+                      </div>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-[#EA717B]" />}
+                    </button>
+                  );
+                })}
               </div>
-
             )}
-
           </div>
-
         </div>
-
       </div>
 
-
       {/* =========================================================
-          MAIN NAVIGATION
-          RESPONSIVE DESKTOP / TABLET
+          TIER 2: MAIN NAVIGATION BAR
+          Warm white, minimal, modern typography
           ========================================================= */}
-
-      <div
-        className="
-          w-full
-          max-w-full
-          px-3
-          sm:px-5
-          lg:px-6
-          2xl:px-10
-          py-2.5
-          lg:py-3
-          2xl:py-4
-          overflow-visible
-        "
-      >
-
-        <div
-          className="
-            w-full
-            max-w-[1600px]
-            mx-auto
-            flex
-            items-center
-            gap-3
-            lg:gap-4
-            2xl:gap-5
-            min-w-0
-          "
-        >
-
-
-          {/* =====================================================
-              LOGO
-              ===================================================== */}
-
+      <div className="w-full max-w-full px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+        <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between gap-3 lg:gap-6 min-w-0">
+          {/* Logo & Brand Identity */}
           <Link
             to="/"
-            className="
-              flex
-              items-center
-              gap-2
-              lg:gap-2.5
-              shrink-0
-              group
-              rounded-xl
-            "
-            aria-label={t(
-              'nav.homeAria',
-              'YojnaSetu Home'
-            )}
+            className="flex items-center gap-2.5 shrink-0 group rounded-xl"
+            aria-label={t('nav.homeAria', 'YojnaSetu Home')}
           >
-
             <img
               src="/logo.png"
               alt="YojnaSetu Emblem"
-              className="
-                w-8
-                h-8
-                sm:w-9
-                sm:h-9
-                lg:w-10
-                lg:h-10
-                object-contain
-                transition
-                group-hover:scale-105
-              "
+              className="w-8 h-8 sm:w-9 sm:h-9 object-contain transition group-hover:scale-105"
             />
-
-
-            <div
-              className="
-                flex
-                items-center
-              "
-            >
-
-              <span
-                className="
-                  text-lg
-                  sm:text-xl
-                  lg:text-2xl
-                  font-semibold
-                  tracking-tight
-                  text-white
-                  whitespace-nowrap
-                "
-              >
-                {t(
-                  'nav.title',
-                  'YojnaSetu'
-                )}
+            <div className="flex flex-col">
+              <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#3B2522] whitespace-nowrap">
+                Yojna<span className="text-[#EA717B] font-black">Setu</span>
               </span>
-
+              <span className="hidden sm:block text-xs font-medium text-[#765E59] normal-case">
+                National civic-tech platform
+              </span>
             </div>
-
           </Link>
 
-
-          {/* =====================================================
-              DESKTOP PILL NAVIGATION
-              ===================================================== */}
-
-          <nav
-            className={`
-              hidden
-              xl:flex
-              flex-1
-              min-w-0
-              items-center
-              justify-center
-              rounded-full
-              border
-              border-white/60
-              bg-white/[0.035]
-              backdrop-blur-md
-              p-1
-              shadow-sm
-              overflow-visible
-              ${isCompactLanguage ? 'gap-0 min-w-0' : ''}
-            `}
-          >
-
-
-            {/* HOME */}
-
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-1 bg-[#FFF4EC] p-1 rounded-full border border-[#E8D8D2]">
+            {/* Home */}
             <Link
               to="/"
-              className={`
-                shrink
-                min-w-0
-                overflow-hidden
-                px-2
-                2xl:px-3
-                py-2
-                2xl:py-2.5
-                rounded-full
-                text-[11px]
-                2xl:text-[13px]
-                font-medium
-                transition
-                whitespace-nowrap
-                flex
-                items-center
-                justify-center
-                gap-1
-                2xl:gap-1.5
-                ${
-                  isActive('/')
-                    ? 'bg-white/15 text-white shadow-sm'
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                }
-              `}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
+                isActive('/')
+                  ? 'bg-[#EA717B] text-white shadow-warm-sm font-bold'
+                  : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
+              }`}
             >
-
-              <Home
-                className="
-                  w-3
-                  h-3
-                  2xl:w-3.5
-                  2xl:h-3.5
-                  text-white/80
-                  shrink-0
-                "
-              />
-
-              <span
-                className={
-                  isCompactLanguage
-                    ? 'min-w-0 max-w-[85px] truncate'
-                    : ''
-                }
-              >
-                {t(
-                  'nav.home',
-                  'Home'
-                )}
-              </span>
-
+              <Home className={`w-3.5 h-3.5 ${isActive('/') ? 'text-white' : 'text-[#765E59]'}`} />
+              <span>{t('nav.home', 'Home')}</span>
             </Link>
 
-
-            {/* EXPLORE SCHEMES */}
-
-            <div
-              className="relative shrink min-w-0"
-              ref={megaMenuRef}
-            >
-
+            {/* Explore Schemes (Mega Menu) */}
+            <div className="relative" ref={megaMenuRef}>
               <button
                 type="button"
-                onClick={() =>
-                  setMegaMenuOpen(
-                    !megaMenuOpen
-                  )
-                }
-                className={`
-                  min-w-0
-                  overflow-hidden
-                  px-2
-                  2xl:px-3
-                  py-2
-                  2xl:py-2.5
-                  rounded-full
-                  text-[11px]
-                  2xl:text-[13px]
-                  font-medium
-                  transition
-                  whitespace-nowrap
-                  flex
-                  items-center
-                  justify-center
-                  gap-1
-                  2xl:gap-1.5
-                  ${
-                    isSchemesPathActive ||
-                    megaMenuOpen
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/80 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-                aria-expanded={
-                  megaMenuOpen
-                }
+                onClick={() => setMegaMenuOpen(!megaMenuOpen)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
+                  isSchemesPathActive || megaMenuOpen
+                    ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
+                    : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
+                }`}
+                aria-expanded={megaMenuOpen}
                 aria-haspopup="true"
               >
-
-                <Search
-                  className="
-                    w-3
-                    h-3
-                    2xl:w-3.5
-                    2xl:h-3.5
-                    text-white/80
-                    shrink-0
-                  "
-                />
-
-                <span
-                  className={
-                    isCompactLanguage
-                      ? 'min-w-0 max-w-[105px] truncate'
-                      : ''
-                  }
-                >
-                  {t(
-                    'nav.schemes',
-                    'Explore Schemes'
-                  )}
-                </span>
-
+                <Search className={`w-3.5 h-3.5 ${isSchemesPathActive || megaMenuOpen ? 'text-[#EA717B]' : 'text-[#765E59]'}`} />
+                <span>{t('nav.schemes', 'Explore Schemes')}</span>
                 <ChevronDown
-                  className={`
-                    w-3
-                    h-3
-                    2xl:w-3.5
-                    2xl:h-3.5
-                    text-white/60
-                    transition-transform
-                    ${
-                      megaMenuOpen
-                        ? 'rotate-180'
-                        : ''
-                    }
-                  `}
+                  className={`w-3 h-3 text-[#9B817A] transition-transform ${
+                    megaMenuOpen ? 'rotate-180' : ''
+                  }`}
                 />
-
               </button>
 
-
-              {/* =================================================
-                  MEGA MENU
-                  ================================================= */}
-
               {megaMenuOpen && (
-
-                <div
-                  className="
-                    absolute
-                    left-0
-                    mt-3
-                    w-[min(90vw,780px)]
-                    max-w-[calc(100vw-2rem)]
-                    bg-[#6f1420]
-                    border
-                    border-white/10
-                    rounded-2xl
-                    shadow-2xl
-                    p-5
-                    z-[120]
-                    max-h-[80vh]
-                    overflow-y-auto
-                  "
-                >
-
-                  <div
-                    className="
-                      grid
-                      grid-cols-1
-                      md:grid-cols-12
-                      gap-5
-                    "
-                  >
-
-                    {/* BROWSE */}
-
-                    <div
-                      className="
-                        md:col-span-3
-                        space-y-2
-                        md:border-r
-                        border-white/10
-                        md:pr-4
-                      "
-                    >
-
-                      <div
-                        className="
-                          text-[10px]
-                          font-extrabold
-                          uppercase
-                          text-sky-400
-                          tracking-wider
-                          flex
-                          items-center
-                          gap-1.5
-                        "
-                      >
-
-                        <Layers
-                          className="w-3.5 h-3.5"
-                        />
-
-                        {t(
-                          'nav.browseSchemes',
-                          'Browse Schemes'
-                        )}
-
+                <div className="absolute left-0 mt-3 w-[min(90vw,760px)] bg-white border border-[#E8D8D2] rounded-2xl shadow-warm-lg p-5 z-[120]">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                    {/* Browse Routes */}
+                    <div className="md:col-span-4 space-y-2 md:border-r border-[#E8D8D2] md:pr-4">
+                      <div className="text-[10px] font-extrabold uppercase text-[#9B817A] tracking-wider flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-[#EA717B]" />
+                        <span>{t('nav.browseSchemes', 'Browse Schemes')}</span>
                       </div>
-
-
                       <div className="space-y-1">
-
                         <Link
                           to="/schemes"
-                          onClick={() =>
-                            setMegaMenuOpen(false)
-                          }
-                          className="
-                            block
-                            px-2
-                            py-1.5
-                            rounded-lg
-                            text-xs
-                            font-semibold
-                            text-slate-200
-                            hover:bg-white/5
-                            hover:text-sky-300
-                          "
+                          onClick={() => setMegaMenuOpen(false)}
+                          className="block px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#3B2522] hover:bg-[#FFF4EC] hover:text-[#EA717B] transition"
                         >
-                          {t(
-                            'nav.allSchemes',
-                            'All Schemes (90)'
-                          )}
+                          {t('nav.allSchemes', 'All Schemes Directory')}
                         </Link>
-
-
                         <Link
                           to="/schemes?sort_by=ministry"
-                          onClick={() =>
-                            setMegaMenuOpen(false)
-                          }
-                          className="
-                            block
-                            px-2
-                            py-1.5
-                            rounded-lg
-                            text-xs
-                            text-slate-300
-                            hover:bg-white/5
-                            hover:text-white
-                          "
+                          onClick={() => setMegaMenuOpen(false)}
+                          className="block px-2.5 py-1.5 rounded-lg text-xs text-[#765E59] hover:bg-[#FFF4EC] hover:text-[#3B2522] transition"
                         >
-                          {t(
-                            'nav.byMinistry',
-                            'By Ministry'
-                          )}
+                          {t('nav.byMinistry', 'By Ministry')}
                         </Link>
-
-
                         <Link
                           to="/schemes?sort_by=category"
-                          onClick={() =>
-                            setMegaMenuOpen(false)
-                          }
-                          className="
-                            block
-                            px-2
-                            py-1.5
-                            rounded-lg
-                            text-xs
-                            text-slate-300
-                            hover:bg-white/5
-                            hover:text-white
-                          "
+                          onClick={() => setMegaMenuOpen(false)}
+                          className="block px-2.5 py-1.5 rounded-lg text-xs text-[#765E59] hover:bg-[#FFF4EC] hover:text-[#3B2522] transition"
                         >
-                          {t(
-                            'nav.byCategory',
-                            'By Category'
-                          )}
+                          {t('nav.byCategory', 'By Category')}
                         </Link>
-
-
                         <Link
                           to="/schemes?sort_by=sector"
-                          onClick={() =>
-                            setMegaMenuOpen(false)
-                          }
-                          className="
-                            block
-                            px-2
-                            py-1.5
-                            rounded-lg
-                            text-xs
-                            text-slate-300
-                            hover:bg-white/5
-                            hover:text-white
-                          "
+                          onClick={() => setMegaMenuOpen(false)}
+                          className="block px-2.5 py-1.5 rounded-lg text-xs text-[#765E59] hover:bg-[#FFF4EC] hover:text-[#3B2522] transition"
                         >
-                          {t(
-                            'nav.bySector',
-                            'By Sector'
-                          )}
+                          {t('nav.bySector', 'By Sector')}
                         </Link>
-
-
-                        <Link
-                          to="/schemes?sort_by=state"
-                          onClick={() =>
-                            setMegaMenuOpen(false)
-                          }
-                          className="
-                            block
-                            px-2
-                            py-1.5
-                            rounded-lg
-                            text-xs
-                            text-slate-300
-                            hover:bg-white/5
-                            hover:text-white
-                          "
-                        >
-                          {t(
-                            'nav.byState',
-                            'By State Restrictions'
-                          )}
-                        </Link>
-
                       </div>
-
                     </div>
 
-
-                    {/* FINANCIAL */}
-
-                    <div
-                      className="
-                        md:col-span-4
-                        space-y-2
-                        md:border-r
-                        border-white/10
-                        md:pr-4
-                      "
-                    >
-
-                      <div
-                        className="
-                          text-[10px]
-                          font-extrabold
-                          uppercase
-                          text-emerald-400
-                          tracking-wider
-                          flex
-                          items-center
-                          gap-1.5
-                        "
-                      >
-
-                        <Banknote
-                          className="w-3.5 h-3.5"
-                        />
-
-                        {t(
-                          'nav.financialType',
-                          'Financial Type'
-                        )}
-
+                    {/* Popular National Schemes */}
+                    <div className="md:col-span-8 space-y-2">
+                      <div className="text-[10px] font-extrabold uppercase text-[#9B817A] tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#F7AE56]" />
+                        <span>{t('nav.popularSchemes', 'Popular National Schemes')}</span>
                       </div>
-
-
-                      <div className="space-y-1">
-
-                        {[
-                          {
-                            href: '/schemes?financial_type=LOAN',
-                            label: 'Loan / Credit Schemes',
-                            tag: 'PMMY',
-                          },
-                          {
-                            href: '/schemes?financial_type=SUBSIDY',
-                            label: 'Subsidy / Capital Grant',
-                            tag: 'PMEGP',
-                          },
-                          {
-                            href: '/schemes?financial_type=SCHOLARSHIP',
-                            label: 'Scholarship / Education',
-                            tag: 'NSP',
-                          },
-                          {
-                            href: '/schemes?financial_type=TRAINING',
-                            label: 'Skill & Training Grants',
-                            tag: 'PMKVY',
-                          },
-                          {
-                            href: '/schemes?financial_type=GUARANTEE',
-                            label: 'Credit Guarantee Cover',
-                            tag: 'CGTMSE',
-                          },
-                        ].map((item) => (
-
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {POPULAR_NATIONAL_SCHEMES.slice(0, 4).map((scheme) => (
                           <Link
-                            key={item.href}
-                            to={item.href}
-                            onClick={() =>
-                              setMegaMenuOpen(false)
-                            }
-                            className="
-                              flex
-                              items-center
-                              justify-between
-                              px-2
-                              py-1.5
-                              rounded-lg
-                              text-xs
-                              text-slate-300
-                              hover:bg-white/5
-                              hover:text-emerald-300
-                            "
+                            key={scheme.id}
+                            to={scheme.query}
+                            onClick={() => setMegaMenuOpen(false)}
+                            className="block p-2.5 rounded-xl border border-[#E8D8D2] hover:border-[#FFD0CA] hover:bg-[#FFF4EC]/60 transition group"
                           >
-
-                            <span>
-                              {item.label}
+                            <span className="text-xs font-bold text-[#3B2522] group-hover:text-[#EA717B] transition block truncate">
+                              {scheme.shortName}
                             </span>
-
-                            <span
-                              className="
-                                text-[9px]
-                                bg-white/5
-                                px-1.5
-                                py-0.5
-                                rounded
-                                text-slate-400
-                                font-mono
-                              "
-                            >
-                              {item.tag}
-                            </span>
-
+                            <p className="text-[10px] text-[#765E59] line-clamp-1 mt-0.5">
+                              {scheme.tag}
+                            </p>
                           </Link>
-
                         ))}
-
                       </div>
-
                     </div>
-
-
-                    {/* POPULAR */}
-
-                    <div
-                      className="
-                        md:col-span-5
-                        space-y-2
-                      "
-                    >
-
-                      <div
-                        className="
-                          text-[10px]
-                          font-extrabold
-                          uppercase
-                          text-gov-saffron
-                          tracking-wider
-                          flex
-                          items-center
-                          gap-1.5
-                        "
-                      >
-
-                        <Flame
-                          className="
-                            w-3.5
-                            h-3.5
-                            text-gov-saffron
-                          "
-                        />
-
-                        {t(
-                          'nav.popularSearches',
-                          'Popular Searches'
-                        )}
-
-                      </div>
-
-
-                      <div className="space-y-1">
-
-                        {POPULAR_NATIONAL_SCHEMES
-                          .slice(0, 4)
-                          .map((scheme) => (
-
-                            <Link
-                              key={scheme.id}
-                              to={scheme.query}
-                              onClick={() =>
-                                setMegaMenuOpen(false)
-                              }
-                              className="
-                                block
-                                p-2
-                                rounded-lg
-                                bg-white/[0.035]
-                                hover:bg-white/[0.07]
-                                border
-                                border-transparent
-                                hover:border-white/10
-                                transition
-                              "
-                            >
-
-                              <span
-                                className="
-                                  text-xs
-                                  font-bold
-                                  text-white
-                                "
-                              >
-                                {scheme.shortName}
-                              </span>
-
-
-                              <p
-                                className="
-                                  text-[9px]
-                                  text-slate-400
-                                  line-clamp-1
-                                  mt-0.5
-                                "
-                              >
-                                {scheme.tag}
-                              </p>
-
-                            </Link>
-
-                          ))}
-
-                      </div>
-
-                    </div>
-
                   </div>
 
-
-                  {/* MENU FOOTER */}
-
-                  <div
-                    className="
-                      mt-4
-                      pt-3
-                      border-t
-                      border-white/10
-                      flex
-                      items-center
-                      justify-between
-                      gap-2
-                    "
-                  >
-
+                  <div className="mt-4 pt-3 border-t border-[#E8D8D2] flex items-center justify-between">
+                    <span className="text-[11px] text-[#765E59]">
+                      Grounded in published official Gazette guidelines.
+                    </span>
                     <Link
                       to="/schemes"
-                      onClick={() =>
-                        setMegaMenuOpen(false)
-                      }
-                      className="
-                        font-bold
-                        text-sky-400
-                        hover:text-sky-300
-                        flex
-                        items-center
-                        gap-1
-                        text-xs
-                      "
+                      onClick={() => setMegaMenuOpen(false)}
+                      className="text-xs font-bold text-[#EA717B] hover:text-[#D65D67] flex items-center gap-1"
                     >
-                      {t(
-                        'nav.advancedSearch',
-                        'Advanced Scheme Search'
-                      )}
-
-                      <ArrowRight
-                        className="w-3.5 h-3.5"
-                      />
-
+                      <span>Explore all schemes</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
-
                   </div>
-
                 </div>
-
               )}
-
             </div>
 
-
-            {/* SMART MATCHING */}
-
+            {/* Smart Matching */}
             <Link
               to="/recommendations"
-              className={`
-                shrink
-                min-w-0
-                overflow-hidden
-                px-2
-                2xl:px-3
-                py-2
-                2xl:py-2.5
-                rounded-full
-                text-[11px]
-                2xl:text-[13px]
-                font-medium
-                transition
-                whitespace-nowrap
-                flex
-                items-center
-                justify-center
-                gap-1
-                2xl:gap-1.5
-                ${
-                  isActive('/recommendations')
-                    ? 'bg-white/15 text-white'
-                    : 'text-white hover:bg-white/10'
-                }
-              `}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
+                isActive('/recommendations')
+                  ? 'bg-[#EA717B] text-white shadow-warm-sm font-bold'
+                  : 'text-[#765E59] hover:text-[#EA717B] hover:bg-[#FFD0CA]/40'
+              }`}
             >
-
-              <Sparkles
-                className="
-                  w-3
-                  h-3
-                  2xl:w-3.5
-                  2xl:h-3.5
-                  text-white
-                  shrink-0
-                "
-              />
-
-              <span
-                className={
-                  isCompactLanguage
-                    ? 'min-w-0 max-w-[105px] truncate'
-                    : ''
-                }
-              >
-                {t(
-                  'nav.recommendations',
-                  'Smart Matching'
-                )}
-              </span>
-
+              <Sparkles className={`w-3.5 h-3.5 ${isActive('/recommendations') ? 'text-[#FFF0EE]' : 'text-[#EA717B]'}`} />
+              <span>{t('nav.recommendations', 'Smart Matching')}</span>
             </Link>
 
+            {/* Financial Health Hub */}
+            <Link
+              to="/financial-health"
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
+                isFinancialHealthActive
+                  ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
+                  : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
+              }`}
+              aria-current={isFinancialHealthActive ? 'page' : undefined}
+            >
+              <Activity className={`w-3.5 h-3.5 ${isFinancialHealthActive ? 'text-[#EA717B]' : 'text-[#765E59]'}`} />
+              <span>{t('nav.financialHealth', 'Financial Health')}</span>
+            </Link>
 
-            {/* CALCULATOR */}
-
+            {/* Financial Calculator */}
             <Link
               to="/calculator"
-              className={`
-                shrink
-                min-w-0
-                overflow-hidden
-                px-2
-                2xl:px-3
-                py-2
-                2xl:py-2.5
-                rounded-full
-                text-[11px]
-                2xl:text-[13px]
-                font-medium
-                transition
-                whitespace-nowrap
-                flex
-                items-center
-                justify-center
-                gap-1
-                2xl:gap-1.5
-                ${
-                  isActive('/calculator')
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                }
-              `}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
+                isActive('/calculator')
+                  ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
+                  : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
+              }`}
             >
-
-              <Calculator
-                className="
-                  w-3
-                  h-3
-                  2xl:w-3.5
-                  2xl:h-3.5
-                  text-white/80
-                  shrink-0
-                "
-              />
-
-              <span
-                className={
-                  isCompactLanguage
-                    ? 'min-w-0 max-w-[115px] truncate'
-                    : ''
-                }
-              >
-                {t(
-                  'nav.calculator',
-                  'Financial Calculator'
-                )}
-              </span>
-
+              <Calculator className="w-3.5 h-3.5 text-[#765E59]" />
+              <span>{t('nav.calculator', 'Financial Calculator')}</span>
             </Link>
 
-
-            {/* PARTNER */}
-
+            {/* Nearby Partners */}
             <Link
               to="/channel-partners"
-              className={`
-                shrink
-                min-w-0
-                overflow-hidden
-                px-2
-                2xl:px-3
-                py-2
-                2xl:py-2.5
-                rounded-full
-                text-[11px]
-                2xl:text-[13px]
-                font-medium
-                transition
-                whitespace-nowrap
-                flex
-                items-center
-                justify-center
-                gap-1
-                2xl:gap-1.5
-                ${
-                  isActive('/channel-partners')
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                }
-              `}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
+                isActive('/channel-partners')
+                  ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
+                  : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
+              }`}
             >
-
-              <MapPin
-                className="
-                  w-3
-                  h-3
-                  2xl:w-3.5
-                  2xl:h-3.5
-                  text-white/80
-                  shrink-0
-                "
-              />
-
-              <span
-                className={
-                  isCompactLanguage
-                    ? 'min-w-0 max-w-[115px] truncate'
-                    : ''
-                }
-              >
-                {t(
-                  'nav.partnerLocator',
-                  'Find Nearby Partner'
-                )}
-              </span>
-
+              <MapPin className="w-3.5 h-3.5 text-[#765E59]" />
+              <span>{t('nav.partnerLocator', 'Nearby Partners')}</span>
             </Link>
 
-
-            {/* MORE */}
-
-            <div
-              className="relative shrink min-w-0"
-              ref={moreMenuRef}
-            >
-
+            {/* More Dropdown */}
+            <div className="relative" ref={moreMenuRef}>
               <button
                 type="button"
-                onClick={() =>
-                  setMoreMenuOpen(
-                    !moreMenuOpen
-                  )
-                }
-                className={`
-                  min-w-0
-                  overflow-hidden
-                  px-2
-                  2xl:px-3
-                  py-2
-                  2xl:py-2.5
-                  rounded-full
-                  text-[11px]
-                  2xl:text-[13px]
-                  font-medium
-                  transition
-                  whitespace-nowrap
-                  flex
-                  items-center
-                  justify-center
-                  gap-1
-                  2xl:gap-1.5
-                  ${
-                    moreMenuOpen
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/80 hover:bg-white/10 hover:text-white'
-                  }
-                `}
+                onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
+                  moreMenuOpen
+                    ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
+                    : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
+                }`}
                 aria-expanded={moreMenuOpen}
                 aria-haspopup="true"
               >
-
-                <BookOpen
-                  className="
-                    w-3
-                    h-3
-                    2xl:w-3.5
-                    2xl:h-3.5
-                    text-white/80
-                    shrink-0
-                  "
-                />
-
-                <span
-                  className={
-                    isCompactLanguage
-                      ? 'min-w-0 max-w-[75px] truncate'
-                      : ''
-                  }
-                >
-                  {t(
-                    'nav.more',
-                    'More'
-                  )}
-                </span>
-
+                <BookOpen className="w-3.5 h-3.5 text-[#765E59]" />
+                <span>{t('nav.more', 'More')}</span>
                 <ChevronDown
-                  className={`
-                    w-3
-                    h-3
-                    2xl:w-3.5
-                    2xl:h-3.5
-                    text-white/60
-                    transition-transform
-                    ${
-                      moreMenuOpen
-                        ? 'rotate-180'
-                        : ''
-                    }
-                  `}
+                  className={`w-3 h-3 text-[#9B817A] transition-transform ${
+                    moreMenuOpen ? 'rotate-180' : ''
+                  }`}
                 />
-
               </button>
 
-
               {moreMenuOpen && (
-
-                <div
-                  className="
-                    absolute
-                    right-0
-                    mt-3
-                    w-64
-                    bg-[#6f1420]
-                    border
-                    border-white/10
-                    rounded-2xl
-                    shadow-2xl
-                    py-2
-                    z-[120]
-                  "
-                >
-
-                  <div
-                    className="
-                      px-4
-                      py-2
-                      text-[10px]
-                      uppercase
-                      font-bold
-                      text-slate-400
-                    "
-                  >
-                    {t(
-                      'nav.infoHelp',
-                      'Information & Help'
-                    )}
+                <div className="absolute right-0 mt-3 w-64 bg-white border border-[#E8D8D2] rounded-2xl shadow-warm-lg py-2 z-[120]">
+                  <div className="px-4 py-1.5 text-[10px] uppercase font-bold text-[#9B817A]">
+                    {t('nav.infoHelp', 'Information & Tools')}
                   </div>
-
-
                   <Link
-  to="/resources"
-  onClick={() => setMoreMenuOpen(false)}
-  className="w-full text-left px-4 py-2.5 text-xs flex items-center gap-3 text-slate-200 hover:bg-white/5"
->
-  <BookOpen className="w-4 h-4 text-amber-400" />
-  <div>
-    <div className="text-white font-bold">
-      Resources & Guidelines
-    </div>
-    <span className="text-[10px] text-slate-400">
-      Official tools & national guidance
-    </span>
-  </div>
-</Link>
-
-<Link
-  to="/blogs"
-  onClick={() => setMoreMenuOpen(false)}
-  className="w-full text-left px-4 py-2.5 text-xs flex items-center gap-3 text-slate-200 hover:bg-white/5"
->
-  <BookOpen className="w-4 h-4 text-sky-400" />
-  <div>
-    <div className="text-white font-bold">Blog</div>
-    <span className="text-[10px] text-slate-400">Financial guidance & insights</span>
-  </div>
-</Link>
-
-<Link
-  to="/faq"
-  onClick={() => setMoreMenuOpen(false)}
-  className="w-full text-left px-4 py-2.5 text-xs flex items-center gap-3 text-slate-200 hover:bg-white/5"
->
-  <HelpCircle className="w-4 h-4 text-emerald-400" />
-  <div>
-    <div className="text-white font-bold">
-      FAQs
-    </div>
-    <span className="text-[10px] text-slate-400">
-      Frequently asked questions
-    </span>
-  </div>
-</Link>
-
-
-
-                  <Link
-  to="/about"
-  onClick={() => setMoreMenuOpen(false)}
-  className="
-    w-full
-    text-left
-    px-4
-    py-2.5
-    text-xs
-    flex
-    items-center
-    gap-3
-    text-slate-200
-    hover:bg-white/5
-  "
->
-  <Info
-    className="
-      w-4
-      h-4
-      text-sky-400
-    "
-  />
-
-  <div>
-    <div
-      className="
-        text-white
-        font-bold
-      "
-    >
-      {t(
-        'nav.aboutYojnaSetu',
-        'About YojnaSetu'
-      )}
-    </div>
-
-    <span
-      className="
-        text-[10px]
-        text-slate-400
-      "
-    >
-      {t(
-        'nav.aboutDesc',
-        'Zero PII Policy & Engine'
-      )}
-    </span>
-  </div>
-</Link>
-
-
-                  {/* ADMIN */}
-
-                  {isAuthenticated &&
-                    role === 'SYSTEM_ADMIN' && (
-
-                      <Link
-                        to="/admin"
-                        onClick={() =>
-                          setMoreMenuOpen(false)
-                        }
-                        className="
-                          flex
-                          items-center
-                          gap-3
-                          px-4
-                          py-2.5
-                          text-xs
-                          text-rose-300
-                          hover:bg-rose-950/50
-                        "
-                      >
-
-                        <ShieldAlert
-                          className="
-                            w-4
-                            h-4
-                            text-rose-400
-                          "
-                        />
-
-                        <span>
-                          {t(
-                            'nav.adminControlCenter',
-                            'Admin Control Center'
-                          )}
-                        </span>
-
-                      </Link>
-
-                    )}
-
-                </div>
-
-              )}
-
-            </div>
-
-
-            {/* CITIZEN HUB */}
-
-            {isAuthenticated &&
-              role === 'BENEFICIARY' && (
-
-                <div
-                  className="relative shrink"
-                  ref={citizenMenuRef}
-                >
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCitizenMenuOpen(
-                        !citizenMenuOpen
-                      )
-                    }
-                    className={`
-                      min-w-0
-                      max-w-full
-                      overflow-hidden
-                      px-2.5
-                      2xl:px-4
-                      py-2
-                      2xl:py-2.5
-                      rounded-full
-                      text-[12px]
-                      2xl:text-sm
-                      font-medium
-                      transition
-                      whitespace-nowrap
-                      flex
-                      items-center
-                      justify-center
-                      gap-1.5
-                      2xl:gap-2
-                      ${
-                        isCitizenPathActive ||
-                        citizenMenuOpen
-                          ? 'bg-white/15 text-white'
-                          : 'text-white/80 hover:bg-white/10 hover:text-white'
-                      }
-                    `}
+                    to="/compare"
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="w-full text-left px-4 py-2 text-xs flex items-center gap-3 text-[#3B2522] hover:bg-[#FFF4EC]"
                   >
-
-                    <User
-                      className="
-                        w-3.5
-                        h-3.5
-                        2xl:w-4
-                        2xl:h-4
-                        shrink-0
-                      "
-                    />
-
-                    <span
-                      className={
-                        isCompactLanguage
-                          ? 'min-w-0 max-w-[120px] truncate'
-                          : ''
-                      }
-                    >
-                      {t(
-                        'nav.citizenHub',
-                        'Citizen Hub'
-                      )}
-                    </span>
-
-                    <ChevronDown
-                      className={`
-                        w-3
-                        h-3
-                        2xl:w-3.5
-                        2xl:h-3.5
-                        transition-transform
-                        ${
-                          citizenMenuOpen
-                            ? 'rotate-180'
-                            : ''
-                        }
-                      `}
-                    />
-
-                  </button>
-
-
-                  {citizenMenuOpen && (
-
-                    <div
-                      className="
-                        absolute
-                        right-0
-                        mt-3
-                        w-60
-                        bg-[#6f1420]
-                        border
-                        border-white/10
-                        rounded-2xl
-                        shadow-2xl
-                        py-2
-                        z-[120]
-                      "
-                    >
-
-                      {[
-                        {
-                          to: '/profile',
-                          icon: User,
-                          label: 'My Profile',
-                        },
-                        {
-                          to: '/dashboard',
-                          icon: LayoutDashboard,
-                          label: 'Citizen Dashboard',
-                        },
-                        {
-                          to: '/applications',
-                          icon: FileText,
-                          label: 'Applications & Guidance',
-                        },
-                        {
-                          to: '/saved-schemes',
-                          icon: Bookmark,
-                          label: 'Saved Schemes',
-                        },
-                      ].map((item) => {
-
-                        const Icon = item.icon;
-
-                        return (
-
-                          <Link
-                            key={item.to}
-                            to={item.to}
-                            onClick={() =>
-                              setCitizenMenuOpen(false)
-                            }
-                            className="
-                              flex
-                              items-center
-                              gap-3
-                              px-4
-                              py-2.5
-                              text-xs
-                              text-slate-200
-                              hover:bg-white/5
-                            "
-                          >
-
-                            <Icon
-                              className="
-                                w-4
-                                h-4
-                                text-sky-400
-                              "
-                            />
-
-                            <span>
-                              {t(
-                                `nav.${item.label
-                                  .toLowerCase()
-                                  .replaceAll(
-                                    ' ',
-                                    ''
-                                  )}`,
-                                item.label
-                              )}
-                            </span>
-
-                          </Link>
-
-                        );
-
-                      })}
-
+                    <Layers className="w-4 h-4 text-[#EA717B]" />
+                    <div>
+                      <div className="font-bold text-[#3B2522]">{t('nav.compare', 'Compare Schemes')}</div>
+                      <span className="text-[10px] text-[#765E59]">{t('nav.compareSubtitle', 'Side-by-side eligibility check')}</span>
                     </div>
+                  </Link>
+                  <Link
+                    to="/resources"
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="w-full text-left px-4 py-2 text-xs flex items-center gap-3 text-[#3B2522] hover:bg-[#FFF4EC]"
+                  >
+                    <BookOpen className="w-4 h-4 text-[#F7AE56]" />
+                    <div>
+                      <div className="font-bold text-[#3B2522]">{t('nav.resources', 'Resources & Guidelines')}</div>
+                      <span className="text-[10px] text-[#765E59]">{t('nav.gazetteVerified', 'Gazette rules & circulars')}</span>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/blogs"
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="w-full text-left px-4 py-2 text-xs flex items-center gap-3 text-[#3B2522] hover:bg-[#FFF4EC]"
+                  >
+                    <BookOpen className="w-4 h-4 text-[#EA717B]" />
+                    <div>
+                      <div className="font-bold text-[#3B2522]">Blog</div>
+                      <span className="text-[10px] text-[#765E59]">Financial guidance & insights</span>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/faq"
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="w-full text-left px-4 py-2 text-xs flex items-center gap-3 text-[#3B2522] hover:bg-[#FFF4EC]"
+                  >
+                    <HelpCircle className="w-4 h-4 text-[#2E7D32]" />
+                    <div>
+                      <div className="font-bold text-[#3B2522]">{t('nav.faq', 'FAQs')}</div>
+                      <span className="text-[10px] text-[#765E59]">{t('nav.faqSubtitle', 'Frequently asked questions')}</span>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/about"
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="w-full text-left px-4 py-2 text-xs flex items-center gap-3 text-[#3B2522] hover:bg-[#FFF4EC]"
+                  >
+                    <Info className="w-4 h-4 text-[#EA717B]" />
+                    <div>
+                      <div className="font-bold text-[#3B2522]">{t('nav.about', 'About YojnaSetu')}</div>
+                      <span className="text-[10px] text-[#765E59]">{t('nav.aboutSubtitle', 'Zero PII Policy & Civic Mission')}</span>
+                    </div>
+                  </Link>
 
+                  {isAuthenticated && role === 'SYSTEM_ADMIN' && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setMoreMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2 text-xs text-[#B91C1C] bg-[#FDECEF] hover:bg-[#FFD0CA]/50 border-t border-[#E8D8D2] font-semibold"
+                    >
+                      <ShieldAlert className="w-4 h-4 text-[#B91C1C]" />
+                      <span>{t('nav.adminControlCenter', 'Admin Control Center')}</span>
+                    </Link>
                   )}
-
                 </div>
-
               )}
-
+            </div>
           </nav>
 
+          {/* Right Section: Compact Search & Auth Actions */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Desktop Search Bar */}
+            <form
+              onSubmit={handleSchemeSearch}
+              className="hidden md:flex items-center bg-white hover:bg-[#FFF4EC]/50 focus-within:bg-white border border-[#E8D8D2] focus-within:border-[#EA717B] focus-within:ring-2 focus-within:ring-[#EA717B]/20 rounded-full px-3 py-1.5 transition max-w-[220px] xl:max-w-[260px] shadow-2xs"
+            >
+              <Search className="w-3.5 h-3.5 text-[#9B817A] shrink-0 mr-1.5" />
+              <input
+                type="text"
+                value={schemeSearch}
+                onChange={(e) => setSchemeSearch(e.target.value)}
+                placeholder="Search schemes..."
+                className="w-full text-xs bg-transparent outline-none text-[#3B2522] placeholder:text-[#9B817A]"
+              />
+            </form>
 
-          {/* =====================================================
-              RIGHT SIDE
-              ===================================================== */}
-
-          <div
-            className="
-              flex
-              items-center
-              gap-1.5
-              lg:gap-2
-              2xl:gap-2
-              shrink-0
-              ml-auto
-            "
-          >
-
-            {/* ===================================================
-                AUTHENTICATED
-                =================================================== */}
-
+            {/* Authenticated User or Login/Register */}
             {isAuthenticated && user ? (
-
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-2
-                "
-              >
-
+              <div className="flex items-center gap-2">
                 <NotificationBell />
 
-
-                <div
-                  className="
-                    relative
-                    hidden
-                    md:block
-                  "
-                  ref={userMenuRef}
-                >
-
+                {/* User Dropdown */}
+                <div className="relative" ref={userMenuRef}>
                   <button
-                    type="button"
-                    onClick={() =>
-                      setUserMenuOpen(
-                        !userMenuOpen
-                      )
-                    }
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      px-2
-                      py-1.5
-                      rounded-full
-                      border
-                      border-white/40
-                      bg-white/5
-                      hover:bg-white/10
-                      transition
-                    "
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-2 bg-white hover:bg-[#FFF4EC] border border-[#E8D8D2] px-2.5 py-1.5 rounded-full text-xs font-semibold text-[#3B2522] transition shadow-2xs"
                   >
-
-                    <div
-                      className="
-                        w-8
-                        h-8
-                        rounded-full
-                        bg-[#d7832d]
-                        text-[#861823]
-                        flex
-                        items-center
-                        justify-center
-                        font-bold
-                        text-sm
-                        shrink-0
-                      "
-                    >
-                      {user.full_name
-                        ? user.full_name
-                            .charAt(0)
-                            .toUpperCase()
-                        : (
-                          <User
-                            className="
-                              w-4
-                              h-4
-                            "
-                          />
-                        )}
+                    <div className="w-6 h-6 rounded-full bg-[#EA717B] text-white flex items-center justify-center font-bold text-[11px]">
+                      {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
                     </div>
-
-
-                    <span
-                      className="
-                        hidden
-                        2xl:block
-                        text-sm
-                        font-semibold
-                        text-white
-                        max-w-[120px]
-                        truncate
-                      "
-                    >
-                      {user.full_name ||
-                        user.email ||
-                        user.phone}
-                    </span>
-
-
-                    <ChevronDown
-                      className={`
-                        w-3.5
-                        h-3.5
-                        text-white/60
-                        transition-transform
-                        ${
-                          userMenuOpen
-                            ? 'rotate-180'
-                            : ''
-                        }
-                      `}
-                    />
-
+                    <span className="hidden sm:inline max-w-[100px] truncate">{user.full_name || 'User'}</span>
+                    <ChevronDown className="w-3 h-3 text-[#9B817A]" />
                   </button>
-
-
-                  {/* USER DROPDOWN */}
 
                   {userMenuOpen && (
-
-                    <div
-                      className="
-                        absolute
-                        right-0
-                        mt-3
-                        w-56
-                        bg-[#6f1420]
-                        border
-                        border-white/10
-                        rounded-2xl
-                        shadow-2xl
-                        py-2
-                        z-[120]
-                      "
-                    >
-
-                      <div
-                        className="
-                          px-4
-                          py-2
-                          border-b
-                          border-white/10
-                        "
-                      >
-
-                        <p
-                          className="
-                            text-xs
-                            font-bold
-                            text-white
-                            truncate
-                          "
-                        >
-                          {user.email ||
-                            user.phone}
-                        </p>
-
-                        <span
-                          className="
-                            text-[9px]
-                            text-sky-300
-                            uppercase
-                            font-bold
-                          "
-                        >
-                          {user.role}
-                        </span>
-
+                    <div className="absolute right-0 mt-2 w-52 bg-white border border-[#E8D8D2] rounded-2xl shadow-warm-lg py-2 z-[120]">
+                      <div className="px-3.5 py-2 border-b border-[#E8D8D2]">
+                        <p className="text-xs font-bold text-[#3B2522] truncate">{user.full_name}</p>
+                        <p className="text-[10px] text-[#765E59] truncate">{user.email || user.phone}</p>
                       </div>
-
-
-                      {role ===
-                        'BENEFICIARY' && (
-
-                        <>
-
-                          <Link
-                            to="/profile"
-                            onClick={() =>
-                              setUserMenuOpen(false)
-                            }
-                            className="
-                              flex
-                              items-center
-                              gap-2.5
-                              px-4
-                              py-2.5
-                              text-xs
-                              text-slate-200
-                              hover:bg-white/5
-                            "
-                          >
-
-                            <User
-                              className="
-                                w-4
-                                h-4
-                                text-amber-400
-                              "
-                            />
-
-                            My Profile
-
-                          </Link>
-
-
-                          <Link
-                            to="/dashboard"
-                            onClick={() =>
-                              setUserMenuOpen(false)
-                            }
-                            className="
-                              flex
-                              items-center
-                              gap-2.5
-                              px-4
-                              py-2.5
-                              text-xs
-                              text-slate-200
-                              hover:bg-white/5
-                            "
-                          >
-
-                            <LayoutDashboard
-                              className="
-                                w-4
-                                h-4
-                                text-sky-400
-                              "
-                            />
-
-                            Citizen Dashboard
-
-                          </Link>
-
-                        </>
-
-                      )}
-
-
-                      {role ===
-                        'SYSTEM_ADMIN' && (
-
-                        <Link
-                          to="/admin"
-                          onClick={() =>
-                            setUserMenuOpen(false)
-                          }
-                          className="
-                            flex
-                            items-center
-                            gap-2.5
-                            px-4
-                            py-2.5
-                            text-xs
-                            text-rose-300
-                            hover:bg-rose-950/50
-                          "
-                        >
-
-                          <ShieldAlert
-                            className="
-                              w-4
-                              h-4
-                            "
-                          />
-
-                          Admin Control
-
-                        </Link>
-
-                      )}
-
-
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="
-                          w-full
-                          flex
-                          items-center
-                          gap-2.5
-                          px-4
-                          py-2.5
-                          text-xs
-                          text-rose-400
-                          hover:bg-rose-950/50
-                          border-t
-                          border-white/10
-                        "
+                      <Link
+                        to="/profile"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-[#3B2522] hover:bg-[#FFF4EC]"
                       >
-
-                        <LogOut
-                          className="
-                            w-4
-                            h-4
-                          "
-                        />
-
-                        {t(
-                          'nav.logout',
-                          'Sign Out'
-                        )}
-
-                      </button>
-
+                        <User className="w-3.5 h-3.5 text-[#9B817A]" />
+                        <span>{t('nav.profile', 'My Profile')}</span>
+                      </Link>
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-[#3B2522] hover:bg-[#FFF4EC]"
+                      >
+                        <LayoutDashboard className="w-3.5 h-3.5 text-[#9B817A]" />
+                        <span>{t('nav.dashboard', 'Citizen Dashboard')}</span>
+                      </Link>
+                      <Link
+                        to="/applications"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-[#3B2522] hover:bg-[#FFF4EC]"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-[#9B817A]" />
+                        <span>{t('nav.applications', 'Applications')}</span>
+                      </Link>
+                      <Link
+                        to="/saved-schemes"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-[#3B2522] hover:bg-[#FFF4EC]"
+                      >
+                        <Bookmark className="w-3.5 h-3.5 text-[#9B817A]" />
+                        <span>{t('nav.savedSchemes', 'Saved Schemes')}</span>
+                      </Link>
+                      <div className="border-t border-[#E8D8D2] mt-1 pt-1">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left flex items-center gap-2.5 px-3.5 py-2 text-xs text-[#B91C1C] hover:bg-[#FDECEF]"
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          <span>{t('nav.logout', 'Sign Out')}</span>
+                        </button>
+                      </div>
                     </div>
-
                   )}
-
                 </div>
-
               </div>
-
             ) : (
-
-              /* =================================================
-                 GUEST
-                 ================================================= */
-
-              <div
-                className="
-                  hidden
-                  md:flex
-                  items-center
-                  gap-1.5
-                  lg:gap-2
-                "
-              >
-
-                <form
-                  onSubmit={handleSchemeSearch}
-                  className="
-                    hidden
-                    xl:flex
-                    items-center
-                    w-40
-                    2xl:w-48
-                    h-9
-                    2xl:h-10
-                    rounded-full
-                    border
-                    border-white/35
-                    bg-white
-                    text-[#861823]
-                    overflow-hidden
-                    focus-within:ring-2
-                    focus-within:ring-[#d7832d]
-                    focus-within:ring-offset-2
-                    focus-within:ring-offset-[#861823]
-                  "
-                  role="search"
-                >
-
-                  <label
-                    htmlFor="navbar-scheme-search"
-                    className="sr-only"
-                  >
-                    {t(
-    'nav.searchSchemes',
-    'Search schemes...'
-  )}
-                  </label>
-
-                  <input
-                    id="navbar-scheme-search"
-                    type="search"
-                    value={schemeSearch}
-                    onChange={(event) =>
-                      setSchemeSearch(
-                        event.target.value
-                      )
-                    }
-                    placeholder={t(
-    'nav.searchSchemes',
-    'Search schemes...'
-  )}
-  
-                    className="
-                      min-w-0
-                      flex-1
-                      h-full
-                      bg-transparent
-                      px-3
-                      text-xs
-                      2xl:text-[13px]
-                      font-medium
-                      placeholder:text-slate-500
-                      outline-none
-                    "
-                  />
-
-                  <button
-                    type="submit"
-                    className="
-                      h-full
-                      px-2.5
-                      2xl:px-3
-                      text-[#861823]
-                      hover:text-gov-sky
-                      transition-colors
-                      shrink-0
-                    "
-                    aria-label={t(
-  'nav.searchSchemes',
-  'Search schemes...'
-)}
-                  >
-
-                    <Search
-                      className="
-                        w-4
-                        h-4
-                        2xl:w-5
-                        2xl:h-5
-                      "
-                    />
-
-                  </button>
-
-                </form>
-
-
-                {/* SIGN UP */}
-
+              <div className="flex items-center gap-2">
                 <Link
                   to="/register"
-                  className="
-                    px-3
-                    lg:px-4
-                    2xl:px-5
-                    py-2
-                    2xl:py-2.5
-                    rounded-full
-                    bg-white
-                    text-[#861823]
-                    text-xs
-                    2xl:text-sm
-                    font-semibold
-                    hover:bg-[#d7832d]
-                    transition
-                    whitespace-nowrap
-                    shrink-0
-                  "
+                  className="hidden sm:inline-flex items-center justify-center px-3.5 py-1.5 rounded-xl bg-[#FFD0CA] hover:bg-[#F5B8B0] text-[#4A2525] border border-[#E8D8D2] font-bold text-xs shadow-2xs transition"
                 >
-                  {t(
-                    'nav.register',
-                    'Sign up'
-                  )}
+                  {t('nav.register', 'Register')}
                 </Link>
-
-
-                {/* LOG IN */}
-
                 <Link
                   to="/login"
-                  className="
-                    px-3
-                    lg:px-4
-                    2xl:px-5
-                    py-2
-                    2xl:py-2.5
-                    rounded-full
-                    border
-                    border-white
-                    text-white
-                    text-xs
-                    2xl:text-sm
-                    font-semibold
-                    hover:bg-white
-                    hover:text-[#861823]
-                    transition
-                    whitespace-nowrap
-                    shrink-0
-                  "
+                  className="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-[#EA717B] hover:bg-[#D65D67] text-white text-xs font-bold shadow-warm-sm transition"
                 >
-                  {t(
-                    'nav.login',
-                    'Log in'
-                  )}
+                  {t('nav.login', 'Citizen Login')}
                 </Link>
-
               </div>
-
             )}
 
-
-            {/* MOBILE MATCH */}
-
-            {!isAuthenticated && (
-
-              <Link
-                to="/recommendations"
-                className="
-                  hidden
-                  min-[360px]:flex
-                  md:hidden
-                  items-center
-                  gap-1.5
-                  bg-gov-saffron
-                  text-white
-                  px-3
-                  py-2
-                  rounded-full
-                  text-[11px]
-                  font-bold
-                  shrink-0
-                "
-              >
-
-                <Sparkles
-                  className="w-3 h-3"
-                />
-
-                Match
-
-              </Link>
-
-            )}
-
-
-            {/* MOBILE MENU */}
-
+            {/* Mobile Menu Toggle Button */}
             <button
               type="button"
-              onClick={() =>
-                setMobileMenuOpen(
-                  !mobileMenuOpen
-                )
-              }
-              className="
-                xl:hidden
-                p-2.5
-                rounded-full
-                text-white
-                bg-white/5
-                hover:bg-white/10
-                border
-                border-white/20
-                min-h-[42px]
-                min-w-[42px]
-                flex
-                items-center
-                justify-center
-                shrink-0
-              "
-              aria-expanded={
-                mobileMenuOpen
-              }
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl text-[#3B2522] hover:bg-[#FFF4EC] transition"
+              aria-label="Toggle Navigation Menu"
             >
-
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-
           </div>
-
         </div>
-
       </div>
 
-
       {/* =========================================================
-          MOBILE / TABLET DRAWER
+          MOBILE NAVIGATION DRAWER
           ========================================================= */}
-
       {mobileMenuOpen && (
-
-        <>
-
+        <div
+          id="mobile-navigation-drawer"
+          className="lg:hidden fixed left-0 right-0 w-full top-[var(--nav-height,90px)] bottom-0 bg-slate-900/30 backdrop-blur-xs z-50 overflow-y-auto"
+          onClick={() => setMobileMenuOpen(false)}
+        >
           <div
-            className="
-              fixed
-              inset-0
-              bg-slate-950/70
-              backdrop-blur-sm
-              z-[99]
-              xl:hidden
-            "
-            style={{
-              top: `${navHeight}px`,
-            }}
-            onClick={() =>
-              setMobileMenuOpen(false)
-            }
-          />
-
-
-          <div
-            id="mobile-navigation-drawer"
-            className="
-              xl:hidden
-              fixed
-              left-0
-              right-0
-              w-full
-              bg-[#861823]
-              px-4
-              sm:px-6
-              pt-4
-              pb-6
-              border-t
-              border-white/10
-              space-y-4
-              overflow-y-auto
-              shadow-2xl
-              z-[100]
-            "
-            style={{
-              top: `${navHeight}px`,
-              maxHeight:
-                `calc(100dvh - ${navHeight}px)`,
-            }}
+            className="bg-[#FFFBF0] w-full max-w-md ml-auto min-h-full p-5 space-y-5 shadow-warm-xl border-l border-[#E8D8D2]"
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* Mobile Search */}
+            <form onSubmit={handleSchemeSearch} className="flex items-center bg-white border border-[#E8D8D2] rounded-xl px-3 py-2 shadow-2xs">
+              <Search className="w-4 h-4 text-[#9B817A] mr-2 shrink-0" />
+              <input
+                type="text"
+                value={schemeSearch}
+                onChange={(e) => setSchemeSearch(e.target.value)}
+                placeholder="Search government schemes..."
+                className="w-full text-xs bg-transparent outline-none text-[#3B2522]"
+              />
+              <button type="submit" className="text-xs font-bold text-[#EA717B] shrink-0">
+                Go
+              </button>
+            </form>
 
-            {/* PUBLIC NAV */}
-
-            <div
-              className="
-                rounded-2xl
-                border
-                border-white/10
-                bg-white/[0.025]
-                p-2
-              "
-            >
-
-              <div
-                className="
-                  px-3
-                  py-2
-                  text-[10px]
-                  font-bold
-                  uppercase
-                  text-slate-500
-                  tracking-wider
-                "
-              >
-                {t(
-                  'nav.publicNav',
-                  'Public Navigation'
-                )}
-              </div>
-
-
-              {[
-                {
-                  to: '/',
-                  icon: Home,
-                  label: 'Home',
-                },
-                {
-                  to: '/schemes',
-                  icon: Search,
-                  label: 'Explore Schemes',
-                },
-                {
-                  to: '/calculator',
-                  icon: Calculator,
-                  label: 'Financial Calculator',
-                },
-                {
-                  to: '/channel-partners',
-                  icon: MapPin,
-                  label: 'Find Nearby Partner',
-                },
-              ].map((item) => {
-
-                const Icon = item.icon;
-
-                return (
-
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      px-3
-                      py-3
-                      rounded-xl
-                      text-sm
-                      font-medium
-                      text-white/85
-                      hover:bg-white/5
-                      hover:text-white
-                    "
-                  >
-
-                    <Icon
-                      className="
-                        w-4
-                        h-4
-                        text-sky-400
-                      "
-                    />
-
-                    <span>
-                      {item.label}
-                    </span>
-
-                  </Link>
-
-                );
-
-              })}
-
-            </div>
-
-
-            {/* CITIZEN */}
-
-            {isAuthenticated &&
-              role === 'BENEFICIARY' && (
-
-                <div
-                  className="
-                    border-t
-                    border-white/10
-                    pt-3
-                    space-y-1
-                  "
-                >
-
-                  <div
-                    className="
-                      px-3
-                      text-[10px]
-                      font-bold
-                      uppercase
-                      text-amber-400
-                      tracking-wider
-                    "
-                  >
-                    Citizen Account
-                  </div>
-
-
-                  <Link
-                    to="/profile"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      px-3
-                      py-2.5
-                      rounded-xl
-                      text-sm
-                      text-white/85
-                      hover:bg-white/5
-                    "
-                  >
-
-                    <User
-                      className="
-                        w-4
-                        h-4
-                        text-amber-400
-                      "
-                    />
-
-                    My Profile
-
-                  </Link>
-
-
-                  <Link
-                    to="/dashboard"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      px-3
-                      py-2.5
-                      rounded-xl
-                      text-sm
-                      text-white/85
-                      hover:bg-white/5
-                    "
-                  >
-
-                    <LayoutDashboard
-                      className="
-                        w-4
-                        h-4
-                        text-sky-400
-                      "
-                    />
-
-                    Citizen Dashboard
-
-                  </Link>
-
-
-                  <Link
-                    to="/applications"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      px-3
-                      py-2.5
-                      rounded-xl
-                      text-sm
-                      text-white/85
-                      hover:bg-white/5
-                    "
-                  >
-
-                    <FileText
-                      className="
-                        w-4
-                        h-4
-                        text-emerald-400
-                      "
-                    />
-
-                    Applications & Guidance
-
-                  </Link>
-
-
-                  <Link
-                    to="/saved-schemes"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      px-3
-                      py-2.5
-                      rounded-xl
-                      text-sm
-                      text-white/85
-                      hover:bg-white/5
-                    "
-                  >
-
-                    <Bookmark
-                      className="
-                        w-4
-                        h-4
-                        text-rose-400
-                      "
-                    />
-
-                    Saved Schemes
-
-                  </Link>
-
-                </div>
-
-              )}
-
-
-            {/* ADMIN */}
-
-            {isAuthenticated &&
-              role === 'SYSTEM_ADMIN' && (
-
-                <div
-                  className="
-                    border-t
-                    border-white/10
-                    pt-3
-                  "
-                >
-
-                  <Link
-                    to="/admin"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      px-3
-                      py-3
-                      rounded-xl
-                      text-sm
-                      text-rose-300
-                      hover:bg-rose-950/50
-                    "
-                  >
-
-                    <ShieldAlert
-                      className="
-                        w-4
-                        h-4
-                      "
-                    />
-
-                    Admin Control Center
-
-                  </Link>
-
-                </div>
-
-              )}
-
-
-            {/* INFORMATION */}
-
-            <div
-              className="
-                border-t
-                border-white/10
-                pt-3
-                space-y-1
-              "
-            >
-
-              <div
-                className="
-                  px-3
-                  text-[10px]
-                  font-bold
-                  uppercase
-                  text-slate-500
-                "
-              >
-                Information & Help
-              </div>
-
-
+            {/* Nav Links */}
+            <div className="space-y-1">
               <Link
-  to="/resources"
-  onClick={() => setMobileMenuOpen(false)}
-  className="w-full text-left flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-white/85 hover:bg-white/5"
->
-  <BookOpen className="w-4 h-4 text-amber-400" />
-  Resources & Guidelines
-</Link>
-
-
+                to="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+              >
+                <Home className="w-4 h-4 text-[#EA717B]" />
+                <span>{t('nav.home', 'Home')}</span>
+              </Link>
               <Link
-  to="/about"
-  onClick={() => setMobileMenuOpen(false)}
-  className="
-    w-full
-    text-left
-    flex
-    items-center
-    gap-3
-    px-3
-    py-3
-    rounded-xl
-    text-sm
-    text-white/85
-    hover:bg-white/5
-  "
->
-  <Info
-    className="
-      w-4
-      h-4
-      text-sky-400
-    "
-  />
-
-  About YojnaSetu
-</Link>
-
-            </div>
-
-
-            {/* TEXT SIZE */}
-
-            <div
-              className="
-                border-t
-                border-white/10
-                pt-3
-              "
-            >
-
-              <div
-                className="
-                  px-3
-                  mb-2
-                  text-[10px]
-                  font-bold
-                  uppercase
-                  text-slate-500
-                "
+                to="/schemes"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
               >
-                Text Size
-              </div>
-
-
-              <div
-                className="
-                  grid
-                  grid-cols-3
-                  gap-2
-                "
+                <Search className="w-4 h-4 text-[#F7AE56]" />
+                <span>{t('nav.schemes', 'Explore All Schemes')}</span>
+              </Link>
+              <Link
+                to="/recommendations"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-[#EA717B] bg-[#FFF0EE] border border-[#FFD0CA]"
               >
+                <Sparkles className="w-4 h-4 text-[#EA717B]" />
+                <span>{t('nav.recommendations', 'Smart Matching (For You)')}</span>
+              </Link>
+              <Link
+                to="/financial-health"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${
+                  isFinancialHealthActive
+                    ? 'text-[#EA717B] bg-[#FFF0EE] font-bold border border-[#FFD0CA]'
+                    : 'text-[#3B2522] hover:bg-white'
+                }`}
+                aria-current={isFinancialHealthActive ? 'page' : undefined}
+              >
+                <Activity className={`w-4 h-4 ${isFinancialHealthActive ? 'text-[#EA717B]' : 'text-[#2E7D32]'}`} />
+                <span>{t('nav.financialHealth', 'Financial Health')}</span>
+              </Link>
+              <Link
+                to="/calculator"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+              >
+                <Calculator className="w-4 h-4 text-[#2E7D32]" />
+                <span>{t('nav.calculator', 'Financial Calculator')}</span>
+              </Link>
+              <Link
+                to="/channel-partners"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+              >
+                <MapPin className="w-4 h-4 text-[#EA717B]" />
+                <span>{t('nav.channelPartners', 'Nearby Partner Centers')}</span>
+              </Link>
+              <Link
+                to="/compare"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+              >
+                <Layers className="w-4 h-4 text-[#EA717B]" />
+                <span>{t('nav.compare', 'Compare Schemes')}</span>
+              </Link>
+              <Link
+                to="/resources"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+              >
+                <BookOpen className="w-4 h-4 text-[#F7AE56]" />
+                <span>{t('nav.resources', 'Resources & Guidelines')}</span>
+              </Link>
+              <Link
+                to="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+              >
+                <Info className="w-4 h-4 text-[#765E59]" />
+                <span>{t('nav.about', 'About YojnaSetu')}</span>
+              </Link>
+            </div>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setTextSize('small')
-                  }
-                  className="
-                    py-2.5
-                    rounded-xl
-                    bg-white/5
-                    border
-                    border-white/10
-                    text-white
-                    font-bold
-                  "
+            {/* Mobile Auth actions */}
+            {!isAuthenticated && (
+              <div className="pt-4 border-t border-[#E8D8D2] flex flex-col gap-2">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl bg-[#EA717B] hover:bg-[#D65D67] text-white font-bold text-xs shadow-warm-sm"
                 >
-                  A−
-                </button>
-
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setTextSize('default')
-                  }
-                  className="
-                    py-2.5
-                    rounded-xl
-                    bg-white/5
-                    border
-                    border-white/10
-                    text-white
-                    font-bold
-                  "
+                  {t('nav.login', 'Citizen Login')}
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl bg-[#FFD0CA] hover:bg-[#F5B8B0] border border-[#E8D8D2] text-[#4A2525] font-bold text-xs shadow-2xs"
                 >
-                  A
-                </button>
-
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setTextSize('large')
-                  }
-                  className="
-                    py-2.5
-                    rounded-xl
-                    bg-white/5
-                    border
-                    border-white/10
-                    text-white
-                    font-bold
-                  "
-                >
-                  A+
-                </button>
-
+                  {t('nav.register', 'Register New Account')}
+                </Link>
               </div>
-
-            </div>
-
-
-            {/* AUTH */}
-
-            <div
-              className="
-                border-t
-                border-white/10
-                pt-3
-              "
-            >
-
-              {isAuthenticated ? (
-
-                <div
-                  className="
-                    flex
-                    items-center
-                    justify-between
-                    gap-3
-                    p-3
-                    rounded-xl
-                    bg-white/[0.035]
-                    border
-                    border-white/10
-                  "
-                >
-
-                  <div
-                    className="
-                      min-w-0
-                    "
-                  >
-
-                    <p
-                      className="
-                        text-xs
-                        font-bold
-                        text-white
-                        truncate
-                      "
-                    >
-                      {user?.email ||
-                        user?.phone}
-                    </p>
-
-                    <span
-                      className="
-                        text-[9px]
-                        text-sky-400
-                        uppercase
-                        font-bold
-                      "
-                    >
-                      {user?.role}
-                    </span>
-
-                  </div>
-
-
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="
-                      px-3
-                      py-2
-                      rounded-lg
-                      bg-rose-950
-                      text-rose-300
-                      border
-                      border-rose-800
-                      text-xs
-                      font-bold
-                      shrink-0
-                    "
-                  >
-
-                    <LogOut
-                      className="
-                        w-3.5
-                        h-3.5
-                        inline
-                        mr-1
-                      "
-                    />
-
-                    Sign Out
-
-                  </button>
-
-                </div>
-
-              ) : (
-
-                <div
-                  className="
-                    grid
-                    grid-cols-2
-                    gap-2
-                  "
-                >
-
-                  <Link
-                    to="/login"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="
-                      py-3
-                      rounded-xl
-                      border
-                      border-white/30
-                      text-white
-                      text-center
-                      text-sm
-                      font-semibold
-                    "
-                  >
-                    Log in
-                  </Link>
-
-
-                  <Link
-                    to="/register"
-                    onClick={() =>
-                      setMobileMenuOpen(false)
-                    }
-                    className="
-                      py-3
-                      rounded-xl
-                      bg-white
-                      text-[#861823]
-                      text-center
-                      text-sm
-                      font-semibold
-                    "
-                  >
-                    Sign up
-                  </Link>
-
-                </div>
-
-              )}
-
-            </div>
-
+            )}
           </div>
-
-        </>
-
+        </div>
       )}
-
-
-      
-
-
-</header>
+    </header>
   );
 };

@@ -109,3 +109,14 @@ def test_seed_idempotency(db_session):
     assert db_session.query(SchemeRule).count() == rules_before
     assert db_session.query(SchemeDocument).count() == docs_before
     assert db_session.query(SchemeVerification).count() == verifs_before
+
+
+def test_reseed_preserves_official_urls(db_session):
+    from seed_db import OFFICIAL_URL_MAPPING
+    # Verify every mapped official URL is correctly loaded in the database
+    for sid, expected_url in OFFICIAL_URL_MAPPING.items():
+        scheme = db_session.query(Scheme).filter(Scheme.scheme_id == sid).first()
+        assert scheme is not None, f"Scheme {sid} not found after seed"
+        assert scheme.application_url == expected_url, f"Scheme {sid} application_url mismatch: expected {expected_url}, got {scheme.application_url}"
+        assert scheme.official_portal == expected_url, f"Scheme {sid} official_portal mismatch: expected {expected_url}, got {scheme.official_portal}"
+        assert scheme.official_source_url == expected_url, f"Scheme {sid} official_source_url mismatch: expected {expected_url}, got {scheme.official_source_url}"

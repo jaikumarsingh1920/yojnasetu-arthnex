@@ -14,6 +14,7 @@ export interface PartnerData {
   institution_type?: string | null;
   partner_category: string; // 'AUTHORIZED_SCHEME_PARTNER' | 'IMPLEMENTING_ASSISTANCE_CENTRE' | 'NEARBY_FINANCIAL_SERVICE_POINT'
   address?: string | null;
+  city?: string | null;
   district?: string | null;
   state?: string | null;
   pincode?: string | null;
@@ -36,6 +37,50 @@ export interface PartnerData {
   created_at?: string;
 }
 
+export interface FinancialMetricObservation {
+  value?: number | null;
+  status?: string | null;
+  unit?: string | null;
+  financial_scope?: string | null;
+  scope_description?: string | null;
+  institution_name?: string | null;
+  branch_name?: string | null;
+  source?: string | null;
+  source_authority?: string | null;
+  source_url?: string | null;
+  document?: string | null;
+  reporting_period?: string | null;
+  data_as_of?: string | null;
+  status_label?: string | null;
+  rule_applicability?: string | null;
+}
+
+export interface FinancialRuleEvaluation {
+  rule_id: string;
+  rule_name?: string;
+  name?: string;
+  metric?: string;
+  metric_name?: string;
+  operator?: string;
+  threshold?: number | string | null;
+  threshold_value?: number | null;
+  threshold_status?: string | null;
+  unit?: string | null;
+  authority?: string;
+  financial_scope?: string;
+  source_document?: string;
+  source_url?: string;
+  wording?: string;
+  result?: string;
+  rule_status?: string;
+  actual_value?: any;
+  observed_value?: any;
+  observed_status?: any;
+  observation_source?: string | null;
+  data_as_of?: string | null;
+  explanation?: string;
+}
+
 export interface NearestPartnerResponse {
   partner: PartnerData;
   distance_km: number;
@@ -48,6 +93,131 @@ export interface NearestPartnerResponse {
   scheme_mapping_notes?: string | null;
   suitability_reason?: string | null;
   lending_capacity_status?: string | null;
+  google_maps_url?: string | null;
+  coordinate_precision?: string | null;
+  confidence?: string | null;
+  application_channel?: string | null;
+  routing_status?: string;
+  institution_name?: string | null;
+  branch_location?: string | null;
+  entity_resolution_status?: string | null;
+  entity_match_level?: string | null;
+  entity_confidence?: number | null;
+  entity_resolution_notes?: string | null;
+  financial_scope?: string | null;
+  financial_intelligence?: {
+    NNPA_PERCENT?: FinancialMetricObservation;
+    GNPA_PERCENT?: FinancialMetricObservation;
+    CRAR_PERCENT?: FinancialMetricObservation;
+    [key: string]: FinancialMetricObservation | any;
+  };
+  rules_evaluated?: FinancialRuleEvaluation[];
+  routing_reasons?: string[];
+  prudential_status?: string | null;
+  prudential_summary?: string | null;
+  statutory_checks?: Record<string, any> | null;
+  is_restricted?: boolean;
+  exclusion_reason?: string | null;
+}
+
+export interface FinancialIndicatorStatus {
+  code: 'STRONGER' | 'MIXED' | 'HIGHER_STRESS' | 'LIMITED_DATA';
+  label: string;
+  short_description: string;
+  explanation: string;
+  why_this_status?: string | null;
+  evidence_count: number;
+  calculated_from: string[];
+  methodology_version: string;
+  scope_disclaimer?: string | null;
+}
+
+export interface SchemeFinancialSummary {
+  scheme_id: string;
+  scheme_name: string;
+  short_description?: string | null;
+  overview?: string | null;
+  full_details?: string | null;
+  description?: string | null;
+  ministry?: string | null;
+  sector?: string | null;
+  channel_partners_count: number;
+  with_verified_financial_info_count: number;
+  limited_information_count: number;
+  latest_reporting_period?: string | null;
+  delivery_mode?: 'FINANCIAL_INTERMEDIARY' | 'DIRECT_DEPARTMENTAL_OR_ONLINE' | string;
+}
+
+export interface SchemePartnerFinancialCard {
+  partner_id: string;
+  partner_name: string;
+  partner_code: string;
+  institution_name?: string | null;
+  partner_type?: string | null;
+  institution_type?: string | null;
+  nsfdc_authorized?: string | null;
+  branch_location?: string | null;
+  city?: string | null;
+  district?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  financial_status: FinancialIndicatorStatus;
+  verified_metrics: Record<string, FinancialMetricObservation>;
+  latest_reporting_period?: string | null;
+}
+
+export interface SchemeFinancialDetail {
+  scheme_id: string;
+  scheme_name: string;
+  short_description?: string | null;
+  description?: string | null;
+  overview?: string | null;
+  full_details?: string | null;
+  ministry?: string | null;
+  sector?: string | null;
+  total_channel_partners: number;
+  partners_with_verified_financial_info: number;
+  partners_with_limited_information: number;
+  latest_reporting_period?: string | null;
+  delivery_mode?: 'FINANCIAL_INTERMEDIARY' | 'DIRECT_DEPARTMENTAL_OR_ONLINE' | string;
+  partners: SchemePartnerFinancialCard[];
+}
+
+export interface PartnerFinancialHealthResponse {
+  partner_id: string;
+  partner_name: string;
+  partner_code: string;
+  institution_name?: string | null;
+  entity_resolution_status?: string | null;
+  entity_match_level?: string | null;
+  entity_confidence?: number | null;
+  entity_resolution_notes?: string | null;
+  branch_location?: string | null;
+  branch_address?: string | null;
+  branch_city?: string | null;
+  branch_state?: string | null;
+  branch_pincode?: string | null;
+  financial_scope?: string | null;
+  institution_type?: string | null;
+  routing_status: string;
+  is_restricted: boolean;
+  primary_reason: string;
+  rules_evaluated: FinancialRuleEvaluation[];
+  verified_metrics: Record<string, FinancialMetricObservation>;
+  unverified_metrics: string[];
+  record_status?: string | null;
+  nsfdc_authorized?: string | null;
+  financial_status?: FinancialIndicatorStatus | null;
+}
+
+export interface PartnerRoutingAuditResponse {
+  recommended_partners: NearestPartnerResponse[];
+  excluded_partners: NearestPartnerResponse[];
+  total_evaluated: number;
+  total_recommended: number;
+  total_excluded: number;
+  routing_summary: string;
+  hard_restrictions_enforced: boolean;
 }
 
 export interface PaginatedPartnerAuditResponse {
@@ -85,7 +255,8 @@ export const partnerApi = {
     partnerCategory?: string,
     district?: string,
     state?: string,
-    serviceType?: string
+    serviceType?: string,
+    includeExcluded?: boolean
   ): Promise<NearestPartnerResponse[]> => {
     const response = await apiClient.get<NearestPartnerResponse[]>('/partner/nearest', {
       params: {
@@ -97,7 +268,33 @@ export const partnerApi = {
         partner_category: partnerCategory,
         district,
         state,
-        service_type: serviceType
+        service_type: serviceType,
+        include_excluded: includeExcluded
+      }
+    });
+    return response.data;
+  },
+
+  getRoutingAudit: async (
+    latitude: number,
+    longitude: number,
+    radiusKm: number = 100,
+    schemeId?: string,
+    loanCategory?: string,
+    partnerCategory?: string,
+    district?: string,
+    state?: string
+  ): Promise<PartnerRoutingAuditResponse> => {
+    const response = await apiClient.get<PartnerRoutingAuditResponse>('/partner/routing-audit', {
+      params: {
+        latitude,
+        longitude,
+        radius_km: radiusKm,
+        scheme_id: schemeId,
+        loan_category: loanCategory,
+        partner_category: partnerCategory,
+        district,
+        state
       }
     });
     return response.data;
@@ -112,6 +309,22 @@ export const partnerApi = {
     const response = await apiClient.get<NearestPartnerResponse[]>('/partner/directory', {
       params: { district, state, partner_category: partnerCategory, scheme_id: schemeId }
     });
+    return response.data;
+  },
+
+  getCoverageReport: async (): Promise<{
+    total_schemes: number;
+    total_partners: number;
+    total_scheme_partner_mappings: number;
+    schemes_with_at_least_one_partner: number;
+    coverage_percentage: number;
+  }> => {
+    const response = await apiClient.get('/partner/coverage-report');
+    return response.data;
+  },
+
+  getPartnerFinancialHealth: async (partnerId: string): Promise<PartnerFinancialHealthResponse> => {
+    const response = await apiClient.get<PartnerFinancialHealthResponse>(`/partner/${partnerId}/financial-health`);
     return response.data;
   },
 
@@ -231,6 +444,25 @@ export const partnerApi = {
 
   getAdminStats: async (): Promise<any> => {
     const response = await apiClient.get('/admin/applications/stats');
+    return response.data;
+  },
+
+  getFinancialHealthSchemes: async (params?: {
+    limit?: number;
+    search?: string;
+    ministry?: string;
+    has_partners_only?: boolean;
+    availability?: string;
+  }): Promise<SchemeFinancialSummary[]> => {
+    const response = await apiClient.get<SchemeFinancialSummary[]>('/partners/financial-health/schemes', { params });
+    return response.data;
+  },
+
+  getSchemeFinancialHealth: async (
+    schemeId: string,
+    params?: { search?: string; state?: string; district?: string; partner_type?: string; status?: string }
+  ): Promise<SchemeFinancialDetail> => {
+    const response = await apiClient.get<SchemeFinancialDetail>(`/partners/financial-health/schemes/${schemeId}`, { params });
     return response.data;
   },
 };

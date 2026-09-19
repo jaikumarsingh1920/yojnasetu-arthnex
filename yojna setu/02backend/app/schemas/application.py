@@ -30,7 +30,6 @@ class ApplicationDocumentResponse(BaseModel):
     requirement_type: str
     condition: Optional[str] = None
     is_uploaded: bool
-    file_path: Optional[str] = None
     file_name: Optional[str] = None
     file_size_bytes: Optional[int] = None
     mime_type: Optional[str] = None

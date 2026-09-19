@@ -1,6 +1,7 @@
 import json
 import math
 import re
+from decimal import Decimal
 from typing import Optional, List, Dict, Any, Set
 from fastapi import APIRouter, Depends, HTTPException, Query, Body, Path, status
 from sqlalchemy import or_, and_, asc, desc, func
@@ -10,6 +11,7 @@ from app.api.deps import get_db, get_optional_current_user
 from app.models.user import User
 from app.models.scheme import Scheme
 from app.models.verification import SchemeVerification
+from app.models.partner_scheme import PartnerSchemeMapping
 from app.schemas.profile import BeneficiaryProfileInput
 from app.engine.eligibility import DeterministicEligibilityEngine
 from app.core.config import settings
@@ -25,6 +27,7 @@ from app.schemas.scheme import (
     SchemePersonalizedEligibility,
     EmailSchemeRequest,
     EmailSchemeResponse,
+    SchemeSelectorItem,
 )
 
 router = APIRouter()
@@ -238,6 +241,27 @@ def get_filter_options(db: Session = Depends(get_db)):
         for rt, cnt in sorted(route_counts.items(), key=lambda x: (-x[1], x[0]))
     ]
 
+    # 7. Availability breakdown (canonical and dynamic)
+    partner_scheme_ids = set(
+        row[0] for row in db.query(PartnerSchemeMapping.scheme_id).distinct().all()
+    )
+    with_partners_cnt = len(partner_scheme_ids)
+    direct_cnt = max(0, total_schemes - with_partners_cnt)
+    verified_portal_cnt = db.query(Scheme).filter(
+        Scheme.application_route == "OFFICIAL_PORTAL"
+    ).count()
+    assisted_cnt = db.query(Scheme).filter(
+        Scheme.application_route == "ASSISTED"
+    ).count()
+
+    availability_counts = {
+        "ALL": total_schemes,
+        "PARTNERS": with_partners_cnt,
+        "VERIFIED": verified_portal_cnt,
+        "LIMITED": assisted_cnt,
+        "DIRECT": direct_cnt,
+    }
+
     return FilterOptionsResponse(
         ministries=ministry_items,
         sectors=sector_items,
@@ -246,6 +270,7 @@ def get_filter_options(db: Session = Depends(get_db)):
         states=state_items,
         application_routes=route_items,
         total_schemes=total_schemes,
+        availability_counts=availability_counts,
     )
 
 
@@ -253,6 +278,48 @@ def _clean_str(val: Any) -> Optional[str]:
     if isinstance(val, str) and val.strip():
         return val.strip()
     return None
+
+
+@router.get(
+    "/selector",
+    response_model=List[SchemeSelectorItem],
+    summary="Get complete scheme catalog for dropdown selector without truncation",
+    description="Returns all active canonical schemes with their partner mapping status for dynamic UI selection."
+)
+def get_scheme_selector(
+    only_with_partners: bool = Query(default=False, description="Filter only to schemes with authorized channel partner mappings"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(
+        Scheme.scheme_id,
+        Scheme.scheme_code,
+        Scheme.scheme_name,
+        Scheme.scheme_type,
+        Scheme.ministry
+    ).filter(
+        or_(Scheme.scheme_status == "ACTIVE", Scheme.scheme_status == None, Scheme.scheme_status == "")
+    )
+
+    # Subquery for schemes with partner mappings
+    mapped_rows = db.query(PartnerSchemeMapping.scheme_id).distinct().all()
+    mapped_ids = {r[0] for r in mapped_rows if r[0]}
+
+    if only_with_partners:
+        query = query.filter(Scheme.scheme_id.in_(mapped_ids))
+
+    results = query.order_by(Scheme.scheme_name.asc()).all()
+
+    return [
+        SchemeSelectorItem(
+            scheme_id=r[0],
+            scheme_code=r[1] or r[0],
+            scheme_name=r[2],
+            category=r[3],
+            ministry=r[4],
+            has_partner_mapping=(r[0] in mapped_ids)
+        )
+        for r in results
+    ]
 
 
 @router.get(
@@ -709,24 +776,29 @@ def list_schemes(
     description="Fetches full scheme details for up to 4 schemes in a single query. Computes personalized eligibility if beneficiary is authenticated."
 )
 def compare_schemes(
-    ids: str = Query(..., description="Comma-separated scheme IDs (between 2 and 4 schemes, e.g. 'SIH26092-001,SIH26092-053')"),
+    ids: Optional[str] = Query(None, description="Comma-separated scheme IDs (e.g. 'SIH26092-001,SIH26092-053')"),
+    scheme_ids: Optional[str] = Query(None, description="Alternative alias for ids"),
+    project_cost: Optional[float] = Query(None, description="Optional total project cost in INR"),
+    requested_loan_amount: Optional[float] = Query(None, description="Optional requested loan amount in INR"),
+    own_contribution: Optional[float] = Query(None, description="Optional available own contribution / liquid savings in INR"),
     current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Side-by-side comparison endpoint for 2 to 4 schemes.
+    Side-by-side comparison endpoint for 2 to 4 schemes with integrated financial facts.
     Deduplicates requested IDs while preserving requested order.
     Rejects requests with > 4 scheme IDs.
-    Calculates deterministic personalized eligibility for logged-in citizens.
+    Calculates deterministic personalized eligibility and financial suitability.
     """
-    if not ids or not ids.strip():
+    effective_ids = ids or scheme_ids
+    if not effective_ids or not effective_ids.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Please provide at least 1 scheme ID to compare."
         )
 
     # Parse and deduplicate requested IDs while preserving order
-    raw_parts = [p.strip() for p in ids.split(",") if p.strip()]
+    raw_parts = [p.strip() for p in effective_ids.split(",") if p.strip()]
     dedup_ids: List[str] = []
     for pid in raw_parts:
         if pid not in dedup_ids:
@@ -797,9 +869,24 @@ def compare_schemes(
                         missing_fields=[]
                     )
 
+            fin_assess: Optional[SchemeFinancialAssessment] = None
+            try:
+                from app.engine.financial_health import DeterministicFinancialHealthEngine
+                fin_assess = DeterministicFinancialHealthEngine.evaluate_scheme_suitability(
+                    scheme=sch,
+                    profile=user_profile,
+                    requested_loan_amount=Decimal(str(requested_loan_amount)) if requested_loan_amount is not None else None,
+                    project_cost=Decimal(str(project_cost)) if project_cost is not None else None,
+                    own_contribution=Decimal(str(own_contribution)) if own_contribution is not None else None,
+                    db=db
+                )
+            except Exception:
+                fin_assess = None
+
             compared_items.append(SchemeComparisonItem(
                 scheme=detail_res,
-                personalized_eligibility=elig_res
+                personalized_eligibility=elig_res,
+                financial_assessment=fin_assess
             ))
 
     return SchemeComparisonResponse(

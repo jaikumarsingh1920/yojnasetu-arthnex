@@ -315,7 +315,16 @@ def test_verify_all_mandatory_documents_and_approve(partner_client, p1_user_head
 
 
 def test_already_approved_application_cannot_be_approved_or_rejected(partner_client, p1_admin_headers, submitted_app_id):
-    client, _ = partner_client
+    client, TestingSessionLocal = partner_client
+    db = TestingSessionLocal()
+    app_obj = db.query(Application).filter(Application.application_id == submitted_app_id).first()
+    if app_obj:
+        app_obj.status = ApplicationStatus.APPROVED.value
+        for d in app_obj.documents:
+            d.verification_status = DocumentVerificationStatus.VERIFIED.value
+        db.commit()
+    db.close()
+
     res = client.post(
         f"/api/v1/partner/applications/{submitted_app_id}/review",
         json={"decision": "APPROVED", "reason": "Second approval attempt"},

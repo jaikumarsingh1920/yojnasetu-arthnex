@@ -82,15 +82,24 @@ class AIExplainableRecommendationService:
             # Grounded AI explanation construction
             if item.eligibility_status == "ELIGIBLE":
                 explanation = (
-                    f"Recommended #{idx}: {item.scheme_name} matches your profile with a soft-fit score of {item.score:.1f}/100. "
-                    f"HARD ELIGIBILITY STATUS: 100% Deterministically Eligible. "
-                    f"Matched dimensions include {', '.join(item.matched_factors or ['Category', 'Sector'])}."
+                    f"Recommended #{idx}: {item.scheme_name} satisfies statutory eligibility criteria with a soft-fit score of {item.score:.1f}/100. "
+                    f"Matched dimensions include {', '.join(item.matched_factors or ['Category', 'Sector'])}. "
+                    f"Final approval and loan sanction remain subject to document verification and partner sanctioning norms."
+                )
+            elif item.eligibility_status == "CONDITIONAL":
+                explanation = (
+                    f"Scheme {item.scheme_name} meets baseline criteria subject to statutory conditions. "
+                    f"Conditions: {'; '.join(item.eligibility_reasons or ['Verification required'])}."
+                )
+            elif item.eligibility_status == "INSUFFICIENT_INFORMATION":
+                explanation = (
+                    f"Scheme {item.scheme_name} cannot be fully evaluated due to missing citizen profile information: "
+                    f"{'; '.join(item.missing_information or item.eligibility_reasons or ['Additional demographic or financial parameters required'])}."
                 )
             else:
                 explanation = (
                     f"Scheme {item.scheme_name} is currently deterministically INELIGIBLE. "
-                    f"REASON: {'; '.join(item.eligibility_reasons or ['Does not meet scheme eligibility rules'])}. "
-                    f"AI Note: The backend deterministic engine strictly forbids claiming eligibility when rules are broken."
+                    f"Statutory reasons: {'; '.join(item.eligibility_reasons or ['Does not satisfy scheme statutory criteria'])}."
                 )
 
             fin_summary = f"Scheme ID: {item.scheme_id} | Rank #{idx} | Score: {item.score:.1f}/100"

@@ -1,0 +1,284 @@
+{
+  "version": "1.0.0",
+  "authority": "NSFDC",
+  "ministry": "Ministry of Social Justice and Empowerment, Government of India",
+  "effective_date": "2026-09-15",
+  "verified_at": "2026-09-16T10:15:00Z",
+  "source_document": "Notional Allocation of Funds & Norms for Disbursement (Section 3 & 3.1)",
+  "source_url": "https://nsfdc.nic.in/allocation-of-funds",
+  "rules": [
+    {
+      "rule_id": "NSFDC_GEN_OVERDUE_001",
+      "name": "General Prohibition of Overdues to NSFDC",
+      "target_institution_types": [
+        "ALL"
+      ],
+      "metric_name": "OVERDUE_STATUS",
+      "operator": "==",
+      "threshold_value": null,
+      "threshold_status": "CLEAR",
+      "unit": "STATUS",
+      "authority": "NSFDC",
+      "source_url": "https://nsfdc.nic.in/allocation-of-funds",
+      "source_document": "NSFDC Norms for Disbursement Section 3",
+      "source_section": "3. Norms for Disbursement, Item 2",
+      "wording": "There should not be any overdues payable to NSFDC.",
+      "severity": "CRITICAL_EXCLUSION",
+      "is_active": true,
+      "description": "Any channel partner with verified overdue debts payable to NSFDC cannot receive disbursements and is non-routable.",
+      "applicable_institution_types": [
+        "ALL"
+      ],
+      "financial_scope": "POLICY_LEVEL",
+      "source": "NSFDC Norms for Disbursement Section 3 (https://nsfdc.nic.in/allocation-of-funds)",
+      "metric": "OVERDUE_STATUS",
+      "threshold": "CLEAR",
+      "institution_types": [
+        "ALL"
+      ],
+      "effective_from": "2026-09-15",
+      "verified_at": "2026-09-16T10:15:00Z",
+      "scope": "POLICY_LEVEL"
+    },
+    {
+      "rule_id": "NSFDC_GEN_UTILIZATION_001",
+      "name": "Full Cumulative Fund Utilization Requirement",
+      "target_institution_types": [
+        "ALL"
+      ],
+      "metric_name": "FUND_UTILIZATION_PERCENT",
+      "operator": ">=",
+      "threshold_value": 100.0,
+      "threshold_status": null,
+      "unit": "PERCENT",
+      "authority": "NSFDC",
+      "source_url": "https://nsfdc.nic.in/allocation-of-funds",
+      "source_document": "NSFDC Norms for Disbursement Section 3",
+      "source_section": "3. Norms for Disbursement, Item 3",
+      "wording": "The cumulative utilization level of earlier disbursements shall be 100% as at the end of preceding month for disbursement of funds.",
+      "severity": "CRITICAL_EXCLUSION",
+      "is_active": true,
+      "description": "Requires 100% cumulative utilization of previously disbursed central funds before fresh loan allocations.",
+      "applicable_institution_types": [
+        "ALL"
+      ],
+      "financial_scope": "POLICY_LEVEL",
+      "source": "NSFDC Norms for Disbursement Section 3 (https://nsfdc.nic.in/allocation-of-funds)",
+      "metric": "FUND_UTILIZATION_PERCENT",
+      "threshold": 100.0,
+      "institution_types": [
+        "ALL"
+      ],
+      "effective_from": "2026-09-15",
+      "verified_at": "2026-09-16T10:15:00Z",
+      "scope": "POLICY_LEVEL"
+    },
+    {
+      "rule_id": "NSFDC_GEN_GUARANTEE_001",
+      "name": "Adequate Guarantee Requirement",
+      "target_institution_types": [
+        "ALL"
+      ],
+      "metric_name": "GUARANTEE_STATUS",
+      "operator": "==",
+      "threshold_value": null,
+      "threshold_status": "ADEQUATE",
+      "unit": "STATUS",
+      "authority": "NSFDC",
+      "source_url": "https://nsfdc.nic.in/allocation-of-funds",
+      "source_document": "NSFDC Norms for Disbursement Section 3",
+      "source_section": "3. Norms for Disbursement, Item 1",
+      "wording": "Availability of adequate Government Guarantee/Bank Guarantee.",
+      "severity": "CRITICAL_EXCLUSION",
+      "is_active": true,
+      "description": "Requires an active, adequate State Government Guarantee or Bank Guarantee securing credit disbursements.",
+      "applicable_institution_types": [
+        "ALL"
+      ],
+      "financial_scope": "INSTITUTION_LEVEL",
+      "source": "NSFDC Norms for Disbursement Section 3 (https://nsfdc.nic.in/allocation-of-funds)",
+      "metric": "GUARANTEE_STATUS",
+      "threshold": "ADEQUATE",
+      "institution_types": [
+        "ALL"
+      ],
+      "effective_from": "2026-09-15",
+      "verified_at": "2026-09-16T10:15:00Z",
+      "scope": "INSTITUTION_LEVEL"
+    },
+    {
+      "rule_id": "NSFDC_RRB_NNPA_001",
+      "name": "Regional Rural Bank Net NPA Limit",
+      "target_institution_types": [
+        "REGIONAL_RURAL_BANK"
+      ],
+      "metric_name": "NNPA_PERCENT",
+      "operator": "<",
+      "threshold_value": 15.0,
+      "threshold_status": null,
+      "unit": "PERCENT",
+      "authority": "NSFDC",
+      "source_url": "https://nsfdc.nic.in/allocation-of-funds",
+      "source_document": "NSFDC Additional Norms for Regional Rural Banks (RRBs)",
+      "source_section": "Section 3.1, Bullet 1",
+      "wording": "Net NPA must be less than 15% in at least 3 years out of last 6 years preceding the year of disbursement.",
+      "severity": "CRITICAL_EXCLUSION",
+      "is_active": true,
+      "description": "An RRB must maintain Net Non-Performing Assets strictly below 15% to remain eligible for credit routing.",
+      "applicable_institution_types": [
+        "REGIONAL_RURAL_BANK"
+      ],
+      "financial_scope": "INSTITUTION_LEVEL",
+      "source": "NSFDC Additional Norms for Regional Rural Banks (RRBs) (https://nsfdc.nic.in/allocation-of-funds)",
+      "metric": "NNPA_PERCENT",
+      "threshold": 15.0,
+      "institution_types": [
+        "REGIONAL_RURAL_BANK"
+      ],
+      "effective_from": "2026-09-15",
+      "verified_at": "2026-09-16T10:15:00Z",
+      "scope": "INSTITUTION_LEVEL"
+    },
+    {
+      "rule_id": "NSFDC_RRB_PROFIT_001",
+      "name": "Regional Rural Bank Minimum Profitability Track Record",
+      "target_institution_types": [
+        "REGIONAL_RURAL_BANK"
+      ],
+      "metric_name": "PROFITABLE_YEARS_COUNT",
+      "operator": ">=",
+      "threshold_value": 3.0,
+      "threshold_status": null,
+      "unit": "YEARS",
+      "authority": "NSFDC",
+      "source_url": "https://nsfdc.nic.in/allocation-of-funds",
+      "source_document": "NSFDC Additional Norms for Regional Rural Banks (RRBs)",
+      "source_section": "Section 3.1, Bullet 2",
+      "wording": "The RRB must have earned a net profit in at least in 3 out of last 6 financial years preceding the year of disbursement.",
+      "severity": "CRITICAL_EXCLUSION",
+      "is_active": true,
+      "description": "RRBs must demonstrate net operating profits in at least 3 out of the previous 6 financial years.",
+      "applicable_institution_types": [
+        "REGIONAL_RURAL_BANK"
+      ],
+      "financial_scope": "INSTITUTION_LEVEL",
+      "source": "NSFDC Additional Norms for Regional Rural Banks (RRBs) (https://nsfdc.nic.in/allocation-of-funds)",
+      "metric": "PROFITABLE_YEARS_COUNT",
+      "threshold": 3.0,
+      "institution_types": [
+        "REGIONAL_RURAL_BANK"
+      ],
+      "effective_from": "2026-09-15",
+      "verified_at": "2026-09-16T10:15:00Z",
+      "scope": "INSTITUTION_LEVEL"
+    },
+    {
+      "rule_id": "NSFDC_MFI_GNPA_001",
+      "name": "NBFC-MFI Maximum Gross NPA Ceiling",
+      "target_institution_types": [
+        "NBFC_MFI",
+        "MICRO_FINANCE_INSTITUTION"
+      ],
+      "metric_name": "GNPA_PERCENT",
+      "operator": "<",
+      "threshold_value": 2.0,
+      "threshold_status": null,
+      "unit": "PERCENT",
+      "authority": "NSFDC",
+      "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/lending_policy_mfi.pdf",
+      "source_document": "NSFDC Lending Policy for Micro-Finance Institutions",
+      "source_section": "Section 4.2 Asset Quality Norms",
+      "wording": "Gross NPA must be less than 2% as per the Annual Accounts at the end of the preceding financial year.",
+      "severity": "CRITICAL_EXCLUSION",
+      "is_active": true,
+      "description": "NBFC-MFIs must maintain Gross NPA strictly below 2% to qualify as channelizing agents.",
+      "applicable_institution_types": [
+        "NBFC_MFI",
+        "MICRO_FINANCE_INSTITUTION"
+      ],
+      "financial_scope": "INSTITUTION_LEVEL",
+      "source": "NSFDC Lending Policy for Micro-Finance Institutions (https://nsfdc.nic.in/storage/channel-partners/attachments/lending_policy_mfi.pdf)",
+      "metric": "GNPA_PERCENT",
+      "threshold": 2.0,
+      "institution_types": [
+        "NBFC_MFI",
+        "MICRO_FINANCE_INSTITUTION"
+      ],
+      "effective_from": "2026-09-15",
+      "verified_at": "2026-09-16T10:15:00Z",
+      "scope": "INSTITUTION_LEVEL"
+    },
+    {
+      "rule_id": "NSFDC_MFI_NNPA_001",
+      "name": "NBFC-MFI Maximum Net NPA Ceiling",
+      "target_institution_types": [
+        "NBFC_MFI",
+        "MICRO_FINANCE_INSTITUTION"
+      ],
+      "metric_name": "NNPA_PERCENT",
+      "operator": "<",
+      "threshold_value": 0.5,
+      "threshold_status": null,
+      "unit": "PERCENT",
+      "authority": "NSFDC",
+      "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/lending_policy_mfi.pdf",
+      "source_document": "NSFDC Lending Policy for Micro-Finance Institutions",
+      "source_section": "Section 4.2 Asset Quality Norms",
+      "wording": "Net NPA must be below 0.5% as per the Annual Accounts at the end of the preceding financial year.",
+      "severity": "CRITICAL_EXCLUSION",
+      "is_active": true,
+      "description": "NBFC-MFIs must maintain Net NPA strictly below 0.5%.",
+      "applicable_institution_types": [
+        "NBFC_MFI",
+        "MICRO_FINANCE_INSTITUTION"
+      ],
+      "financial_scope": "INSTITUTION_LEVEL",
+      "source": "NSFDC Lending Policy for Micro-Finance Institutions (https://nsfdc.nic.in/storage/channel-partners/attachments/lending_policy_mfi.pdf)",
+      "metric": "NNPA_PERCENT",
+      "threshold": 0.5,
+      "institution_types": [
+        "NBFC_MFI",
+        "MICRO_FINANCE_INSTITUTION"
+      ],
+      "effective_from": "2026-09-15",
+      "verified_at": "2026-09-16T10:15:00Z",
+      "scope": "INSTITUTION_LEVEL"
+    },
+    {
+      "rule_id": "NSFDC_COOP_NNPA_001",
+      "name": "Co-operative Institution Maximum Net NPA",
+      "target_institution_types": [
+        "COOPERATIVE_BANK",
+        "COOPERATIVE_SOCIETY"
+      ],
+      "metric_name": "NNPA_PERCENT",
+      "operator": "<",
+      "threshold_value": 5.0,
+      "threshold_status": null,
+      "unit": "PERCENT",
+      "authority": "NSFDC",
+      "source_url": "https://nsfdc.nic.in/storage/channel-partners/attachments/coop_lending_norms.pdf",
+      "source_document": "NSFDC Lending Norms for Co-operatives",
+      "source_section": "Prudential Norms for Co-operatives",
+      "wording": "Net NPA should be less than 5% for the preceding financial year, OR the average Net NPA for the last 5 financial years should be less than 5%.",
+      "severity": "CRITICAL_EXCLUSION",
+      "is_active": true,
+      "description": "Co-operative financial partners must maintain Net NPA below 5%.",
+      "applicable_institution_types": [
+        "COOPERATIVE_BANK",
+        "COOPERATIVE_SOCIETY"
+      ],
+      "financial_scope": "INSTITUTION_LEVEL",
+      "source": "NSFDC Lending Norms for Co-operatives (https://nsfdc.nic.in/storage/channel-partners/attachments/coop_lending_norms.pdf)",
+      "metric": "NNPA_PERCENT",
+      "threshold": 5.0,
+      "institution_types": [
+        "COOPERATIVE_BANK",
+        "COOPERATIVE_SOCIETY"
+      ],
+      "effective_from": "2026-09-15",
+      "verified_at": "2026-09-16T10:15:00Z",
+      "scope": "INSTITUTION_LEVEL"
+    }
+  ]
+}
