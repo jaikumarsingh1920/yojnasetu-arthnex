@@ -88,7 +88,7 @@ export const App: React.FC = () => {
                   <Route path="/resources" element={<Resources />} />
                   <Route path="/faq" element={<Faq />} />
                   <Route path="/blogs" element={<BlogsLanding />} />
-                  <Route path="/blogs/:slug" element={<BlogReader />} />
+                  <Route path="/blogs/:blogId" element={<BlogReader />} />
 
                 {/* Authenticated Notifications Route */}
                 <Route
