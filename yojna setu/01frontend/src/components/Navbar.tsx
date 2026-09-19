@@ -601,6 +601,17 @@ export const Navbar: React.FC = () => {
                     </div>
                   </Link>
                   <Link
+                    to="/blogs"
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="w-full text-left px-4 py-2 text-xs flex items-center gap-3 text-[#3B2522] hover:bg-[#FFF4EC]"
+                  >
+                    <BookOpen className="w-4 h-4 text-[#EA717B]" />
+                    <div>
+                      <div className="font-bold text-[#3B2522]">Blog</div>
+                      <span className="text-[10px] text-[#765E59]">Financial guidance & insights</span>
+                    </div>
+                  </Link>
+                  <Link
                     to="/faq"
                     onClick={() => setMoreMenuOpen(false)}
                     className="w-full text-left px-4 py-2 text-xs flex items-center gap-3 text-[#3B2522] hover:bg-[#FFF4EC]"

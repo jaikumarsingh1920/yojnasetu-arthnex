@@ -38,6 +38,8 @@ import { Compare } from './pages/Compare';
 import { ScrollToTop } from './components/ScrollToTop';
 import { PageTitleManager } from './components/PageTitleManager';
 import Faq from './pages/Faq';
+import { BlogsLanding } from './pages/BlogsLanding';
+import { BlogReader } from './pages/BlogReader';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +87,8 @@ export const App: React.FC = () => {
                   <Route path="/unauthorized" element={<Unauthorized />} />
                   <Route path="/resources" element={<Resources />} />
                   <Route path="/faq" element={<Faq />} />
+                  <Route path="/blogs" element={<BlogsLanding />} />
+                  <Route path="/blogs/:blogId" element={<BlogReader />} />
 
                 {/* Authenticated Notifications Route */}
                 <Route

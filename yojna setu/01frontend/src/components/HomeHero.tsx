@@ -15,11 +15,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
-import heroDigital from '../assets/hero-digital.jpg';
-import heroWomen from '../assets/hero-women.jpg';
 import heroEntrepreneur from '../assets/hero-entrepreneur.png';
 import heroFarmer from '../assets/hero-farmer.png';
-import heroStudent from '../assets/hero-student.jpg';
 
 export interface WarmHeroSlide {
   id: string;
@@ -50,7 +47,7 @@ export const HomeHero: React.FC<{ totalSchemes?: number }> = ({ totalSchemes = 8
   const slides: WarmHeroSlide[] = [
     {
       id: 'digital-civic',
-      image: heroDigital,
+      image: heroEntrepreneur,
       position: 'center center',
       badgeText: 'National Welfare & Credit Guidance Portal',
       badgeIcon: ShieldCheck,
@@ -68,7 +65,7 @@ export const HomeHero: React.FC<{ totalSchemes?: number }> = ({ totalSchemes = 8
     },
     {
       id: 'women-empowerment',
-      image: heroWomen,
+      image: heroFarmer,
       position: 'center center',
       badgeText: 'Women Welfare • Self-Help Groups • Direct Subsidy',
       badgeIcon: Users,
@@ -122,7 +119,7 @@ export const HomeHero: React.FC<{ totalSchemes?: number }> = ({ totalSchemes = 8
     },
     {
       id: 'students',
-      image: heroStudent,
+      image: heroEntrepreneur,
       position: 'center center',
       badgeText: 'Youth & Higher Education • Fellowships & Grants',
       badgeIcon: GraduationCap,

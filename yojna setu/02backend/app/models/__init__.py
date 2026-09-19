@@ -21,6 +21,7 @@ from app.models.audit import AuditLog
 from app.models.notification import Notification
 from app.models.notification_preference import NotificationPreference
 from app.models.saved_scheme import SavedScheme
+from app.models.blog import FinancialBlog
 from app.models.ingestion import (
     SchemeSource,
     SourceSnapshot,
@@ -60,6 +61,7 @@ __all__ = [
     "Notification",
     "NotificationPreference",
     "SavedScheme",
+    "FinancialBlog",
     "SchemeSource",
     "SourceSnapshot",
     "PendingSchemeUpdate",

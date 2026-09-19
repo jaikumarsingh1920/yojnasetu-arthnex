@@ -402,3 +402,74 @@ html[data-text-size="default"] .yojnasetu-navbar {
     transform: none !important;
   }
 }
+
+/* Financial blog pages use the same light civic palette as the main site. */
+.blog-page {
+  background: #FFFBF0 !important;
+  color: #3B2522 !important;
+}
+
+.blog-page > section {
+  background: #FFF4EC !important;
+  border-color: #E8D8D2 !important;
+  color: #3B2522 !important;
+}
+
+.blog-page > section > .absolute {
+  background: radial-gradient(circle at 85% 10%, rgba(234, 113, 123, 0.2), transparent 28%), radial-gradient(circle at 10% 90%, rgba(247, 174, 86, 0.18), transparent 30%) !important;
+}
+
+.blog-page > section h1 {
+  color: #3B2522 !important;
+}
+
+.blog-page > section p,
+.blog-page > section .text-white\/80,
+.blog-page > section .text-white\/85 {
+  color: #765E59 !important;
+}
+
+.blog-page > section .border-white\/20,
+.blog-page > section .border-white\/15 {
+  border-color: #E8D8D2 !important;
+}
+
+.blog-page > section .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.blog-page > section .text-amber-200 {
+  color: #EA717B !important;
+}
+
+.blog-page > main > div:last-child {
+  background: #FFFFFF !important;
+  border: 1px solid #E8D8D2;
+  color: #765E59 !important;
+}
+
+.blog-page > main > div:last-child .text-white\/75 {
+  color: #765E59 !important;
+}
+
+.blog-page .bg-\[\#3c1424\] {
+  background-color: #FFFFFF !important;
+}
+
+article[class*="bg-[#fef9f3]"] {
+  background-color: #FFFBF0 !important;
+  color: #3B2522 !important;
+}
+
+article[class*="bg-[#fef9f3]"] header,
+article[class*="bg-[#fef9f3]"] .border-\[\#f0dfe1\] {
+  border-color: #E8D8D2 !important;
+}
+
+article[class*="bg-[#fef9f3]"] .text-\[\#861823\] {
+  color: #EA717B !important;
+}
+
+article[class*="bg-[#fef9f3]"] .bg-\[\#f7e9e9\] {
+  background-color: #FFF4EC !important;
+}
