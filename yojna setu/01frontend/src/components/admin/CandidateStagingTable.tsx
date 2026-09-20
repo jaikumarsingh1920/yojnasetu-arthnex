@@ -70,6 +70,25 @@ export const CandidateStagingTable: React.FC = () => {
     setIsSubmittingReview(true);
     setFeedbackMessage(null);
 
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setTimeout(() => {
+        setCandidates((prev) => prev.filter((c) => c.candidate_id !== reviewTarget.candidate_id));
+        setFeedbackMessage({
+          type: 'success',
+          text: `✨ [DEMO SANDBOX] Candidate '${reviewTarget.scheme_name}' ${reviewAction.toLowerCase()}d visually in preview. Database preserved.`,
+        });
+        setReviewTarget(null);
+        setIsSubmittingReview(false);
+        setTimeout(() => setFeedbackMessage(null), 6000);
+      }, 400);
+      return;
+    }
+
     try {
       const payload: CandidateReviewInput = {
         action: reviewAction,

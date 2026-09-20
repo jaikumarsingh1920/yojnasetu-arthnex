@@ -19,6 +19,7 @@ declare global {
 
 interface GoogleAuthButtonProps {
   mode?: 'login' | 'register';
+  buttonText?: string;
   onSuccess?: () => void;
   onError?: (errorMsg: string) => void;
   className?: string;
@@ -26,6 +27,7 @@ interface GoogleAuthButtonProps {
 
 export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   mode = 'login',
+  buttonText,
   onSuccess,
   onError,
   className = '',
@@ -173,9 +175,10 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
                 />
               </svg>
               <span>
-                {mode === 'register'
-                  ? t('auth.continueWithGoogle', 'Continue with Google')
-                  : t('auth.signInWithGoogle', 'Sign in with Google')}
+                {buttonText ||
+                  (mode === 'register'
+                    ? t('auth.continueWithGoogle', 'Continue with Google')
+                    : t('auth.signInWithGoogle', 'Sign in with Google'))}
               </span>
             </button>
           )}

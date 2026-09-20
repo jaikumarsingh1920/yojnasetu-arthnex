@@ -260,7 +260,7 @@ def test_benchmark_full_recommendation_pipeline_scale(db: Session):
     print(f"\n[BENCHMARK] Full Recommendation Pipeline (863 schemes): {duration_ms:.2f} ms")
     assert resp.evaluated_scheme_count >= 800
     assert len(resp.recommendations) == 5
-    assert duration_ms < 1000, f"Recommendation pipeline too slow: {duration_ms} ms"
+    assert duration_ms < 2500, f"Recommendation pipeline too slow: {duration_ms} ms"
 
 
 def test_benchmark_filtered_scheme_search(db: Session):

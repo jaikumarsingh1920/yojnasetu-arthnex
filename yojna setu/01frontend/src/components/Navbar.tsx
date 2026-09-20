@@ -214,12 +214,73 @@ export const Navbar: React.FC = () => {
   const currentLang =
     SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) || SUPPORTED_LANGUAGES[0];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isRouteActive = (route: string): boolean => {
+    const current = location.pathname;
+    if (route === '/') {
+      return current === '/' || current === '/home';
+    }
+    if (route === '/schemes') {
+      return (
+        current.startsWith('/schemes') ||
+        current === '/explore-schemes' ||
+        current === '/explore' ||
+        current.startsWith('/explore')
+      );
+    }
+    if (route === '/recommendations') {
+      return current.startsWith('/recommendations');
+    }
+    if (route === '/financial-health') {
+      return current.startsWith('/financial-health');
+    }
+    if (route === '/calculator') {
+      return current.startsWith('/calculator');
+    }
+    if (route === '/channel-partners') {
+      return (
+        current.startsWith('/channel-partners') ||
+        current.startsWith('/nearby-partners')
+      );
+    }
+    if (route === '/blogs' || route === '/blog') {
+      return current.startsWith('/blogs') || current.startsWith('/blog');
+    }
+    if (route === 'more') {
+      return (
+        current === '/compare' ||
+        current === '/resources' ||
+        current === '/faq' ||
+        current === '/about' ||
+        current.startsWith('/blogs') ||
+        current.startsWith('/blog')
+      );
+    }
+    return current === route;
+  };
+
+  const getNavLinkClass = (active: boolean) =>
+    `px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+      active
+        ? 'bg-[#EA717B] text-white shadow-warm-sm font-bold'
+        : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
+    }`;
+
+  const getNavIconClass = (active: boolean) =>
+    `w-3.5 h-3.5 ${active ? 'text-white' : 'text-[#765E59]'}`;
+
+  const getMobileNavLinkClass = (active: boolean) =>
+    `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${
+      active
+        ? 'bg-[#EA717B] text-white font-bold shadow-warm-xs'
+        : 'text-[#3B2522] hover:bg-white'
+    }`;
+
+  const getMobileNavIconClass = (active: boolean) =>
+    `w-4 h-4 ${active ? 'text-white' : 'text-[#765E59]'}`;
+
   const isCitizenPathActive = ['/profile', '/dashboard', '/applications', '/saved-schemes'].includes(
     location.pathname
   );
-  const isSchemesPathActive = location.pathname.startsWith('/schemes');
-  const isFinancialHealthActive = location.pathname.startsWith('/financial-health');
 
   return (
     <header
@@ -372,7 +433,7 @@ export const Navbar: React.FC = () => {
                 Yojna<span className="text-[#EA717B] font-black">Setu</span>
               </span>
               <span className="hidden sm:block text-xs font-medium text-[#765E59] normal-case">
-                National civic-tech platform
+                {t('common.nationalCivicTechPlatform', 'National civic-tech platform')}
               </span>
             </div>
           </Link>
@@ -382,13 +443,9 @@ export const Navbar: React.FC = () => {
             {/* Home */}
             <Link
               to="/"
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
-                isActive('/')
-                  ? 'bg-[#EA717B] text-white shadow-warm-sm font-bold'
-                  : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
-              }`}
+              className={getNavLinkClass(isRouteActive('/'))}
             >
-              <Home className={`w-3.5 h-3.5 ${isActive('/') ? 'text-white' : 'text-[#765E59]'}`} />
+              <Home className={getNavIconClass(isRouteActive('/'))} />
               <span>{t('nav.home', 'Home')}</span>
             </Link>
 
@@ -397,20 +454,16 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMegaMenuOpen(!megaMenuOpen)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
-                  isSchemesPathActive || megaMenuOpen
-                    ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
-                    : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
-                }`}
+                className={getNavLinkClass(isRouteActive('/schemes') || megaMenuOpen)}
                 aria-expanded={megaMenuOpen}
                 aria-haspopup="true"
               >
-                <Search className={`w-3.5 h-3.5 ${isSchemesPathActive || megaMenuOpen ? 'text-[#EA717B]' : 'text-[#765E59]'}`} />
+                <Search className={getNavIconClass(isRouteActive('/schemes') || megaMenuOpen)} />
                 <span>{t('nav.schemes', 'Explore Schemes')}</span>
                 <ChevronDown
-                  className={`w-3 h-3 text-[#9B817A] transition-transform ${
-                    megaMenuOpen ? 'rotate-180' : ''
-                  }`}
+                  className={`w-3 h-3 transition-transform ${
+                    isRouteActive('/schemes') || megaMenuOpen ? 'text-white' : 'text-[#9B817A]'
+                  } ${megaMenuOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
@@ -490,7 +543,7 @@ export const Navbar: React.FC = () => {
                       onClick={() => setMegaMenuOpen(false)}
                       className="text-xs font-bold text-[#EA717B] hover:text-[#D65D67] flex items-center gap-1"
                     >
-                      <span>Explore all schemes</span>
+                      <span>{t('nav.exploreAllSchemes', 'Explore all schemes')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
@@ -501,53 +554,37 @@ export const Navbar: React.FC = () => {
             {/* Smart Matching */}
             <Link
               to="/recommendations"
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
-                isActive('/recommendations')
-                  ? 'bg-[#EA717B] text-white shadow-warm-sm font-bold'
-                  : 'text-[#765E59] hover:text-[#EA717B] hover:bg-[#FFD0CA]/40'
-              }`}
+              className={getNavLinkClass(isRouteActive('/recommendations'))}
             >
-              <Sparkles className={`w-3.5 h-3.5 ${isActive('/recommendations') ? 'text-[#FFF0EE]' : 'text-[#EA717B]'}`} />
+              <Sparkles className={getNavIconClass(isRouteActive('/recommendations'))} />
               <span>{t('nav.recommendations', 'Smart Matching')}</span>
             </Link>
 
             {/* Financial Health Hub */}
             <Link
               to="/financial-health"
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
-                isFinancialHealthActive
-                  ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
-                  : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
-              }`}
-              aria-current={isFinancialHealthActive ? 'page' : undefined}
+              className={getNavLinkClass(isRouteActive('/financial-health'))}
+              aria-current={isRouteActive('/financial-health') ? 'page' : undefined}
             >
-              <Activity className={`w-3.5 h-3.5 ${isFinancialHealthActive ? 'text-[#EA717B]' : 'text-[#765E59]'}`} />
+              <Activity className={getNavIconClass(isRouteActive('/financial-health'))} />
               <span>{t('nav.financialHealth', 'Financial Health')}</span>
             </Link>
 
             {/* Financial Calculator */}
             <Link
               to="/calculator"
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
-                isActive('/calculator')
-                  ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
-                  : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
-              }`}
+              className={getNavLinkClass(isRouteActive('/calculator'))}
             >
-              <Calculator className="w-3.5 h-3.5 text-[#765E59]" />
+              <Calculator className={getNavIconClass(isRouteActive('/calculator'))} />
               <span>{t('nav.calculator', 'Financial Calculator')}</span>
             </Link>
 
             {/* Nearby Partners */}
             <Link
               to="/channel-partners"
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
-                isActive('/channel-partners')
-                  ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
-                  : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
-              }`}
+              className={getNavLinkClass(isRouteActive('/channel-partners'))}
             >
-              <MapPin className="w-3.5 h-3.5 text-[#765E59]" />
+              <MapPin className={getNavIconClass(isRouteActive('/channel-partners'))} />
               <span>{t('nav.partnerLocator', 'Nearby Partners')}</span>
             </Link>
 
@@ -556,20 +593,16 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 ${
-                  moreMenuOpen
-                    ? 'bg-white text-[#EA717B] shadow-2xs font-bold border border-[#E8D8D2]'
-                    : 'text-[#765E59] hover:text-[#3B2522] hover:bg-[#FFD0CA]/40'
-                }`}
+                className={getNavLinkClass(isRouteActive('more') || moreMenuOpen)}
                 aria-expanded={moreMenuOpen}
                 aria-haspopup="true"
               >
-                <BookOpen className="w-3.5 h-3.5 text-[#765E59]" />
+                <BookOpen className={getNavIconClass(isRouteActive('more') || moreMenuOpen)} />
                 <span>{t('nav.more', 'More')}</span>
                 <ChevronDown
-                  className={`w-3 h-3 text-[#9B817A] transition-transform ${
-                    moreMenuOpen ? 'rotate-180' : ''
-                  }`}
+                  className={`w-3 h-3 transition-transform ${
+                    isRouteActive('more') || moreMenuOpen ? 'text-white' : 'text-[#9B817A]'
+                  } ${moreMenuOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
@@ -598,6 +631,17 @@ export const Navbar: React.FC = () => {
                     <div>
                       <div className="font-bold text-[#3B2522]">{t('nav.resources', 'Resources & Guidelines')}</div>
                       <span className="text-[10px] text-[#765E59]">{t('nav.gazetteVerified', 'Gazette rules & circulars')}</span>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/blogs"
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="w-full text-left px-4 py-2 text-xs flex items-center gap-3 text-[#3B2522] hover:bg-[#FFF4EC]"
+                  >
+                    <BookOpen className="w-4 h-4 text-[#EA717B]" />
+                    <div>
+                      <div className="font-bold text-[#3B2522]">{t('nav.blog', 'Blog')}</div>
+                      <span className="text-[10px] text-[#765E59]">{t('nav.blogSubtitle', 'Financial guidance & insights')}</span>
                     </div>
                   </Link>
                   <Link
@@ -650,7 +694,7 @@ export const Navbar: React.FC = () => {
                 type="text"
                 value={schemeSearch}
                 onChange={(e) => setSchemeSearch(e.target.value)}
-                placeholder="Search schemes..."
+                placeholder={t('nav.searchPlaceholder', 'Search schemes...')}
                 className="w-full text-xs bg-transparent outline-none text-[#3B2522] placeholder:text-[#9B817A]"
               />
             </form>
@@ -774,11 +818,11 @@ export const Navbar: React.FC = () => {
                 type="text"
                 value={schemeSearch}
                 onChange={(e) => setSchemeSearch(e.target.value)}
-                placeholder="Search government schemes..."
+                placeholder={t('nav.searchPlaceholder', 'Search schemes...')}
                 className="w-full text-xs bg-transparent outline-none text-[#3B2522]"
               />
               <button type="submit" className="text-xs font-bold text-[#EA717B] shrink-0">
-                Go
+                {t('nav.searchGo', 'Go')}
               </button>
             </form>
 
@@ -787,71 +831,75 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+                className={getMobileNavLinkClass(isRouteActive('/'))}
               >
-                <Home className="w-4 h-4 text-[#EA717B]" />
+                <Home className={getMobileNavIconClass(isRouteActive('/'))} />
                 <span>{t('nav.home', 'Home')}</span>
               </Link>
               <Link
                 to="/schemes"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+                className={getMobileNavLinkClass(isRouteActive('/schemes'))}
               >
-                <Search className="w-4 h-4 text-[#F7AE56]" />
+                <Search className={getMobileNavIconClass(isRouteActive('/schemes'))} />
                 <span>{t('nav.schemes', 'Explore All Schemes')}</span>
               </Link>
               <Link
                 to="/recommendations"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-[#EA717B] bg-[#FFF0EE] border border-[#FFD0CA]"
+                className={getMobileNavLinkClass(isRouteActive('/recommendations'))}
               >
-                <Sparkles className="w-4 h-4 text-[#EA717B]" />
+                <Sparkles className={getMobileNavIconClass(isRouteActive('/recommendations'))} />
                 <span>{t('nav.recommendations', 'Smart Matching (For You)')}</span>
               </Link>
               <Link
                 to="/financial-health"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${
-                  isFinancialHealthActive
-                    ? 'text-[#EA717B] bg-[#FFF0EE] font-bold border border-[#FFD0CA]'
-                    : 'text-[#3B2522] hover:bg-white'
-                }`}
-                aria-current={isFinancialHealthActive ? 'page' : undefined}
+                className={getMobileNavLinkClass(isRouteActive('/financial-health'))}
+                aria-current={isRouteActive('/financial-health') ? 'page' : undefined}
               >
-                <Activity className={`w-4 h-4 ${isFinancialHealthActive ? 'text-[#EA717B]' : 'text-[#2E7D32]'}`} />
+                <Activity className={getMobileNavIconClass(isRouteActive('/financial-health'))} />
                 <span>{t('nav.financialHealth', 'Financial Health')}</span>
               </Link>
               <Link
                 to="/calculator"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+                className={getMobileNavLinkClass(isRouteActive('/calculator'))}
               >
-                <Calculator className="w-4 h-4 text-[#2E7D32]" />
+                <Calculator className={getMobileNavIconClass(isRouteActive('/calculator'))} />
                 <span>{t('nav.calculator', 'Financial Calculator')}</span>
               </Link>
               <Link
                 to="/channel-partners"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+                className={getMobileNavLinkClass(isRouteActive('/channel-partners'))}
               >
-                <MapPin className="w-4 h-4 text-[#EA717B]" />
+                <MapPin className={getMobileNavIconClass(isRouteActive('/channel-partners'))} />
                 <span>{t('nav.channelPartners', 'Nearby Partner Centers')}</span>
               </Link>
               <Link
                 to="/compare"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+                className={getMobileNavLinkClass(isRouteActive('/compare'))}
               >
-                <Layers className="w-4 h-4 text-[#EA717B]" />
+                <Layers className={getMobileNavIconClass(isRouteActive('/compare'))} />
                 <span>{t('nav.compare', 'Compare Schemes')}</span>
               </Link>
               <Link
                 to="/resources"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#3B2522] hover:bg-white"
+                className={getMobileNavLinkClass(isRouteActive('/resources'))}
               >
-                <BookOpen className="w-4 h-4 text-[#F7AE56]" />
+                <BookOpen className={getMobileNavIconClass(isRouteActive('/resources'))} />
                 <span>{t('nav.resources', 'Resources & Guidelines')}</span>
+              </Link>
+              <Link
+                to="/blogs"
+                onClick={() => setMobileMenuOpen(false)}
+                className={getMobileNavLinkClass(isRouteActive('/blogs') || isRouteActive('/blog'))}
+              >
+                <BookOpen className={getMobileNavIconClass(isRouteActive('/blogs') || isRouteActive('/blog'))} />
+                <span>{t('nav.blog', 'Blog & Financial Insights')}</span>
               </Link>
               <Link
                 to="/about"

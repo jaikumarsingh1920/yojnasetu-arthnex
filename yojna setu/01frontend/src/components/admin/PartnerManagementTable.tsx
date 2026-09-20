@@ -78,6 +78,27 @@ export const PartnerManagementTable: React.FC = () => {
   const handleToggleStatus = async () => {
     if (!targetPartner) return;
     setIsTogglingStatus(true);
+
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setTimeout(() => {
+        const newActive = !targetPartner.is_active;
+        setPartners((prev) =>
+          prev.map((p) => (p.partner_id === targetPartner.partner_id ? { ...p, is_active: newActive } : p))
+        );
+        setSuccessBanner(`✨ [DEMO SANDBOX] Partner '${targetPartner.name}' ${newActive ? 'activated' : 'deactivated'} visually in preview.`);
+        setTargetPartner(null);
+        setStatusReason('');
+        setIsTogglingStatus(false);
+        setTimeout(() => setSuccessBanner(null), 6000);
+      }, 400);
+      return;
+    }
+
     try {
       const newActive = !targetPartner.is_active;
       await partnerApi.updateAdminPartnerStatus(
@@ -101,6 +122,23 @@ export const PartnerManagementTable: React.FC = () => {
     if (!mappingTargetPartner || !newSchemeId.trim()) return;
 
     setIsLinkingScheme(true);
+
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setTimeout(() => {
+        setSuccessBanner(`✨ [DEMO SANDBOX] Scheme '${newSchemeId}' linked visually to '${mappingTargetPartner.name}' in preview.`);
+        setNewSchemeId('');
+        setMappingTargetPartner(null);
+        setIsLinkingScheme(false);
+        setTimeout(() => setSuccessBanner(null), 6000);
+      }, 400);
+      return;
+    }
+
     try {
       await partnerApi.linkPartnerScheme(mappingTargetPartner.partner_id, {
         scheme_id: newSchemeId.trim(),
@@ -121,6 +159,18 @@ export const PartnerManagementTable: React.FC = () => {
 
   const handleUnlinkScheme = async (partnerId: string, schemeId: string) => {
     if (!confirm(`Are you sure you want to unlink scheme ${schemeId}?`)) return;
+
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setSuccessBanner(`✨ [DEMO SANDBOX] Scheme '${schemeId}' unlinked visually in preview.`);
+      setTimeout(() => setSuccessBanner(null), 6000);
+      return;
+    }
+
     try {
       await partnerApi.unlinkPartnerScheme(partnerId, schemeId, 'Unlinked by administrator');
       setSuccessBanner(`Scheme '${schemeId}' unlinked.`);

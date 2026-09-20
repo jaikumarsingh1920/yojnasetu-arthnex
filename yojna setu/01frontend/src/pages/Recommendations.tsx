@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { useAuth } from '../context/AuthContext';
@@ -39,12 +39,14 @@ import {
   Sparkles,
   Info,
   User,
+  Lock,
   Sliders,
   RefreshCw,
   ArrowRight,
   Mic,
   MicOff,
-  Square
+  Square,
+  BarChart3
 } from 'lucide-react';
 
 type InputMode = 'PROFILE' | 'TYPE' | 'FORM';
@@ -120,6 +122,7 @@ const calculateClientProfileCompletion = (profile: BeneficiaryProfileInput | nul
 export const Recommendations: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('q');
 
@@ -697,6 +700,24 @@ export const Recommendations: React.FC = () => {
     persistRecommendationState({ inputMode: mode });
   };
 
+  const isProfileComplete = Boolean(
+    isAuthenticated && canonicalProfile && profileCompletion >= 50
+  );
+
+  const handleSavedProfileClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/recommendations', {
+        state: { from: { pathname: '/recommendations' } },
+      });
+      return;
+    }
+    if (!isProfileComplete) {
+      navigate('/profile?redirect=/recommendations');
+      return;
+    }
+    handleInputModeChange('PROFILE');
+  };
+
   const buildProfileFromForm = (): BeneficiaryProfileInput => {
     let sector = 'MICRO_FINANCE';
     let activity = 'SMALL_MICRO_BUSINESS';
@@ -855,13 +876,13 @@ export const Recommendations: React.FC = () => {
         <div className="relative z-10 max-w-3xl space-y-2.5">
           <div className="inline-flex items-center gap-2 bg-[#F7AE56]/20 border border-[#F7AE56]/40 text-[#F7AE56] px-3 py-1 rounded-full text-xs font-bold tracking-wide">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>AI-POWERED SCHEME DISCOVERY</span>
+            <span>{t('recommendations.aiPoweredDiscovery', 'AI-POWERED SCHEME DISCOVERY')}</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
-            Find Schemes That Fit Your Situation
+            {t('recommendations.heroTitle', 'Find Schemes That Fit Your Situation')}
           </h1>
           <p className="text-xs sm:text-sm text-[#FFD0CA]/90 leading-relaxed max-w-xl">
-            Tell us about yourself in simple language. We'll evaluate your profile against official published guidelines to find the most relevant schemes for you.
+            {t('recommendations.heroSubtitle', "Tell us about yourself in simple language. We'll evaluate your profile against official published guidelines to find the most relevant schemes for you.")}
           </p>
         </div>
       </div>
@@ -934,12 +955,18 @@ export const Recommendations: React.FC = () => {
               {/* Readable Demographic Chips */}
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
                 {[
-                  canonicalProfile.gender || 'Any Gender',
-                  canonicalProfile.age ? `Age ${canonicalProfile.age}` : null,
-                  canonicalProfile.social_category ? `Category ${canonicalProfile.social_category}` : null,
-                  canonicalProfile.annual_income ? `Income ₹${canonicalProfile.annual_income.toLocaleString('en-IN')}` : null,
+                  (() => {
+                    const g = (canonicalProfile.gender || '').toUpperCase();
+                    if (g === 'FEMALE') return t('common.female', 'Female');
+                    if (g === 'MALE') return t('common.male', 'Male');
+                    if (g === 'TRANSGENDER') return t('common.transgender', 'Transgender');
+                    return canonicalProfile.gender ? t(`common.${canonicalProfile.gender.toLowerCase()}`, canonicalProfile.gender) : t('recommendations.anyGender', 'Any Gender');
+                  })(),
+                  canonicalProfile.age ? `${t('recommendations.agePrefix', 'Age')} ${canonicalProfile.age}` : null,
+                  canonicalProfile.social_category ? `${t('recommendations.categoryPrefix', 'Category')} ${canonicalProfile.social_category}` : null,
+                  canonicalProfile.annual_income ? `${t('recommendations.incomePrefix', 'Income')} ₹${canonicalProfile.annual_income.toLocaleString(i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'bn' ? 'bn-IN' : 'en-IN')}` : null,
                   canonicalProfile.state ? canonicalProfile.state.replace(/_/g, ' ') : null,
-                  canonicalProfile.sector ? `Sector ${canonicalProfile.sector}` : null,
+                  canonicalProfile.sector ? `${t('recommendations.sectorPrefix', 'Sector')} ${canonicalProfile.sector}` : null,
                 ].filter(Boolean).map((chip, cIdx) => (
                   <span
                     key={cIdx}
@@ -980,20 +1007,14 @@ export const Recommendations: React.FC = () => {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Card 1: Saved Profile / Complete Your Profile */}
           <button
             type="button"
-            disabled={!isAuthenticated}
-            onClick={() => {
-              if (isAuthenticated) {
-                handleInputModeChange('PROFILE');
-              }
-            }}
-            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-2 ${
-              !isAuthenticated
-                ? 'bg-[#FFFBF0]/60 border-[#E8D8D2] opacity-70 cursor-not-allowed'
-                : inputMode === 'PROFILE'
+            onClick={handleSavedProfileClick}
+            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-3 cursor-pointer ${
+              inputMode === 'PROFILE' && isProfileComplete
                 ? 'bg-[#FFF4EC] border-[#EA717B] ring-2 ring-[#EA717B]/20 shadow-warm-sm'
-                : 'bg-white border-[#E8D8D2] hover:border-[#F7AE56]/60 shadow-warm-xs'
+                : 'bg-white border-[#E8D8D2] hover:border-[#EA717B]/60 hover:shadow-warm-sm shadow-warm-xs'
             }`}
           >
             <div className="flex items-center justify-between">
@@ -1001,41 +1022,58 @@ export const Recommendations: React.FC = () => {
                 <User className="w-4 h-4" />
               </div>
 
-              {isAuthenticated && inputMode === 'PROFILE' && (
-                <Check className="w-4 h-4 text-[#EA717B] font-extrabold" />
+              {!isAuthenticated && (
+                <span className="text-[10px] font-bold text-[#765E59] bg-[#FFF4EC] px-2 py-0.5 rounded-full border border-[#E8D8D2] flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5 text-[#765E59]" />
+                  <span>{t('recommendations.signInRequired', 'Sign in required')}</span>
+                </span>
+              )}
+
+              {isAuthenticated && !isProfileComplete && (
+                <span className="text-[10px] font-bold text-[#4A2525] bg-[#FFD0CA] px-2 py-0.5 rounded-full border border-[#EA717B]/30">
+                  {t('recommendations.completeProfileBadge', 'Complete Profile')}
+                </span>
+              )}
+
+              {isAuthenticated && isProfileComplete && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    {t('recommendations.profileReadyBadge', 'Profile ready')}
+                  </span>
+                  {inputMode === 'PROFILE' && (
+                    <Check className="w-4 h-4 text-[#EA717B] font-extrabold" />
+                  )}
+                </div>
               )}
             </div>
 
             <div>
               <h3 className="font-extrabold text-[#3B2522] text-xs">
-                {t('recommendations.modeProfile', '👤 Saved Citizen Profile')}
+                {!isAuthenticated
+                  ? t('recommendations.savedProfileTitle', 'Saved Profile')
+                  : !isProfileComplete
+                  ? t('recommendations.completeYourProfileTitle', 'Complete Your Profile')
+                  : t('recommendations.savedProfileTitle', 'Saved Profile')}
               </h3>
 
-              {isAuthenticated ? (
-                <p className="text-[11px] text-[#765E59] mt-0.5">
-                  {t(
-                    'recommendations.modeProfileDesc',
-                    'Uses your authoritative saved profile parameters.'
-                  )}
-                </p>
-              ) : (
-                <p className="text-[11px] text-[#EA717B] font-bold mt-0.5">
-                  🔒 {t(
-                    'recommendations.signInFirst',
-                    'Sign in first to use this feature'
-                  )}
-                </p>
-              )}
+              <p className="text-[11px] text-[#765E59] mt-0.5 leading-relaxed">
+                {!isAuthenticated
+                  ? t('recommendations.savedProfileSignInSub', 'Sign in to use your saved profile')
+                  : !isProfileComplete
+                  ? t('recommendations.completeProfileSub', 'Add your details to get personalized scheme matching.')
+                  : t('recommendations.savedProfileReadySub', 'Use your saved profile for scheme matching.')}
+              </p>
             </div>
           </button>
 
+          {/* Card 2: Natural Language / Voice Search */}
           <button
             type="button"
             onClick={() => handleInputModeChange('TYPE')}
-            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-2 ${
+            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-3 cursor-pointer ${
               inputMode === 'TYPE'
                 ? 'bg-[#FFF4EC] border-[#EA717B] ring-2 ring-[#EA717B]/20 shadow-warm-sm'
-                : 'bg-white border-[#E8D8D2] hover:border-[#F7AE56]/60 shadow-warm-xs'
+                : 'bg-white border-[#E8D8D2] hover:border-[#EA717B]/60 hover:shadow-warm-sm shadow-warm-xs'
             }`}
           >
             <div className="flex items-center justify-between">
@@ -1046,17 +1084,18 @@ export const Recommendations: React.FC = () => {
             </div>
             <div>
               <h3 className="font-extrabold text-[#3B2522] text-xs">{t('recommendations.modeNatural', '✍️ Natural Language / Voice')}</h3>
-              <p className="text-[11px] text-[#765E59] mt-0.5">{t('recommendations.modeNaturalDesc', 'Describe your situation in everyday sentences or Hindi.')}</p>
+              <p className="text-[11px] text-[#765E59] mt-0.5 leading-relaxed">{t('recommendations.modeNaturalDesc', 'Describe your situation in everyday sentences or Hindi.')}</p>
             </div>
           </button>
 
+          {/* Card 3: Quick Override Form */}
           <button
             type="button"
             onClick={() => handleInputModeChange('FORM')}
-            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-2 ${
+            className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between space-y-3 cursor-pointer ${
               inputMode === 'FORM'
                 ? 'bg-[#FFF4EC] border-[#EA717B] ring-2 ring-[#EA717B]/20 shadow-warm-sm'
-                : 'bg-white border-[#E8D8D2] hover:border-[#F7AE56]/60 shadow-warm-xs'
+                : 'bg-white border-[#E8D8D2] hover:border-[#EA717B]/60 hover:shadow-warm-sm shadow-warm-xs'
             }`}
           >
             <div className="flex items-center justify-between">
@@ -1067,11 +1106,102 @@ export const Recommendations: React.FC = () => {
             </div>
             <div>
               <h3 className="font-extrabold text-[#3B2522] text-xs">{t('recommendations.modeQuickForm', '📋 Quick Override Form')}</h3>
-              <p className="text-xs text-[#765E59] mt-0.5">{t('recommendations.modeQuickFormDesc', 'Temporarily simulate another age, category, or loan amount.')}</p>
+              <p className="text-xs text-[#765E59] mt-0.5 leading-relaxed">{t('recommendations.modeQuickFormDesc', 'Temporarily simulate another age, category, or loan amount.')}</p>
             </div>
           </button>
         </div>
       </div>
+
+      {/* INPUT INTERFACE 0: SAVED CITIZEN PROFILE INTERFACE */}
+      {inputMode === 'PROFILE' && canonicalProfile && (
+        <div className="bg-white rounded-2xl border border-[#E8D8D2] shadow-warm-xs p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#E8D8D2]/60">
+            <div className="flex items-center gap-2">
+              <User className="w-5 h-5 text-[#EA717B]" />
+              <div>
+                <h2 className="text-base sm:text-lg font-bold text-[#3B2522]">
+                  {t('recommendations.savedProfileTitle', 'Authoritative Saved Citizen Profile')}
+                </h2>
+                <p className="text-xs text-[#765E59]">
+                  {t('recommendations.savedProfileSub', 'Evaluates schemes deterministically using your saved demographic and economic profile.')}
+                </p>
+              </div>
+            </div>
+
+            <Link
+              to="/profile?redirect=/recommendations"
+              className="text-xs font-bold text-[#EA717B] hover:text-[#d65f69] flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF4EC] border border-[#FFD0CA] transition"
+            >
+              <span>{t('recommendations.editProfile', 'Edit in Profile')}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            <div className="bg-[#FFFBF0]/70 p-3 rounded-xl border border-[#E8D8D2]">
+              <span className="text-[10px] uppercase font-bold text-[#765E59] block">Age</span>
+              <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
+                {canonicalProfile.age ? `${canonicalProfile.age} yrs` : 'Unspecified'}
+              </span>
+            </div>
+
+            <div className="bg-[#FFFBF0]/70 p-3 rounded-xl border border-[#E8D8D2]">
+              <span className="text-[10px] uppercase font-bold text-[#765E59] block">Gender</span>
+              <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm capitalize">
+                {canonicalProfile.gender ? canonicalProfile.gender.toLowerCase() : 'Unspecified'}
+              </span>
+            </div>
+
+            <div className="bg-[#FFFBF0]/70 p-3 rounded-xl border border-[#E8D8D2]">
+              <span className="text-[10px] uppercase font-bold text-[#765E59] block">State</span>
+              <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm truncate block" title={canonicalProfile.state || 'All India'}>
+                {canonicalProfile.state ? canonicalProfile.state.replace(/_/g, ' ') : 'All India'}
+              </span>
+            </div>
+
+            <div className="bg-[#FFFBF0]/70 p-3 rounded-xl border border-[#E8D8D2]">
+              <span className="text-[10px] uppercase font-bold text-[#765E59] block">Category</span>
+              <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
+                {canonicalProfile.social_category || 'General'}
+              </span>
+            </div>
+
+            <div className="bg-[#FFFBF0]/70 p-3 rounded-xl border border-[#E8D8D2]">
+              <span className="text-[10px] uppercase font-bold text-[#765E59] block">{t('recommendations.annualIncomeLabel', 'Annual Income')}</span>
+              <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
+                {canonicalProfile.annual_income
+                  ? `₹${canonicalProfile.annual_income.toLocaleString('en-IN')}`
+                  : 'Unspecified'}
+              </span>
+            </div>
+
+            <div className="bg-[#FFFBF0]/70 p-3 rounded-xl border border-[#E8D8D2]">
+              <span className="text-[10px] uppercase font-bold text-[#765E59] block">{t('recommendations.projectSectorLabel', 'Project / Sector')}</span>
+              <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm truncate block" title={canonicalProfile.sector || 'MSME'}>
+                {canonicalProfile.sector ? canonicalProfile.sector.replace(/_/g, ' ') : 'Standard Unit'}
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => handleFindSchemes()}
+              disabled={isLoading}
+              className="w-full btn-primary min-h-[44px] justify-center text-sm font-bold shadow-warm-sm transition flex items-center gap-2 bg-[#EA717B] hover:bg-[#d65f69] text-white"
+            >
+              {isLoading ? (
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>{t('recommendations.evaluateProfileBtn', 'Evaluate Schemes with Saved Profile')}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* INPUT INTERFACE 1: TEXT INPUT (Warm Theme) */}
       {inputMode === 'TYPE' && (
@@ -1428,7 +1558,7 @@ export const Recommendations: React.FC = () => {
                 </div>
 
                 <div className="bg-white p-2.5 rounded-xl border border-[#E8D8D2] text-xs shadow-warm-xs">
-                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">Annual Income</span>
+                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">{t('recommendations.annualIncomeLabel', 'Annual Income')}</span>
                   <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
                     {extractionResult.extracted_profile.annual_income
                       ? `₹${extractionResult.extracted_profile.annual_income.toLocaleString('en-IN')}`
@@ -1437,7 +1567,7 @@ export const Recommendations: React.FC = () => {
                 </div>
 
                 <div className="bg-white p-2.5 rounded-xl border border-[#E8D8D2] text-xs shadow-warm-xs">
-                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">Project Cost / Loan</span>
+                  <span className="text-[10px] uppercase font-bold text-[#F7AE56] block">{t('recommendations.projectCostLabel', 'Project Cost / Loan')}</span>
                   <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm">
                     {extractionResult.extracted_profile.project_cost
                       ? `₹${extractionResult.extracted_profile.project_cost.toLocaleString('en-IN')}`
@@ -1611,173 +1741,163 @@ export const Recommendations: React.FC = () => {
                 return (
                   <div
                     key={rec.scheme_id || idx}
-                    className={`bg-white rounded-2xl border shadow-warm-xs p-4 sm:p-5 hover:shadow-warm-md transition space-y-4 ${
+                    className={`bg-white rounded-3xl border shadow-warm-xs p-6 sm:p-7 hover:shadow-warm-md hover:-translate-y-0.5 transition-all duration-200 space-y-5 ${
                       isEligible
-                        ? 'border-emerald-200 ring-1 ring-emerald-100'
+                        ? 'border-emerald-200/90 ring-1 ring-emerald-100'
                         : isConditional
-                        ? 'border-[#FFD0CA] ring-1 ring-[#FFD0CA]/50'
+                        ? 'border-[#FFD0CA] ring-1 ring-[#FFD0CA]/60'
                         : isInsufficient
-                        ? 'border-[#F7AE56]/40 ring-1 ring-[#F7AE56]/20'
-                        : 'border-[#E8D8D2] opacity-95'
+                        ? 'border-[#F7AE56]/40 ring-1 ring-[#F7AE56]/30'
+                        : 'border-[#E8D8D2]'
                     }`}
                   >
-                    {/* ── 1. SCHEME HEADER & COMPACT FIT SCORE ── */}
-                    <div className="flex items-start gap-3">
-                      {/* Rank Badge on Left */}
-                      <div
-                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-warm-xs ${
-                          isEligible
-                            ? 'bg-emerald-600 text-white'
-                            : isConditional
-                            ? 'bg-[#4A2525] text-white'
-                            : isInsufficient
-                            ? 'bg-[#F7AE56] text-[#3B2522]'
-                            : 'bg-[#765E59] text-white'
-                        }`}
-                      >
-                        #{rec.rank || idx + 1}
-                      </div>
-
-                      {/* Main Header Info Area */}
-                      <div className="flex-1 min-w-0 space-y-1.5">
-                        <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
-                          <h3 className="text-sm sm:text-base font-extrabold text-[#3B2522] leading-snug hover:text-[#EA717B] transition">
-                            <Link to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}>
-                              {rec.scheme_name}
-                            </Link>
-                          </h3>
-                        </div>
-
-                        {/* Short Purpose / Objective */}
-                        {(rec.purpose || rec.short_description || rec.financial_assistance_summary) && (
-                          <p className="text-xs sm:text-sm text-[#765E59] line-clamp-2 leading-relaxed">
-                            {rec.purpose || rec.short_description || rec.financial_assistance_summary}
-                          </p>
-                        )}
-
-                        {/* Secondary Details: Scheme ID & Ministry */}
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-[#765E59] pt-0.5">
-                          <span className="font-mono text-xs bg-[#FFFBF0] px-2 py-0.5 rounded border border-[#E8D8D2] text-[#765E59] font-semibold">
-                            {rec.scheme_id}
+                    {/* ── 1. SCHEME HEADER & BADGES ── */}
+                    <div className="space-y-3">
+                      {/* Top Meta Tag Row */}
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="bg-[#FFF4EC] text-[#4A2525] border border-[#FFD0CA] text-[11px] font-bold px-3 py-0.5 rounded-full truncate max-w-xs">
+                            {rec.ministry || 'Central Ministry'}
+                          </span>
+                          <span className="font-mono text-xs text-[#765E59] bg-[#FFFBF0] px-2.5 py-0.5 rounded-full border border-[#E8D8D2]">
+                            ID: {rec.scheme_id}
                           </span>
                           {rec.is_direct_portal_scheme && (
-                            <span className="text-xs font-bold bg-[#FFD0CA] text-[#4A2525] px-2.5 py-0.5 rounded-full">
+                            <span className="text-[11px] font-bold bg-[#FFD0CA] text-[#4A2525] px-2.5 py-0.5 rounded-full">
                               Direct Govt Portal
                             </span>
                           )}
-                          {rec.ministry && (
-                            <span className="hidden sm:inline text-xs text-[#765E59] font-medium truncate max-w-sm">
-                              • {rec.ministry}
-                            </span>
-                          )}
                         </div>
 
-                        {/* Eligibility + Compact Fit Badges directly alongside */}
-                        <div className="flex flex-wrap items-center gap-2 pt-1">
-                          {isEligible && (
-                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              <span>✓ {t('recommendations.tabEligible', 'Eligible')}</span>
-                            </span>
-                          )}
-                          {isConditional && (
-                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#FFD0CA] text-[#4A2525] border border-[#EA717B]/40">
-                              <ShieldCheck className="w-3.5 h-3.5 text-[#EA717B]" />
-                              <span>⚡ {t('recommendations.conditional', 'Conditional')}</span>
-                            </span>
-                          )}
-                          {isInsufficient && (
-                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40">
-                              <AlertTriangle className="w-3.5 h-3.5 text-[#F7AE56]" />
-                              <span>⚠ {t('recommendations.moreInfoRequired', 'More Info Needed')}</span>
-                            </span>
-                          )}
-                          {isIneligible && (
-                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#EA717B]/15 text-[#4A2525] border border-[#EA717B]/30">
-                              <XCircle className="w-3.5 h-3.5 text-[#EA717B]" />
-                              <span>✕ {t('recommendations.notEligible', 'Not Eligible')}</span>
-                            </span>
-                          )}
+                        {/* Rank Badge on Right */}
+                        <div
+                          className={`px-3 py-0.5 rounded-full font-black text-xs flex items-center gap-1 shadow-warm-xs ${
+                            isEligible
+                              ? 'bg-[#EAF4EE] text-[#2D6A4F] border border-[#2D6A4F]/20'
+                              : isConditional
+                              ? 'bg-[#FFF4EC] text-[#4A2525] border border-[#FFD0CA]'
+                              : isInsufficient
+                              ? 'bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40'
+                              : 'bg-[#FFFBF0] text-[#765E59] border border-[#E8D8D2]'
+                          }`}
+                        >
+                          <span>Rank #{rec.rank || idx + 1}</span>
+                        </div>
+                      </div>
 
-                          {/* Compact Fit Score Badge */}
-                          <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-extrabold bg-[#FFF4EC] text-[#3B2522] border border-[#E8D8D2]">
-                            <span className="font-mono text-[#EA717B] font-black">{matchPct}% Fit</span>
-                            <span className="text-xs font-medium text-[#765E59]">• {matchLabel}</span>
+                      {/* Main Scheme Title */}
+                      <h3 className="text-lg sm:text-xl font-black text-[#3B2522] leading-snug hover:text-[#EA717B] transition">
+                        <Link to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}>
+                          {rec.scheme_name}
+                        </Link>
+                      </h3>
+
+                      {/* Purpose / Objective Description */}
+                      {(rec.purpose || rec.short_description || rec.financial_assistance_summary) && (
+                        <p className="text-xs sm:text-sm text-[#765E59] line-clamp-2 leading-relaxed font-normal">
+                          {rec.purpose || rec.short_description || rec.financial_assistance_summary}
+                        </p>
+                      )}
+
+                      {/* Eligibility + Compact Fit Badges Row */}
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                        {isEligible && (
+                          <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-bold bg-[#EAF4EE] text-[#2D6A4F] border border-[#2D6A4F]/20">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#2D6A4F]" />
+                            <span>{t('recommendations.tabEligible', 'Eligible')}</span>
                           </span>
+                        )}
+                        {isConditional && (
+                          <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-bold bg-[#FFF4EC] text-[#4A2525] border border-[#FFD0CA]">
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#EA717B]" />
+                            <span>{t('recommendations.conditional', 'Conditional')}</span>
+                          </span>
+                        )}
+                        {isInsufficient && (
+                          <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-bold bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40">
+                            <AlertTriangle className="w-3.5 h-3.5 text-[#F7AE56]" />
+                            <span>{t('recommendations.moreInfoRequired', 'More Info Needed')}</span>
+                          </span>
+                        )}
+                        {isIneligible && (
+                          <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-bold bg-[#EA717B]/15 text-[#4A2525] border border-[#EA717B]/30">
+                            <XCircle className="w-3.5 h-3.5 text-[#EA717B]" />
+                            <span>{t('recommendations.notEligible', 'Not Eligible')}</span>
+                          </span>
+                        )}
 
-                          {/* Scheme Financial Health / Fit Badge */}
-                          {rec.is_credit_scheme === false || rec.financial_suitability === 'NOT_APPLICABLE' ? (
-                            <span
-                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-[#FFFBF0] text-[#765E59] border border-[#E8D8D2]"
-                              title="Non-credit scheme: Direct subsidy/welfare assistance with zero debt repayment obligations"
-                            >
-                              <span>{t('recommendations.fitNonCredit', 'Financial Fit: Non-Credit Scheme')}</span>
-                            </span>
-                          ) : rec.financial_suitability === 'STRONG_FIT' ? (
-                            <span
-                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-900 border border-emerald-300"
-                              title={rec.financial_suitability_reason || 'Comfortable debt service capacity'}
-                            >
-                              <span>{t('recommendations.fitComfortable', '🟢 Financial Fit: Comfortable')}</span>
-                            </span>
-                          ) : rec.financial_suitability === 'POSSIBLE_FIT' ? (
-                            <span
-                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40"
-                              title={rec.financial_suitability_reason || 'Manageable repayment burden'}
-                            >
-                              <span>{t('recommendations.fitManageable', '🟡 Financial Fit: Manageable')}</span>
-                            </span>
-                          ) : rec.financial_suitability === 'FINANCIALLY_UNSUITABLE' ? (
-                            <span
-                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-[#EA717B]/15 text-[#4A2525] border border-[#EA717B]/30"
-                              title={rec.financial_suitability_reason || 'High repayment burden detected'}
-                            >
-                              <span>{t('recommendations.fitHighBurden', '🔴 Financial Fit: High Repayment Burden')}</span>
-                            </span>
-                          ) : rec.financial_suitability_reason && rec.financial_suitability_reason.includes('specified') ? (
-                            <span
-                              className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-[#FFFBF0] text-[#765E59] border border-[#E8D8D2]"
-                              title={rec.financial_suitability_reason}
-                            >
-                              <span>{t('recommendations.fitUnspecified', '⚪ Financial Fit: Lender Rate Unspecified')}</span>
-                            </span>
-                          ) : null}
-                        </div>
+                        {/* Compact Fit Score Badge */}
+                        <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-extrabold bg-[#FFF4EC] text-[#3B2522] border border-[#E8D8D2]">
+                          <span className="font-mono text-[#EA717B] font-black">{matchPct}% Fit</span>
+                          <span className="text-xs font-medium text-[#765E59]">• {matchLabel}</span>
+                        </span>
+
+                        {/* Scheme Financial Health / Fit Badge */}
+                        {rec.is_credit_scheme === false || rec.financial_suitability === 'NOT_APPLICABLE' ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full font-bold bg-[#FFFBF0] text-[#765E59] border border-[#E8D8D2]"
+                            title="Non-credit scheme: Direct subsidy/welfare assistance with zero debt repayment obligations"
+                          >
+                            <span>{t('recommendations.fitNonCredit', 'Non-Credit Scheme')}</span>
+                          </span>
+                        ) : rec.financial_suitability === 'STRONG_FIT' ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full font-bold bg-[#EAF4EE] text-[#2D6A4F] border border-[#2D6A4F]/20"
+                            title={rec.financial_suitability_reason || 'Comfortable debt service capacity'}
+                          >
+                            <span>🟢 Comfortable Fit</span>
+                          </span>
+                        ) : rec.financial_suitability === 'POSSIBLE_FIT' ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full font-bold bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40"
+                            title={rec.financial_suitability_reason || 'Manageable repayment burden'}
+                          >
+                            <span>🟡 Manageable Fit</span>
+                          </span>
+                        ) : rec.financial_suitability === 'FINANCIALLY_UNSUITABLE' ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-[11px] px-3 py-1 rounded-full font-bold bg-[#EA717B]/15 text-[#4A2525] border border-[#EA717B]/30"
+                            title={rec.financial_suitability_reason || 'High repayment burden detected'}
+                          >
+                            <span>🔴 High Repayment Burden</span>
+                          </span>
+                        ) : null}
                       </div>
                     </div>
 
-                    {/* ── VERIFIED FINANCIAL CATEGORY & ASSISTANCE OVERVIEW ── */}
-                    <div className="bg-[#FFFBF0] rounded-xl p-3 sm:p-3.5 border border-[#E8D8D2] grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                      <div>
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-[#765E59] block">
-                          {t('recommendations.financialCategoryLabel', 'Financial Category')}
+                    {/* ── 2. QUICK FACTS 4-PARAMETER GRID (Modeled after SchemeDetail.tsx) ── */}
+                    <div className="bg-[#FFF4EC]/40 rounded-2xl p-4 border border-[#E8D8D2] grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                      <div className="bg-white/80 p-3 rounded-xl border border-[#E8D8D2]/70 space-y-0.5">
+                        <span className="text-[10px] uppercase font-bold text-[#765E59] block">
+                          {t('recommendations.financialCategoryLabel', 'Assistance Category')}
                         </span>
-                        <span className="font-bold text-[#3B2522] text-xs sm:text-[13px] truncate block mt-0.5" title={formatFinancialCategory(rec.financial_category)}>
+                        <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm truncate block" title={formatFinancialCategory(rec.financial_category)}>
                           {formatFinancialCategory(rec.financial_category)}
                         </span>
                       </div>
 
-                      <div>
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-[#765E59] block">
-                          {rec.max_loan_amount ? 'Max Assistance Limit' : rec.grant_amount ? 'Grant Amount' : 'Assistance Mode'}
+                      <div className="bg-white/80 p-3 rounded-xl border border-[#E8D8D2]/70 space-y-0.5">
+                        <span className="text-[10px] uppercase font-bold text-[#765E59] block">
+                          {rec.max_loan_amount ? 'Max Assistance / Loan' : rec.grant_amount ? 'Grant Amount' : 'Assistance Mode'}
                         </span>
-                        <span className="font-bold text-[#3B2522] font-mono text-xs sm:text-[13px] block mt-0.5">
+                        <span className="font-black text-[#3B2522] font-mono text-xs sm:text-sm block">
                           {rec.max_loan_amount
                             ? `₹${rec.max_loan_amount >= 100000 ? `${(rec.max_loan_amount / 100000).toFixed(1)} Lakh` : rec.max_loan_amount.toLocaleString('en-IN')}`
                             : rec.grant_amount
                             ? `₹${rec.grant_amount.toLocaleString('en-IN')}`
                             : rec.is_credit_scheme === false
                             ? 'Direct Benefit'
-                            : 'Per Scheme Rules'}
+                            : 'Per Guidelines'}
                         </span>
                       </div>
 
-                      <div>
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-[#765E59] block">
+                      <div className="bg-white/80 p-3 rounded-xl border border-[#E8D8D2]/70 space-y-0.5">
+                        <span className="text-[10px] uppercase font-bold text-[#765E59] block">
                           {rec.interest_rate !== undefined && rec.interest_rate !== null ? 'Interest Rate' : rec.subsidy_percentage ? 'Capital Subsidy' : 'Repayment Period'}
                         </span>
-                        <span className="font-bold text-emerald-700 font-mono text-xs sm:text-[13px] block mt-0.5">
+                        <span className="font-black text-[#2D6A4F] font-mono text-xs sm:text-sm block">
                           {rec.interest_rate !== undefined && rec.interest_rate !== null
-                            ? `${rec.interest_rate > 0 ? `${rec.interest_rate}% p.a.` : 'Concessional / 0%'}`
+                            ? `${rec.interest_rate > 0 ? `${rec.interest_rate}% p.a.` : '0% (Interest-Free)'}`
                             : rec.subsidy_percentage
                             ? `${rec.subsidy_percentage}% of Project`
                             : rec.repayment_period_max_months
@@ -1786,30 +1906,30 @@ export const Recommendations: React.FC = () => {
                         </span>
                       </div>
 
-                      <div>
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold text-[#765E59] block">
-                          {rec.estimated_monthly_installment ? 'Est. Repayment EMI' : rec.available_subsidy_amount ? 'Available Subsidy' : 'Verification'}
+                      <div className="bg-white/80 p-3 rounded-xl border border-[#E8D8D2]/70 space-y-0.5">
+                        <span className="text-[10px] uppercase font-bold text-[#765E59] block">
+                          {rec.estimated_monthly_installment ? 'Est. Monthly EMI' : rec.available_subsidy_amount ? 'Available Subsidy' : 'Source Verification'}
                         </span>
-                        <span className="font-bold text-[#3B2522] font-mono text-xs sm:text-[13px] block mt-0.5">
+                        <span className="font-black text-[#3B2522] font-mono text-xs sm:text-sm block">
                           {rec.estimated_monthly_installment
                             ? `₹${Math.round(rec.estimated_monthly_installment).toLocaleString('en-IN')}/mo`
                             : rec.available_subsidy_amount
                             ? `₹${Math.round(rec.available_subsidy_amount).toLocaleString('en-IN')}`
-                            : 'Verified Authoritative'}
+                            : 'Gazette Verified'}
                         </span>
                       </div>
                     </div>
 
-                    {/* ── 2. WHY YOU QUALIFY / CRITERIA SUMMARY ── */}
+                    {/* ── 3. WHY YOU QUALIFY / CRITERIA SUMMARY ── */}
                     {isEligible && (
-                      <div className="bg-emerald-50/70 rounded-xl p-3 sm:p-4 border border-emerald-200/80 text-xs space-y-2">
+                      <div className="bg-[#EAF4EE] rounded-2xl p-4 border border-[#2D6A4F]/20 text-xs space-y-2">
                         <div className="flex items-center justify-between">
-                          <div className="font-extrabold text-emerald-950 flex items-center gap-1.5 text-xs sm:text-sm">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <div className="font-extrabold text-[#2D6A4F] flex items-center gap-1.5 text-xs sm:text-sm">
+                            <CheckCircle2 className="w-4 h-4 text-[#2D6A4F] shrink-0" />
                             <span>{t('recommendations.whyQualifyTitle', 'Why You Qualify For This Scheme')}</span>
                           </div>
                           {allEligibleReasons.length > 0 && (
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-200">
+                            <span className="text-[10px] font-bold text-[#2D6A4F] bg-white px-2.5 py-0.5 rounded-full border border-[#2D6A4F]/20">
                               {allEligibleReasons.length} Criteria Passed
                             </span>
                           )}
@@ -1819,7 +1939,7 @@ export const Recommendations: React.FC = () => {
                         <ul className="space-y-1.5 pt-0.5">
                           {defaultEligible.map((reason, rIdx) => (
                             <li key={rIdx} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
-                              <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+                              <span className="text-[#2D6A4F] font-bold shrink-0 mt-0.5">✓</span>
                               <span>{reason}</span>
                             </li>
                           ))}
@@ -1827,10 +1947,10 @@ export const Recommendations: React.FC = () => {
 
                         {/* Expanded remaining reasons */}
                         {isExpanded && remainingEligible.length > 0 && (
-                          <ul className="space-y-1.5 pt-1 border-t border-emerald-200/60">
+                          <ul className="space-y-1.5 pt-1 border-t border-[#2D6A4F]/20">
                             {remainingEligible.map((reason, rIdx) => (
                               <li key={`rem-${rIdx}`} className="flex items-start gap-2 text-[#3B2522] text-[11px] sm:text-xs leading-relaxed">
-                                <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+                                <span className="text-[#2D6A4F] font-bold shrink-0 mt-0.5">✓</span>
                                 <span>{reason}</span>
                               </li>
                             ))}
@@ -1838,7 +1958,7 @@ export const Recommendations: React.FC = () => {
                         )}
 
                         {/* Non-guaranteed approval disclaimer */}
-                        <p className="text-[11px] text-[#765E59] italic pt-1 border-t border-emerald-200/50">
+                        <p className="text-[11px] text-[#765E59] italic pt-1 border-t border-[#2D6A4F]/20">
                           Satisfies statutory eligibility criteria. Final loan sanction and disbursement depend on channel partner verification and underwriting. Approval is not guaranteed.
                         </p>
 
@@ -1848,26 +1968,26 @@ export const Recommendations: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => toggleDetails(rec.scheme_id)}
-                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-white/90 hover:bg-white border border-emerald-200 text-xs font-semibold text-emerald-900 transition shadow-warm-xs focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
+                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/90 hover:bg-white border border-[#2D6A4F]/30 text-xs font-semibold text-[#2D6A4F] transition shadow-warm-xs focus:outline-hidden"
                               aria-expanded={isExpanded}
                             >
                               <span className="flex items-center gap-1.5">
-                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                <ShieldCheck className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
                                 <span>
                                   {isExpanded
                                     ? t('recommendations.hideBreakdown', 'Hide Criteria Breakdown')
                                     : t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
                                 </span>
                                 {!isExpanded && remainingEligible.length > 0 && (
-                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EAF4EE] text-[#2D6A4F] border border-[#2D6A4F]/20">
                                     +{remainingEligible.length} more
                                   </span>
                                 )}
                               </span>
                               {isExpanded ? (
-                                <ChevronUp className="w-4 h-4 text-emerald-700" />
+                                <ChevronUp className="w-4 h-4 text-[#2D6A4F]" />
                               ) : (
-                                <ChevronDown className="w-4 h-4 text-emerald-700" />
+                                <ChevronDown className="w-4 h-4 text-[#2D6A4F]" />
                               )}
                             </button>
                           </div>
@@ -1877,15 +1997,15 @@ export const Recommendations: React.FC = () => {
 
                     {/* ── CONDITIONAL STATUTORY ELIGIBILITY ── */}
                     {isConditional && (
-                      <div className="bg-[#FFF4EC] rounded-xl p-3 sm:p-4 border border-[#FFD0CA] text-xs space-y-2 text-[#3B2522]">
+                      <div className="bg-[#FFF4EC] rounded-2xl p-4 border border-[#FFD0CA] text-xs space-y-2 text-[#3B2522]">
                         <div className="flex items-center justify-between">
                           <div className="font-extrabold text-[#4A2525] flex items-center gap-1.5 text-xs sm:text-sm">
                             <ShieldCheck className="w-4 h-4 text-[#EA717B] shrink-0" />
                             <span>{t('recommendations.statutoryConditionsRequired', 'Statutory Conditions Required')}</span>
                           </div>
                           {allConditionalReasons.length > 0 && (
-                            <span className="text-[10px] font-bold text-[#4A2525] bg-[#FFD0CA] px-2 py-0.5 rounded-full border border-[#EA717B]/30">
-                              {allConditionalReasons.length} Statutory Condition{allConditionalReasons.length > 1 ? 's' : ''}
+                            <span className="text-[10px] font-bold text-[#4A2525] bg-white px-2.5 py-0.5 rounded-full border border-[#FFD0CA]">
+                              {allConditionalReasons.length} Condition{allConditionalReasons.length > 1 ? 's' : ''}
                             </span>
                           )}
                         </div>
@@ -1919,7 +2039,7 @@ export const Recommendations: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => toggleDetails(rec.scheme_id)}
-                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-white/90 hover:bg-white border border-[#FFD0CA] text-xs font-semibold text-[#4A2525] transition shadow-warm-xs focus:outline-hidden focus:ring-2 focus:ring-[#EA717B]/20"
+                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/90 hover:bg-white border border-[#FFD0CA] text-xs font-semibold text-[#4A2525] transition shadow-warm-xs focus:outline-hidden"
                               aria-expanded={isExpanded}
                             >
                               <span className="flex items-center gap-1.5">
@@ -1930,7 +2050,7 @@ export const Recommendations: React.FC = () => {
                                     : t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
                                 </span>
                                 {!isExpanded && remainingConditional.length > 0 && (
-                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#FFD0CA] text-[#4A2525] border border-[#EA717B]/30">
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#FFD0CA] text-[#4A2525]">
                                     +{remainingConditional.length} more
                                   </span>
                                 )}
@@ -1947,15 +2067,15 @@ export const Recommendations: React.FC = () => {
                     )}
 
                     {isIneligible && (
-                      <div className="bg-[#EA717B]/10 rounded-xl p-3 sm:p-4 border border-[#EA717B]/20 text-xs space-y-2 text-[#3B2522]">
+                      <div className="bg-[#EA717B]/10 rounded-2xl p-4 border border-[#EA717B]/20 text-xs space-y-2 text-[#3B2522]">
                         <div className="flex items-center justify-between">
                           <div className="font-extrabold text-[#4A2525] flex items-center gap-1.5 text-xs sm:text-sm">
                             <XCircle className="w-4 h-4 text-[#EA717B] shrink-0" />
                             <span>{t('recommendations.statutoryCriteriaNotMet', 'Statutory Criteria Not Met')}</span>
                           </div>
                           {allFailedReasons.length > 0 && (
-                            <span className="text-[10px] font-bold text-[#EA717B] bg-white px-2 py-0.5 rounded-full border border-[#EA717B]/30">
-                              {allFailedReasons.length} Unmet Criteria
+                            <span className="text-[10px] font-bold text-[#EA717B] bg-white px-2.5 py-0.5 rounded-full border border-[#EA717B]/30">
+                              {allFailedReasons.length} Unmet
                             </span>
                           )}
                         </div>
@@ -1989,7 +2109,7 @@ export const Recommendations: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => toggleDetails(rec.scheme_id)}
-                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-white/90 hover:bg-white border border-[#EA717B]/30 text-xs font-semibold text-[#4A2525] transition shadow-warm-xs focus:outline-hidden focus:ring-2 focus:ring-[#EA717B]/20"
+                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/90 hover:bg-white border border-[#EA717B]/30 text-xs font-semibold text-[#4A2525] transition shadow-warm-xs focus:outline-hidden"
                               aria-expanded={isExpanded}
                             >
                               <span className="flex items-center gap-1.5">
@@ -2000,7 +2120,7 @@ export const Recommendations: React.FC = () => {
                                     : t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
                                 </span>
                                 {!isExpanded && remainingFailed.length > 0 && (
-                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EA717B]/20 text-[#4A2525] border border-[#EA717B]/30">
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EA717B]/20 text-[#4A2525]">
                                     +{remainingFailed.length} more
                                   </span>
                                 )}
@@ -2017,7 +2137,7 @@ export const Recommendations: React.FC = () => {
                     )}
 
                     {isInsufficient && (
-                      <div className="bg-[#F7AE56]/15 rounded-xl p-3 sm:p-4 border border-[#F7AE56]/30 text-xs space-y-2 text-[#3B2522]">
+                      <div className="bg-[#F7AE56]/15 rounded-2xl p-4 border border-[#F7AE56]/30 text-xs space-y-2 text-[#3B2522]">
                         <div className="flex items-center justify-between">
                           <div className="font-extrabold text-[#3B2522] flex items-center gap-1.5 text-xs sm:text-sm">
                             <AlertTriangle className="w-4 h-4 text-[#F7AE56] shrink-0" />
@@ -2025,7 +2145,7 @@ export const Recommendations: React.FC = () => {
                           </div>
                           <Link
                             to="/profile"
-                            className="bg-[#EA717B] hover:bg-[#d65f69] text-white font-bold text-[10px] sm:text-[11px] px-2.5 py-1 rounded-lg shadow-warm-xs transition flex items-center gap-1"
+                            className="bg-[#EA717B] hover:bg-[#d65f69] text-white font-bold text-[10px] sm:text-[11px] px-3 py-1 rounded-xl shadow-warm-xs transition flex items-center gap-1"
                           >
                             <User className="w-3 h-3" />
                             <span>{t('recommendations.completeProfileBtn', 'Complete Profile →')}</span>
@@ -2061,7 +2181,7 @@ export const Recommendations: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => toggleDetails(rec.scheme_id)}
-                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-lg bg-white/90 hover:bg-white border border-[#F7AE56]/30 text-xs font-semibold text-[#3B2522] transition shadow-warm-xs focus:outline-hidden focus:ring-2 focus:ring-[#F7AE56]/20"
+                              className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/90 hover:bg-white border border-[#F7AE56]/30 text-xs font-semibold text-[#3B2522] transition shadow-warm-xs focus:outline-hidden"
                               aria-expanded={isExpanded}
                             >
                               <span className="flex items-center gap-1.5">
@@ -2072,7 +2192,7 @@ export const Recommendations: React.FC = () => {
                                     : t('recommendations.viewAllCriteria', 'View Criteria Breakdown')}
                                 </span>
                                 {!isExpanded && remainingMissing.length > 0 && (
-                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#F7AE56]/20 text-[#3B2522] border border-[#F7AE56]/40">
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#F7AE56]/20 text-[#3B2522]">
                                     +{remainingMissing.length} more
                                   </span>
                                 )}
@@ -2088,9 +2208,9 @@ export const Recommendations: React.FC = () => {
                       </div>
                     )}
 
-                    {/* ── 3. COLLAPSIBLE CRITERIA BREAKDOWN ── */}
+                    {/* ── 4. COLLAPSIBLE CRITERIA BREAKDOWN ── */}
                     {isExpanded && rec.score_breakdown && rec.score_breakdown.length > 0 && (
-                      <div className="p-3 sm:p-4 bg-[#FFFBF0] rounded-xl border border-[#E8D8D2] text-xs space-y-3">
+                      <div className="p-4 bg-[#FFFBF0] rounded-2xl border border-[#E8D8D2] text-xs space-y-3">
                         <div className="flex items-center justify-between border-b border-[#E8D8D2] pb-2">
                           <span className="font-extrabold text-[#3B2522] text-xs sm:text-sm flex items-center gap-1.5">
                             <ShieldCheck className="w-4 h-4 text-[#EA717B]" />
@@ -2111,9 +2231,9 @@ export const Recommendations: React.FC = () => {
                             return (
                               <div
                                 key={bIdx}
-                                className={`p-2.5 rounded-lg border flex items-start justify-between gap-2.5 text-xs transition ${
+                                className={`p-2.5 rounded-xl border flex items-start justify-between gap-2.5 text-xs transition ${
                                   isMatch
-                                    ? 'bg-emerald-50/50 border-emerald-200 text-[#3B2522]'
+                                    ? 'bg-[#EAF4EE] border-[#2D6A4F]/20 text-[#3B2522]'
                                     : isUnmet
                                     ? 'bg-[#EA717B]/10 border-[#EA717B]/30 text-[#3B2522]'
                                     : 'bg-[#F7AE56]/10 border-[#F7AE56]/30 text-[#3B2522]'
@@ -2122,17 +2242,17 @@ export const Recommendations: React.FC = () => {
                                 <div className="space-y-0.5 min-w-0">
                                   <div className="flex flex-wrap items-center gap-1.5">
                                     {isMatch && (
-                                      <span className="inline-flex items-center text-xs font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
+                                      <span className="inline-flex items-center text-xs font-bold text-[#2D6A4F] bg-white px-2 py-0.5 rounded-full border border-[#2D6A4F]/20">
                                         ✓ Matched
                                       </span>
                                     )}
                                     {isUnmet && (
-                                      <span className="inline-flex items-center text-xs font-bold text-[#EA717B] bg-[#EA717B]/15 px-1.5 py-0.5 rounded">
+                                      <span className="inline-flex items-center text-xs font-bold text-[#EA717B] bg-white px-2 py-0.5 rounded-full border border-[#EA717B]/30">
                                         ! Unmet
                                       </span>
                                     )}
                                     {isPending && (
-                                      <span className="inline-flex items-center text-xs font-bold text-[#3B2522] bg-[#F7AE56]/20 px-1.5 py-0.5 rounded">
+                                      <span className="inline-flex items-center text-xs font-bold text-[#3B2522] bg-white px-2 py-0.5 rounded-full border border-[#F7AE56]/40">
                                         ○ Verification Needed
                                       </span>
                                     )}
@@ -2144,7 +2264,7 @@ export const Recommendations: React.FC = () => {
                                 </div>
 
                                 <div className="text-right shrink-0 font-mono text-xs pt-0.5">
-                                  <span className={`font-bold ${isMatch ? 'text-emerald-700' : isUnmet ? 'text-[#EA717B]' : 'text-[#F7AE56]'}`}>
+                                  <span className={`font-bold ${isMatch ? 'text-[#2D6A4F]' : isUnmet ? 'text-[#EA717B]' : 'text-[#F7AE56]'}`}>
                                     +{b.score.toFixed(1)}
                                   </span>
                                   <span className="text-[#765E59]/60"> / {b.max_weight.toFixed(1)}</span>
@@ -2161,7 +2281,7 @@ export const Recommendations: React.FC = () => {
                           </div>
                         )}
 
-                        {/* RAG Knowledge Citations & Grounded Explanation if loaded */}
+                        {/* RAG Knowledge Citations */}
                         {(() => {
                           const aiItem = aiResult?.recommendations?.find(
                             (a) => a.scheme_id === rec.scheme_id
@@ -2170,9 +2290,9 @@ export const Recommendations: React.FC = () => {
                           return (
                             <div className="pt-2.5 border-t border-[#E8D8D2] space-y-2">
                               {aiItem.ai_explanation && (
-                                <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-lg p-2.5 text-xs text-[#4A2525] space-y-1">
+                                <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-xl p-3 text-xs text-[#4A2525] space-y-1">
                                   <span className="font-bold flex items-center gap-1 text-[11px] text-[#EA717B] uppercase tracking-wider">
-                                    <Sparkles className="w-3 h-3 text-[#F7AE56]" /> Grounded Statutory Summary
+                                    <Sparkles className="w-3.5 h-3.5 text-[#F7AE56]" /> Grounded Statutory Summary
                                   </span>
                                   <p className="text-[11px] leading-relaxed text-[#765E59]">{aiItem.ai_explanation}</p>
                                 </div>
@@ -2207,72 +2327,80 @@ export const Recommendations: React.FC = () => {
                       <span>{t('howToApply.disclaimer', 'Eligibility guidance only. Final eligibility and approval are determined by the concerned government authority.')}</span>
                     </div>
 
-                    {/* ── 4. REDESIGNED COMPACT ACTION AREA (Warm Theme) ── */}
-                    <div className="pt-3 border-t border-[#E8D8D2]/60 flex flex-col gap-2.5">
+                    {/* ── 5. STRUCTURED ACTION BUTTON ROW (Modeled after SchemeDetail & PartnerFinancialHealth) ── */}
+                    <div className="pt-3 border-t border-[#E8D8D2] flex flex-col gap-2.5">
                       {/* Priority Tier 1: Primary Action & Direct View */}
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                        {officialUrl ? (
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                        <Link
+                          to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}
+                          className="inline-flex items-center justify-center gap-2 bg-[#EA717B] hover:bg-[#d65f69] text-white text-xs font-bold py-2.5 px-5 rounded-xl transition shadow-warm-xs flex-1 sm:flex-initial cursor-pointer"
+                        >
+                          <FileText className="w-4 h-4 shrink-0" />
+                          <span>{t('schemeCard.viewDetails', 'View Scheme Details')}</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+
+                        {officialUrl && (
                           <button
                             type="button"
                             onClick={() => openPortalModal(rec.scheme_name, officialUrl)}
-                            className="btn-primary btn-sm min-h-[40px] flex-1 flex items-center justify-center gap-2 font-bold shadow-warm-xs bg-[#EA717B] hover:bg-[#d65f69] text-white"
+                            className="inline-flex items-center justify-center gap-2 bg-[#FFF4EC] hover:bg-[#FFD0CA] text-[#4A2525] border border-[#FFD0CA] text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-warm-xs cursor-pointer"
                           >
                             <span>{t('howToApply.ctaPortal', 'Apply on Official Portal')}</span>
                             <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                           </button>
-                        ) : null}
-
-                        <Link
-                          to={`/schemes/${rec.scheme_id}?amount=${requestedAmount}`}
-                          className={`btn-secondary btn-sm min-h-[40px] flex items-center justify-center gap-2 font-semibold bg-[#FFD0CA] hover:bg-[#fca59d] text-[#4A2525] border-transparent ${
-                            officialUrl ? 'sm:flex-initial' : 'flex-1'
-                          }`}
-                        >
-                          <FileText className="w-4 h-4 text-[#4A2525] shrink-0" />
-                          <span>{t('schemeCard.viewDetails', 'View Details')}</span>
-                        </Link>
+                        )}
                       </div>
 
-                      {/* Priority Tier 2: Compact Cohesive Secondary Controls */}
-                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                      {/* Priority Tier 2: Secondary Tool Controls */}
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
                         {rec.is_credit_scheme !== false && (rec.max_loan_amount || rec.interest_rate !== undefined || rec.calculator_applicable !== false) ? (
                           <>
                             <Link
                               to={`/calculator?scheme=${rec.scheme_id}&loan=${rec.max_loan_amount || requestedAmount || 100000}`}
-                              className="btn-secondary btn-sm h-8 px-2.5 text-xs text-[#765E59] hover:text-[#EA717B] flex items-center gap-1.5 rounded-lg border-[#E8D8D2] font-semibold bg-white"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#765E59] hover:text-[#3B2522] rounded-xl border border-[#E8D8D2] font-semibold bg-white hover:bg-[#FFF4EC] transition shadow-warm-xs"
                               title="Open Scheme Financial Calculator"
                             >
-                              <CalcIcon className="w-3.5 h-3.5 text-[#765E59] shrink-0" />
-                              <span>{t('recommendations.calculateEmi', 'Calculate')}</span>
+                              <CalcIcon className="w-3.5 h-3.5 text-[#F7AE56] shrink-0" />
+                              <span>{t('recommendations.calculateEmi', 'Calculate EMI')}</span>
                             </Link>
 
                             <Link
                               to={`/calculator?tab=health&scheme=${rec.scheme_id}&loan=${rec.max_loan_amount || requestedAmount || 100000}`}
-                              className="btn-secondary btn-sm h-8 px-2.5 text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 flex items-center gap-1.5 rounded-lg border-emerald-200 font-bold"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#2D6A4F] bg-[#EAF4EE] hover:bg-[#d8ece0] rounded-xl border border-[#2D6A4F]/20 font-bold transition shadow-warm-xs"
                               title="Assess loan affordability and cashflow fit for this scheme"
                             >
-                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                              <span>{t('recommendations.checkFinancialHealth', 'Check Financial Health')}</span>
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+                              <span>{t('recommendations.checkFinancialHealth', 'Financial Health Fit')}</span>
                             </Link>
                           </>
                         ) : (
                           <Link
                             to={`/calculator?scheme=${rec.scheme_id}`}
-                            className="btn-secondary btn-sm h-8 px-2.5 text-xs text-[#765E59] hover:text-[#EA717B] flex items-center gap-1.5 rounded-lg border-[#E8D8D2] font-medium bg-white"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#765E59] hover:text-[#3B2522] rounded-xl border border-[#E8D8D2] font-semibold bg-white hover:bg-[#FFF4EC] transition shadow-warm-xs"
                             title="View Financial Assistance / Subsidy Guidelines"
                           >
-                            <CalcIcon className="w-3.5 h-3.5 text-[#765E59] shrink-0" />
-                            <span>{t('recommendations.calculateEmi', 'Calculate')}</span>
+                            <CalcIcon className="w-3.5 h-3.5 text-[#F7AE56] shrink-0" />
+                            <span>{t('recommendations.calculateEmi', 'Assistance Calculator')}</span>
                           </Link>
                         )}
 
                         <Link
                           to={`/channel-partners?scheme_id=${rec.scheme_id}&state=${canonicalProfile?.state || formState || ''}`}
-                          className="btn-secondary btn-sm h-8 px-2.5 text-xs text-[#765E59] hover:text-[#EA717B] flex items-center gap-1.5 rounded-lg border-[#E8D8D2] font-semibold bg-white"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#765E59] hover:text-[#3B2522] rounded-xl border border-[#E8D8D2] font-semibold bg-white hover:bg-[#FFF4EC] transition shadow-warm-xs"
                           title="Locate authorized banks and channel partners for this scheme"
                         >
-                          <MapPin className="w-3.5 h-3.5 text-[#765E59] shrink-0" />
+                          <MapPin className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
                           <span>{t('howToApply.ctaPartner', 'Find Nearby Partner')}</span>
+                        </Link>
+
+                        <Link
+                          to={`/financial-health/scheme/${rec.scheme_id}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#765E59] hover:text-[#EA717B] rounded-xl border border-[#E8D8D2] font-semibold bg-white hover:bg-[#FFF4EC] transition shadow-warm-xs"
+                          title={t('recommendations.partnerFinancials', 'Partner Financials')}
+                        >
+                          <BarChart3 className="w-3.5 h-3.5 text-[#EA717B] shrink-0" />
+                          <span>{t('recommendations.partnerFinancials', 'Partner Financials')}</span>
                         </Link>
 
                         <CompareButton

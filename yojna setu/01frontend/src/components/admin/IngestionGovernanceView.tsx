@@ -84,6 +84,25 @@ export const IngestionGovernanceView: React.FC<IngestionGovernanceViewProps> = (
   const handleTriggerSchedulerRun = async () => {
     setIsTriggering(true);
     setActionAlert(null);
+
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setTimeout(() => {
+        setIsTriggerModalOpen(false);
+        setActionAlert({
+          type: 'success',
+          text: `✨ [DEMO SANDBOX] Automated Gazette monitoring run simulated! Discovered: 3 staged updates, 2 source revisions. Production database preserved.`,
+        });
+        setIsTriggering(false);
+        setTimeout(() => setActionAlert(null), 8000);
+      }, 700);
+      return;
+    }
+
     try {
       const res = await adminApi.triggerSchedulerRun(forceUpdate);
       setIsTriggerModalOpen(false);
@@ -107,6 +126,24 @@ export const IngestionGovernanceView: React.FC<IngestionGovernanceViewProps> = (
   const handleRunDiscoveryBatch = async () => {
     setIsRunningDiscovery(true);
     setActionAlert(null);
+
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setTimeout(() => {
+        setActionAlert({
+          type: 'success',
+          text: `✨ [DEMO SANDBOX] Scheme discovery batch simulated in preview! Discovered: 12 schemes, Staged: 4, Filtered: 8.`,
+        });
+        setIsRunningDiscovery(false);
+        setTimeout(() => setActionAlert(null), 8000);
+      }, 700);
+      return;
+    }
+
     try {
       const res = await adminApi.runDiscoveryBatch({ max_candidates: 25 });
       setActionAlert({
@@ -129,6 +166,24 @@ export const IngestionGovernanceView: React.FC<IngestionGovernanceViewProps> = (
   const handleRunSource = async (sourceId: string) => {
     setRunningSourceId(sourceId);
     setActionAlert(null);
+
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setTimeout(() => {
+        setActionAlert({
+          type: 'success',
+          text: `✨ [DEMO SANDBOX] Ingestion pipeline for source '${sourceId}' simulated successfully (100% verified).`,
+        });
+        setRunningSourceId(null);
+        setTimeout(() => setActionAlert(null), 8000);
+      }, 700);
+      return;
+    }
+
     try {
       const res = await adminApi.runIngestion(sourceId);
       setActionAlert({

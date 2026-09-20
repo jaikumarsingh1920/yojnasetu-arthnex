@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { adminApi, AdminDashboardSummaryResponse, SchemeAuditItem } from '../api/adminApi';
+import { authApi } from '../api/authApi';
 import { SystemHealthCard } from '../components/admin/SystemHealthCard';
 import { RuleAuditTable } from '../components/admin/RuleAuditTable';
 import { DocumentAuditTable } from '../components/admin/DocumentAuditTable';
@@ -42,8 +43,19 @@ import {
   Cpu
 } from 'lucide-react';
 
-export const AdminDashboard: React.FC = () => {
+export interface AdminDashboardProps {
+  isDemoMode?: boolean;
+  onDemoLogout?: () => void;
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isDemoMode = false, onDemoLogout }) => {
   const { t } = useTranslation();
+  const isDemo =
+    isDemoMode ||
+    (typeof window !== 'undefined' &&
+      (window.location.pathname.startsWith('/demo-admin') ||
+        window.location.pathname.startsWith('/admin-demo')));
+
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab') as any;
   const validTabs = ['OVERVIEW', 'CANDIDATES', 'PENDING_UPDATES', 'INGESTION_RUNS', 'SCHEME_MANAGEMENT', 'PARTNER_MANAGEMENT', 'SCHEMES', 'RULES', 'DOCUMENTS', 'CHANGELOG', 'AI_HEALTH'];
@@ -91,11 +103,85 @@ export const AdminDashboard: React.FC = () => {
     fetchDashboardData();
   }, [searchQuery, ministryFilter, statusFilter, schemeTypeFilter]);
 
+  const handleResetDemoState = () => {
+    fetchDashboardData();
+    setActionSuccessBanner('✨ [DEMO SANDBOX] Sandbox preview state reset to initial baseline.');
+    setTimeout(() => setActionSuccessBanner(null), 5000);
+  };
+
+  const handleSchemeFormSuccess = (savedData?: any) => {
+    if (isDemo && savedData) {
+      if (schemeToEdit) {
+        setSchemes((prev) =>
+          prev.map((s) =>
+            s.scheme_id === schemeToEdit.scheme_id
+              ? {
+                  ...s,
+                  scheme_name: savedData.scheme_name || s.scheme_name,
+                  ministry: savedData.ministry || s.ministry,
+                  scheme_type: savedData.scheme_type || s.scheme_type,
+                  scheme_status: savedData.scheme_status || s.scheme_status,
+                }
+              : s
+          )
+        );
+        setActionSuccessBanner(`✨ [DEMO SANDBOX] Scheme '${savedData.scheme_name}' updated visually in table.`);
+      } else {
+        const newAuditItem: SchemeAuditItem = {
+          scheme_id: savedData.scheme_id || `SCH-DEMO-${Date.now().toString().slice(-4)}`,
+          scheme_name: savedData.scheme_name,
+          ministry: savedData.ministry,
+          scheme_type: savedData.scheme_type,
+          scheme_status: savedData.scheme_status || 'ACTIVE',
+          data_completeness_score: 96.0,
+          rules_count: 4,
+          documents_count: 3,
+          is_active: true,
+          official_source_url: savedData.official_source_url,
+          official_portal: savedData.official_portal,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as any;
+        setSchemes((prev) => [newAuditItem, ...prev]);
+        setActionSuccessBanner(`✨ [DEMO SANDBOX] New scheme '${savedData.scheme_name}' registered visually in table.`);
+      }
+      setTimeout(() => setActionSuccessBanner(null), 6000);
+    } else {
+      fetchDashboardData();
+    }
+  };
+
   const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const sumData = await adminApi.getDashboardSummary();
-      setSummary(sumData);
+      if (isDemo && !localStorage.getItem('yojnasetu_access_token')) {
+        try {
+          const res = await authApi.login({ identifier: 'demo-admin@yojnasetu.gov.in', password: 'Secret123!' });
+          localStorage.setItem('yojnasetu_access_token', res.access_token);
+          localStorage.setItem('yojnasetu_user', JSON.stringify(res.user));
+        } catch {
+          // Fallback gracefully for offline
+        }
+      }
+
+      const sumData = await adminApi.getDashboardSummary().catch(() => null);
+      if (sumData) {
+        setSummary(sumData);
+      } else if (isDemo) {
+        setSummary({
+          total_schemes: 859,
+          active_schemes: 854,
+          inactive_schemes: 5,
+          total_rules: 126,
+          total_documents: 98,
+          total_ministries: 42,
+          average_completeness: 94.8,
+          system_status: 'HEALTHY',
+          ai_rag_status: 'OPERATIONAL',
+          last_ingestion_sync: new Date().toISOString(),
+          total_changelogs: 342,
+        } as any);
+      }
 
       const schData = await adminApi.getSchemeAuditList({
         search: searchQuery || undefined,
@@ -103,8 +189,11 @@ export const AdminDashboard: React.FC = () => {
         status: statusFilter === 'ALL' ? undefined : statusFilter,
         scheme_type: schemeTypeFilter || undefined,
         page_size: 100,
-      });
-      setSchemes(schData.items);
+      }).catch(() => null);
+
+      if (schData?.items) {
+        setSchemes(schData.items);
+      }
 
       const schedulerData = await adminApi.getSchedulerStatus().catch(() => null);
       if (schedulerData) {
@@ -130,6 +219,16 @@ export const AdminDashboard: React.FC = () => {
   const handleActivateScheme = async (scheme: SchemeAuditItem) => {
     try {
       setIsTogglingStatus(true);
+      if (isDemo) {
+        setSchemes((prev) =>
+          prev.map((s) => (s.scheme_id === scheme.scheme_id ? { ...s, scheme_status: 'ACTIVE' } : s))
+        );
+        setActionSuccessBanner(
+          `✨ [DEMO SANDBOX] Scheme '${scheme.scheme_name}' (${scheme.scheme_id}) activated visually in preview. Database preserved.`
+        );
+        setTimeout(() => setActionSuccessBanner(null), 6000);
+        return;
+      }
       await adminApi.updateSchemeStatus(scheme.scheme_id, 'ACTIVE', 'Re-activated by system administrator');
       setActionSuccessBanner(`Scheme '${scheme.scheme_name}' (${scheme.scheme_id}) has been activated and restored to public catalog.`);
       fetchDashboardData();
@@ -146,6 +245,18 @@ export const AdminDashboard: React.FC = () => {
     if (!deactivateTarget) return;
     try {
       setIsTogglingStatus(true);
+      if (isDemo) {
+        setSchemes((prev) =>
+          prev.map((s) => (s.scheme_id === deactivateTarget.scheme_id ? { ...s, scheme_status: 'INACTIVE' } : s))
+        );
+        setActionSuccessBanner(
+          `✨ [DEMO SANDBOX] Scheme '${deactivateTarget.scheme_name}' (${deactivateTarget.scheme_id}) deactivated visually in preview. Database preserved.`
+        );
+        setDeactivateTarget(null);
+        setDeactivateReason('');
+        setTimeout(() => setActionSuccessBanner(null), 6000);
+        return;
+      }
       await adminApi.updateSchemeStatus(
         deactivateTarget.scheme_id,
         'INACTIVE',
@@ -170,13 +281,66 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Demo Mode Interactive Sandbox Banner */}
+      {isDemo && (
+        <div className="bg-gradient-to-r from-amber-500/10 via-[#EA717B]/15 to-amber-500/10 border-2 border-[#EA717B]/30 rounded-3xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 shadow-warm-sm animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#EA717B] text-white flex items-center justify-center shadow-xs shrink-0">
+              <Sparkles className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-[#4A2525]">
+                  Demo Admin Interactive Sandbox
+                </span>
+                <span className="bg-[#2E7D32]/10 text-[#2E7D32] border border-[#2E7D32]/30 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                  Visual Simulation Mode
+                </span>
+              </div>
+              <p className="text-xs text-[#765E59] font-medium mt-0.5">
+                All changes update visually in real time. Database updates are simulated for demo safety.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleResetDemoState}
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-[#FFF4EC] text-[#3B2522] border border-[#E8D8D2] font-bold text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-[#765E59]" />
+              <span>Reset Preview</span>
+            </button>
+            {onDemoLogout && (
+              <button
+                type="button"
+                onClick={onDemoLogout}
+                className="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs shadow-xs transition cursor-pointer flex items-center gap-1.5"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Exit Demo</span>
+              </button>
+            )}
+            <Link
+              to="/"
+              className="px-3.5 py-2 rounded-xl bg-[#EA717B] hover:bg-[#D65D67] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
+            >
+              <span>Citizen Portal</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-br from-[#4A2525] via-[#3B2522] to-[#4A2525] text-white p-6 sm:p-8 rounded-3xl shadow-warm-md border border-[#E8D8D2]/20 space-y-2">
         <div className="inline-flex items-center gap-2 bg-white/10 text-[#F7AE56] text-xs font-bold px-3 py-1 rounded-full border border-white/20">
           <ShieldAlert className="w-4 h-4 text-[#F7AE56]" />
-          Global System Admin Control & Data Quality Center
+          {isDemo ? 'Demo Admin Simulation & Data Quality Center' : 'Global System Admin Control & Data Quality Center'}
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white">YojnaSetu System Admin Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-white">
+          {isDemo ? 'YojnaSetu Demo Admin Dashboard' : 'YojnaSetu System Admin Dashboard'}
+        </h1>
         <p className="text-xs sm:text-sm text-[#FFFBF0]/85 max-w-3xl">
           Data Governance Center: manage verified schemes dynamically, configure deterministic statutory rules, inspect preparation documents, monitor AI/RAG health, and review audit changelogs.
         </p>
@@ -689,8 +853,8 @@ export const AdminDashboard: React.FC = () => {
           setIsSchemeModalOpen(false);
           setSchemeToEdit(null);
         }}
-        onSuccess={() => {
-          fetchDashboardData();
+        onSuccess={(savedData?: any) => {
+          handleSchemeFormSuccess(savedData);
         }}
         schemeToEdit={schemeToEdit}
       />

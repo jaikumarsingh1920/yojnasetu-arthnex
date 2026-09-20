@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Zap,
   CheckCircle2,
@@ -7,7 +8,6 @@ import {
   MapPin,
   Share2,
   ChevronRight,
-  Sparkles
 } from 'lucide-react';
 
 export interface QuickActionItem {
@@ -30,31 +30,33 @@ export const QuickActionsCard: React.FC<QuickActionsCardProps> = ({
   partnerId,
   customActions,
 }) => {
+  const { t } = useTranslation();
+
   const defaultActions: QuickActionItem[] = [
     {
       id: 'eligibility',
-      label: 'Check Your Eligibility',
+      label: t('shared.checkEligibility'),
       link: schemeId ? `/recommendations?scheme_id=${schemeId}` : '/recommendations',
       variant: 'green',
       icon: CheckCircle2,
     },
     {
       id: 'calculator',
-      label: 'Calculate Loan & Subsidy',
+      label: t('shared.calculateLoanSubsidy'),
       link: schemeId ? `/calculator?scheme=${schemeId}` : '/calculator',
       variant: 'orange',
       icon: Calculator,
     },
     {
       id: 'partner',
-      label: 'Find Nearby Partner',
+      label: t('shared.findNearbyPartner'),
       link: schemeId ? `/channel-partners?scheme_id=${schemeId}` : '/channel-partners',
       variant: 'blue',
       icon: MapPin,
     },
     {
       id: 'share',
-      label: 'Share This Information',
+      label: t('shared.shareInformation'),
       onClick: () => {
         if (navigator.share) {
           navigator.share({
@@ -63,7 +65,7 @@ export const QuickActionsCard: React.FC<QuickActionsCardProps> = ({
           }).catch(() => {});
         } else {
           navigator.clipboard.writeText(window.location.href);
-          alert('Link copied to clipboard!');
+          alert(t('shared.linkCopiedToast'));
         }
       },
       variant: 'slate',
@@ -94,7 +96,7 @@ export const QuickActionsCard: React.FC<QuickActionsCardProps> = ({
           <Zap className="w-4 h-4 fill-amber-500 text-amber-500" />
         </div>
         <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
-          Quick Actions
+          {t('shared.quickActions')}
         </h3>
       </div>
 

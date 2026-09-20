@@ -519,7 +519,7 @@ export const Schemes: React.FC = () => {
           <div className="flex items-center justify-between pb-3 border-b border-[#E8D8D2]/60">
             <h3 className="text-sm font-bold text-[#3B2522] flex items-center gap-1.5">
               <Filter className="w-4 h-4 text-[#EA717B]" />
-              <span>Filters</span>
+              <span>{t('common.filters', 'Filters')}</span>
             </h3>
             {activeFiltersCount > 0 && (
               <button
@@ -527,7 +527,7 @@ export const Schemes: React.FC = () => {
                 onClick={handleClearAll}
                 className="text-xs text-[#EA717B] hover:text-[#D65D67] font-bold cursor-pointer"
               >
-                Clear All
+                {t('schemes.clearAll', 'Clear All')}
               </button>
             )}
           </div>
@@ -535,7 +535,7 @@ export const Schemes: React.FC = () => {
           {/* Ministry list */}
           <div className="space-y-2">
             <span className="text-[11px] font-extrabold uppercase text-[#765E59] tracking-wider block">
-              Ministry
+              {t('schemes.ministry', 'Ministry')}
             </span>
             <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
               <button
@@ -545,7 +545,7 @@ export const Schemes: React.FC = () => {
                   !urlMinistry ? 'bg-[#FFF4EC] text-[#EA717B] font-bold border-l-2 border-[#EA717B]' : 'text-[#765E59] hover:bg-[#FFF4EC]/60'
                 }`}
               >
-                <span>All Ministries</span>
+                <span>{t('common.allMinistries', 'All Ministries')}</span>
                 <span className="text-[10px] text-[#765E59] font-normal">({total || 859})</span>
               </button>
               {filterOptions?.ministries.slice(0, 10).map((m) => (
@@ -567,7 +567,7 @@ export const Schemes: React.FC = () => {
           {/* Beneficiary Type */}
           <div className="space-y-2 pt-3 border-t border-[#E8D8D2]/60">
             <span className="text-[11px] font-extrabold uppercase text-[#765E59] tracking-wider block">
-              Beneficiary Type
+              {t('schemes.beneficiaryType', 'Beneficiary Type')}
             </span>
             <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
               <button
@@ -577,7 +577,7 @@ export const Schemes: React.FC = () => {
                   !urlBeneficiary ? 'bg-[#FFF4EC] text-[#EA717B] font-bold border-l-2 border-[#EA717B]' : 'text-[#765E59] hover:bg-[#FFF4EC]/60'
                 }`}
               >
-                <span>All Beneficiaries</span>
+                <span>{t('common.allBeneficiaries', 'All Beneficiaries')}</span>
               </button>
               {filterOptions?.beneficiary_categories.map((b) => (
                 <button

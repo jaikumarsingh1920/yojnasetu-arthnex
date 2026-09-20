@@ -11,6 +11,10 @@ import {
   splitOverviewAndDetails,
 } from '../utils/textNormalization';
 import {
+  localizeGovMinistry,
+  localizeGovSchemeTitle,
+} from '../utils/civicLocalization';
+import {
   Building2,
   ShieldCheck,
   Search,
@@ -31,7 +35,7 @@ import {
 } from 'lucide-react';
 
 export const SchemeFinancialHealth: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { schemeId } = useParams<{ schemeId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -165,7 +169,7 @@ export const SchemeFinancialHealth: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center space-y-4">
           <AlertCircle className="w-10 h-10 text-rose-600 mx-auto" />
-          <h2 className="text-lg font-black text-rose-900">Scheme Financial Details Not Found</h2>
+          <h2 className="text-lg font-black text-rose-900">{t('schemeFinancial.notFound', 'Scheme Financial Details Not Found')}</h2>
           <p className="text-xs text-rose-700 max-w-md mx-auto">
             {(error as any)?.message || 'The requested scheme could not be found.'}
           </p>
@@ -180,17 +184,17 @@ export const SchemeFinancialHealth: React.FC = () => {
     );
   }
 
-  const cleanSchemeName = cleanGovTitle(data.scheme_name);
-  const cleanMinistry = cleanGovTitle(data.ministry);
+  const cleanSchemeName = localizeGovSchemeTitle(cleanGovTitle(data.scheme_name), i18n.language);
+  const cleanMinistry = localizeGovMinistry(cleanGovTitle(data.ministry), i18n.language);
   const hasPartners = data.total_channel_partners > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-[#765E59] font-medium">
-        <Link to="/" className="hover:text-[#EA717B] transition">Home</Link>
+        <Link to="/" className="hover:text-[#EA717B] transition">{t('nav.home', 'Home')}</Link>
         <ChevronRight className="w-3.5 h-3.5" />
-        <Link to="/financial-health" className="hover:text-[#EA717B] transition">Financial Health</Link>
+        <Link to="/financial-health" className="hover:text-[#EA717B] transition">{t('nav.financialHealth', 'Financial Health')}</Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-[#3B2522] font-bold truncate max-w-sm">{cleanSchemeName}</span>
       </nav>
@@ -227,7 +231,7 @@ export const SchemeFinancialHealth: React.FC = () => {
                     {isFullDetailsOpen && (
                       <div className="mt-3 p-4 bg-white/10 rounded-2xl border border-white/15 text-xs text-[#FFFBF0]/90 space-y-2 leading-relaxed whitespace-pre-line animate-fadeIn">
                         <span className="text-[11px] font-bold text-[#F7AE56] uppercase tracking-wider block">
-                          Full Scheme Information
+                          {t('schemeDetail.fullSchemeInformation', 'Full Scheme Information')}
                         </span>
                         {fullDetailsText}
                       </div>
@@ -236,7 +240,7 @@ export const SchemeFinancialHealth: React.FC = () => {
                       onClick={() => setIsFullDetailsOpen(!isFullDetailsOpen)}
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F7AE56] hover:text-white transition mt-1 cursor-pointer"
                     >
-                      <span>{isFullDetailsOpen ? 'Show less' : 'Read full scheme details'}</span>
+                      <span>{isFullDetailsOpen ? t('schemeDetail.showLess', 'Show less') : t('schemeDetail.readFullDetails', 'Read full scheme details')}</span>
                       {isFullDetailsOpen ? (
                         <ChevronUp className="w-3.5 h-3.5" />
                       ) : (
@@ -253,29 +257,29 @@ export const SchemeFinancialHealth: React.FC = () => {
             onClick={() => navigate('/financial-health')}
             className="shrink-0 bg-white/10 hover:bg-white/20 text-[#FFFBF0] text-xs font-bold px-4 py-2.5 rounded-xl border border-white/20 transition flex items-center gap-2 cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" /> All Schemes
+            <ArrowLeft className="w-4 h-4" /> {t('financialHealth.tabAll', 'All Schemes')}
           </button>
         </div>
 
         {/* Aggregate Stat Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/15">
           <div className="bg-white/10 rounded-2xl p-3.5 border border-white/10 space-y-0.5">
-            <span className="text-[11px] text-[#FFFBF0]/70 font-semibold block">Channel Partners</span>
+            <span className="text-[11px] text-[#FFFBF0]/70 font-semibold block">{t('financialHealth.channelPartnersCount', 'Channel Partners')}</span>
             <span className="text-xl font-black text-white font-mono">{data.total_channel_partners}</span>
           </div>
 
           <div className="bg-white/10 rounded-2xl p-3.5 border border-white/10 space-y-0.5">
-            <span className="text-[11px] text-[#2D6A4F] font-semibold block">Verified Info Available</span>
-            <span className="text-xl font-black text-[#2D6A4F] font-mono">{data.partners_with_verified_financial_info}</span>
+            <span className="text-[11px] text-emerald-300 font-semibold block">{t('financialHealth.tabVerified', 'Verified Info Available')}</span>
+            <span className="text-xl font-black text-emerald-300 font-mono">{data.partners_with_verified_financial_info}</span>
           </div>
 
           <div className="bg-white/10 rounded-2xl p-3.5 border border-white/10 space-y-0.5">
-            <span className="text-[11px] text-[#FFD0CA] font-semibold block">Limited Information</span>
+            <span className="text-[11px] text-[#FFD0CA] font-semibold block">{t('financialHealth.limitedInfo', 'Limited Information')}</span>
             <span className="text-xl font-black text-[#FFD0CA] font-mono">{data.partners_with_limited_information}</span>
           </div>
 
           <div className="bg-white/10 rounded-2xl p-3.5 border border-white/10 space-y-0.5">
-            <span className="text-[11px] text-[#F7AE56] font-semibold block">Latest Reporting Period</span>
+            <span className="text-[11px] text-[#F7AE56] font-semibold block">{t('schemeFinancial.latestReportingPeriod', 'Latest Reporting Period')}</span>
             <span className="text-sm font-bold text-white block truncate">{data.latest_reporting_period || '31 March 2024'}</span>
           </div>
         </div>
@@ -285,7 +289,7 @@ export const SchemeFinancialHealth: React.FC = () => {
       <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-2xl p-4 text-xs text-[#4A2525] flex items-start gap-3">
         <Info className="w-4 h-4 text-[#EA717B] shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="font-bold text-[#3B2522]">Neutral Information Directory</p>
+          <p className="font-bold text-[#3B2522]">{t('financialHealth.statutoryNotice', 'Neutral Information Directory')}</p>
           <p className="text-[#765E59] leading-relaxed font-medium">
             Partners are displayed in neutral alphabetical order without ranking or preferential scoring. Financial figures describe the parent institution as a whole and do not guarantee loan approval or determine scheme eligibility.
           </p>
@@ -304,7 +308,7 @@ export const SchemeFinancialHealth: React.FC = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => updateFilter('q', e.target.value)}
-                  placeholder="Search partner name or code..."
+                  placeholder={t('financialHealth.searchPlaceholder', 'Search partner name or code...')}
                   aria-label="Search partner name"
                   className="w-full bg-[#FFFBF0] border border-[#E8D8D2] rounded-xl pl-9 pr-3 py-2 text-xs text-[#3B2522] placeholder:text-[#765E59]/60 outline-none focus:border-[#EA717B] focus:bg-white transition"
                 />
@@ -318,7 +322,7 @@ export const SchemeFinancialHealth: React.FC = () => {
                   aria-label="Filter by State"
                   className="w-full bg-[#FFFBF0] border border-[#E8D8D2] text-[#3B2522] text-xs font-semibold rounded-xl px-3 py-2 outline-none focus:border-[#EA717B] transition cursor-pointer"
                 >
-                  <option value="ALL">All States ({states.length})</option>
+                  <option value="ALL">{t('financialHealth.allStates', 'All States')} ({states.length})</option>
                   {states.map((st) => (
                     <option key={st} value={st}>
                       {st}
@@ -335,7 +339,7 @@ export const SchemeFinancialHealth: React.FC = () => {
                   aria-label="Filter by Partner Type"
                   className="w-full bg-[#FFFBF0] border border-[#E8D8D2] text-[#3B2522] text-xs font-semibold rounded-xl px-3 py-2 outline-none focus:border-[#EA717B] transition cursor-pointer"
                 >
-                  <option value="ALL">All Partner Types</option>
+                  <option value="ALL">{t('financialHealth.allPartnerTypes', 'All Partner Types')}</option>
                   {partnerTypes.map((pt) => (
                     <option key={pt} value={pt}>
                       {pt.replace(/_/g, ' ')}
@@ -352,11 +356,11 @@ export const SchemeFinancialHealth: React.FC = () => {
                   aria-label="Filter by Financial Status"
                   className="w-full bg-[#FFFBF0] border border-[#E8D8D2] text-[#3B2522] text-xs font-semibold rounded-xl px-3 py-2 outline-none focus:border-[#EA717B] transition cursor-pointer"
                 >
-                  <option value="ALL">All Financial Statuses</option>
-                  <option value="STRONGER">Financial position looks stronger</option>
-                  <option value="MIXED">Financial position is mixed</option>
-                  <option value="HIGHER_STRESS">Financial position needs attention</option>
-                  <option value="LIMITED_DATA">Not enough information</option>
+                  <option value="ALL">{t('financialHealth.allStatuses', 'All Financial Statuses')}</option>
+                  <option value="STRONGER">{t('financialHealth.statusStronger', 'Financial position looks stronger')}</option>
+                  <option value="MIXED">{t('financialHealth.statusMixed', 'Financial position is mixed')}</option>
+                  <option value="HIGHER_STRESS">{t('financialHealth.statusAttention', 'Financial position needs attention')}</option>
+                  <option value="LIMITED_DATA">{t('financialHealth.statusNotEnoughInfo', 'Not enough information')}</option>
                 </select>
               </div>
             </div>
@@ -364,15 +368,14 @@ export const SchemeFinancialHealth: React.FC = () => {
             {/* Results Counter */}
             <div className="flex items-center justify-between text-xs text-[#765E59] pt-2 border-t border-[#E8D8D2]">
               <span>
-                Showing <strong className="text-[#3B2522] font-mono">{filteredPartners.length}</strong> of{' '}
-                <strong className="text-[#3B2522] font-mono">{data.partners.length}</strong> channel partners
+                {t('schemeFinancial.showingPartners', { count: filteredPartners.length, total: data.partners.length, defaultValue: `Showing ${filteredPartners.length} of ${data.partners.length} channel partners` })}
               </span>
               {(searchQuery || selectedState !== 'ALL' || selectedPartnerType !== 'ALL' || selectedStatus !== 'ALL') && (
                 <button
                   onClick={clearAllFilters}
                   className="text-[#EA717B] hover:underline font-semibold cursor-pointer"
                 >
-                  Clear filters
+                  {t('common.clearFilters', 'Clear filters')}
                 </button>
               )}
             </div>
@@ -382,8 +385,8 @@ export const SchemeFinancialHealth: React.FC = () => {
           {filteredPartners.length === 0 ? (
             <div className="bg-white border border-[#E8D8D2] rounded-3xl p-12 text-center space-y-2 shadow-warm-xs">
               <Building2 className="w-10 h-10 text-[#765E59] mx-auto" />
-              <h3 className="text-sm font-bold text-[#3B2522]">No channel partners match the selected filters</h3>
-              <p className="text-xs text-[#765E59]">Try adjusting your search criteria or resetting filters.</p>
+              <h3 className="text-sm font-bold text-[#3B2522]">{t('schemeFinancial.noPartnersMatch', 'No channel partners match the selected filters')}</h3>
+              <p className="text-xs text-[#765E59]">{t('schemeFinancial.adjustSearchPrompt', 'Try adjusting your search criteria or resetting filters.')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -392,12 +395,12 @@ export const SchemeFinancialHealth: React.FC = () => {
                 const evidenceCount = partner.financial_status?.evidence_count ?? 0;
                 const evidenceText =
                   evidenceCount === 3
-                    ? 'Based on 3 verified financial indicators'
+                    ? t('financialPartner.threeIndicators', 'Based on 3 verified financial indicators')
                     : evidenceCount === 2
-                    ? 'Based on 2 verified financial indicators'
+                    ? t('financialPartner.twoIndicators', 'Based on 2 verified financial indicators')
                     : evidenceCount === 1
-                    ? 'Only limited verified financial information is available'
-                    : 'Not enough verified financial information is available';
+                    ? t('financialPartner.oneIndicator', 'Only limited verified financial information is available')
+                    : t('financialPartner.noDataDesc', 'Not enough verified financial information is available');
 
                 const locText =
                   partner.branch_location ||
@@ -470,7 +473,7 @@ export const SchemeFinancialHealth: React.FC = () => {
                         )}`}
                         className="inline-flex items-center gap-1.5 text-xs font-bold text-[#EA717B] hover:text-[#d65f69] hover:underline cursor-pointer"
                       >
-                        <span>View details</span>
+                        <span>{t('common.viewDetails', 'View details')}</span>
                         <ChevronRight className="w-4 h-4" />
                       </Link>
                     </div>
@@ -487,9 +490,9 @@ export const SchemeFinancialHealth: React.FC = () => {
             <Globe className="w-7 h-7" />
           </div>
           <div className="space-y-2 max-w-lg mx-auto">
-            <h2 className="text-lg font-black text-[#3B2522]">Direct Departmental Delivery Scheme</h2>
+            <h2 className="text-lg font-black text-[#3B2522]">{t('schemeFinancial.directDelivery', 'Direct Departmental Delivery Scheme')}</h2>
             <p className="text-xs sm:text-sm text-[#765E59] leading-relaxed font-medium">
-              This scheme is administered directly by the government department or nodal authority through official digital application portals, without intermediary commercial channel partners.
+              {t('schemeFinancial.directDeliveryDesc', 'This scheme is administered directly by the government department or nodal authority through official digital application portals, without intermediary commercial channel partners.')}
             </p>
             <p className="text-xs text-[#765E59]/80 leading-relaxed">
               Because benefits are disbursed directly without external lending intermediaries, institutional partner financial balance sheets are not applicable for this scheme.
@@ -500,7 +503,7 @@ export const SchemeFinancialHealth: React.FC = () => {
               to={`/schemes/${data.scheme_id}`}
               className="inline-flex items-center gap-2 bg-[#EA717B] hover:bg-[#d65f69] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-warm-xs"
             >
-              <span>View complete scheme guidelines & eligibility</span>
+              <span>{t('schemeFinancial.viewCompleteGuidelines', 'View complete scheme guidelines & eligibility')}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>

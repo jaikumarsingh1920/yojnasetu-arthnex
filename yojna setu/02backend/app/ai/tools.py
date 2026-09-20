@@ -211,7 +211,8 @@ class CopilotTools:
             "month", "months", "monthly", "income", "expense", "expenses", "around", "already",
             "obligation", "obligations", "repay", "repayment", "afford", "affordability", "living",
             "household", "family", "salary", "salaried", "earning", "earnings", "rupees", "amount",
-            "borrow", "borrowing", "person", "persons", "people"
+            "borrow", "borrowing", "person", "persons", "people", "existing", "current", "currently",
+            "active", "pending", "previous", "exist"
         }
         tokens = [t for t in re.findall(r"\w+", text_clean) if len(t) >= 5 and t not in GENERIC_STOPWORDS]
         for t in tokens:

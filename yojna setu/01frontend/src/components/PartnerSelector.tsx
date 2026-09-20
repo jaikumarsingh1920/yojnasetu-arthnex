@@ -8,6 +8,7 @@ import {
   getScopeDisplay,
   getRoutingStatusDisplay,
 } from '../utils/financialEvidence';
+import { localizeRoutingReason } from '../utils/civicLocalization';
 import { FinancialIntelligencePanel } from './FinancialIntelligencePanel';
 import {
   MapPin,
@@ -28,7 +29,7 @@ interface PartnerSelectorProps {
 }
 
 export const PartnerSelector: React.FC<PartnerSelectorProps> = ({ onSelectPartner, selectedPartnerId }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [partners, setPartners] = useState<NearestPartnerResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -262,7 +263,7 @@ export const PartnerSelector: React.FC<PartnerSelectorProps> = ({ onSelectPartne
                           </div>
                           {p.suitability_reason && (
                             <p className="text-[10px] text-slate-700 font-medium leading-relaxed">
-                              {p.suitability_reason}
+                              {localizeRoutingReason(p.suitability_reason, t, i18n.language)}
                             </p>
                           )}
                           {p.routing_reasons && p.routing_reasons.length > 0 && (
@@ -273,7 +274,7 @@ export const PartnerSelector: React.FC<PartnerSelectorProps> = ({ onSelectPartne
                                   className="inline-flex items-center gap-1 text-[9px] font-semibold text-indigo-900 bg-white border border-indigo-200 px-2 py-0.5 rounded-md shadow-2xs"
                                 >
                                   <CheckCircle className="w-3 h-3 text-emerald-600 shrink-0" />
-                                  {reason}
+                                  {localizeRoutingReason(reason, t, i18n.language)}
                                 </span>
                               ))}
                             </div>

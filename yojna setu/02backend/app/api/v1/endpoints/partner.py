@@ -183,6 +183,7 @@ def get_financial_health_schemes(
     ministry: Optional[str] = Query(None, description="Filter by ministry"),
     has_partners_only: bool = Query(False, description="Include only schemes with mapped channel partners"),
     availability: Optional[str] = Query(None, description="Filter by availability: ALL, VERIFIED, LIMITED, DIRECT, FINANCIAL_ONLY"),
+    language: Optional[str] = Query(None, description="Target language code for localization"),
     db: Session = Depends(get_db)
 ):
     return ChannelPartnerEnrichmentService.get_financial_health_schemes(
@@ -191,7 +192,8 @@ def get_financial_health_schemes(
         search=search,
         ministry=ministry,
         has_partners_only=has_partners_only,
-        availability=availability
+        availability=availability,
+        language=language
     )
 
 

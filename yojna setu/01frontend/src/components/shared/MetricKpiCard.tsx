@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, Info } from 'lucide-react';
 
 export interface MetricKpiCardProps {
@@ -26,6 +27,7 @@ export const MetricKpiCard: React.FC<MetricKpiCardProps> = ({
   iconBg,
   iconColor,
 }) => {
+  const { t } = useTranslation();
   const badgeClasses = {
     positive: 'bg-emerald-100/80 text-emerald-800 border-emerald-200/80',
     moderate: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
@@ -74,7 +76,7 @@ export const MetricKpiCard: React.FC<MetricKpiCardProps> = ({
           className="text-xs font-bold text-sky-700 hover:text-sky-900 flex items-center gap-1.5 transition cursor-pointer"
         >
           <Info className="w-3.5 h-3.5 text-sky-600" />
-          <span>Why this matters?</span>
+          <span>{t('financialPartner.whyThisMatters', 'Why this matters?')}</span>
         </button>
       </div>
     </div>

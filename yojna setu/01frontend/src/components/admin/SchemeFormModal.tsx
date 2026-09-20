@@ -17,7 +17,7 @@ import { adminApi, SchemeCreateInput, SchemeUpdateInput, SchemeAuditItem } from 
 interface SchemeFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (savedData?: any) => void;
   schemeToEdit?: SchemeAuditItem | null;
 }
 
@@ -209,6 +209,26 @@ export const SchemeFormModal: React.FC<SchemeFormModalProps> = ({
 
     setIsSubmitting(true);
 
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setTimeout(() => {
+        setSuccessMsg(
+          isEditing
+            ? `✨ [DEMO SANDBOX] Scheme '${formData.scheme_name}' updated visually in preview. Production database preserved.`
+            : `✨ [DEMO SANDBOX] Scheme '${formData.scheme_name}' registered visually with ID ${formData.scheme_id}. Production database preserved.`
+        );
+        setTimeout(() => {
+          onSuccess(formData);
+          onClose();
+        }, 700);
+      }, 300);
+      return;
+    }
+
     try {
       if (isEditing && schemeToEdit) {
         const updatePayload: SchemeUpdateInput = {
@@ -235,7 +255,7 @@ export const SchemeFormModal: React.FC<SchemeFormModalProps> = ({
           subsidy_percentage: formData.subsidy_percentage,
           subsidy_details: formData.subsidy_details,
           grant_available: formData.grant_available,
-          grant_amount: formData.grant_amount,
+          grant_amount: formData.grant_available === 'YES' ? formData.grant_amount : undefined,
           application_mode: formData.application_mode,
           official_portal: formData.official_portal,
           official_source_url: formData.official_source_url,
@@ -252,7 +272,7 @@ export const SchemeFormModal: React.FC<SchemeFormModalProps> = ({
       }
 
       setTimeout(() => {
-        onSuccess();
+        onSuccess(formData);
         onClose();
       }, 900);
     } catch (err: any) {

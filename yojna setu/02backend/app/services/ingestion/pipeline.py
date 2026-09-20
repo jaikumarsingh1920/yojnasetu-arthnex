@@ -254,9 +254,14 @@ class DynamicIngestionPipeline:
         db.add(snapshot)
         source.last_snapshot_hash = change_res.content_hash
 
-        # First fetch: establish baseline snapshot for existing mapped schemes
-        # But if source is not linked to any canonical scheme, it is a candidate NEW_SCHEME that must be extracted and staged!
-        if prev_hash is None and source.scheme_id is not None and not force_update:
+        # First fetch: establish baseline snapshot for existing/monitored sources
+        is_new_scheme_source = source.scheme_id is None and (
+            source.source_id.startswith("SRC-NEW-SCHEME") or
+            source.source_id.startswith("SRC-DEEPTECH") or
+            "new-scheme" in source.source_id.lower() or
+            "deeptech" in source.source_id.lower()
+        )
+        if prev_hash is None and not force_update and not is_new_scheme_source:
             db.commit()
             return {
                 "source_id": source.source_id,

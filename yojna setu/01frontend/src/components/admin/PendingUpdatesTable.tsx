@@ -153,6 +153,27 @@ export const PendingUpdatesTable: React.FC<PendingUpdatesTableProps> = ({
     setIsSubmitting(true);
     setFeedback(null);
 
+    const isDemo =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('yojnasetu_demo_admin_authenticated') === 'true' ||
+        window.location.pathname.includes('demo'));
+
+    if (isDemo) {
+      setTimeout(() => {
+        const schemeName = getSchemeName(selectedUpdate);
+        setUpdates((prev) => prev.filter((u) => u.update_id !== selectedUpdate.update_id));
+        setFeedback({
+          type: 'success',
+          text: `✨ [DEMO SANDBOX] Update for '${schemeName}' (${selectedUpdate.scheme_id}) ${actionConfirm === 'APPROVE' ? 'approved' : 'rejected'} visually in preview. Database preserved.`,
+        });
+        setSelectedUpdate(null);
+        setActionConfirm(null);
+        setIsSubmitting(false);
+        setTimeout(() => setFeedback(null), 7000);
+      }, 400);
+      return;
+    }
+
     try {
       const payload: PendingUpdateReviewInput = {
         action: actionConfirm,

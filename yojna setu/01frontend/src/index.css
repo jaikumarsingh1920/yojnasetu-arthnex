@@ -3,6 +3,34 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: #FFFBF0;
+    --surface: #FFFFFF;
+    --surface-muted: #FFF4EC;
+    --surface-dark: #4A2525;
+    --surface-dark-alt: #3B2522;
+    --text-primary: #3B2522;
+    --text-secondary: #765E59;
+    --text-muted: #9B817A;
+    --text-on-dark: #FFFFFF;
+    --text-on-dark-muted: #FFFBF0;
+    --text-on-dark-secondary: #FFD0CA;
+    --accent-primary: #EA717B;
+    --accent-primary-hover: #D65D67;
+    --accent-secondary: #F7AE56;
+    --accent-secondary-hover: #E59B40;
+    --success: #2D6A4F;
+    --success-light: #EAF4EE;
+    --success-on-dark: #6EE7B7;
+    --warning: #B45309;
+    --warning-light: #FEF3C7;
+    --danger: #BE123C;
+    --danger-light: #FFF1F2;
+    --border: #E8D8D2;
+    --border-muted: #F3EAE6;
+    --border-dark: rgba(232, 216, 210, 0.2);
+  }
+
   html[data-text-size="small"] {
     font-size: 15px;
   }
@@ -55,7 +83,17 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     letter-spacing: -0.02em;
-    color: #3B2522;
+    color: inherit;
+  }
+
+  .text-white h1, .text-white h2, .text-white h3, .text-white h4, .text-white h5, .text-white h6,
+  .text-\[\#FFFBF0\] h1, .text-\[\#FFFBF0\] h2, .text-\[\#FFFBF0\] h3, .text-\[\#FFFBF0\] h4,
+  [class*="bg-[#4A2525]"] h1, [class*="bg-[#4A2525]"] h2, [class*="bg-[#4A2525]"] h3, [class*="bg-[#4A2525]"] h4,
+  [class*="bg-[#3B2522]"] h1, [class*="bg-[#3B2522]"] h2, [class*="bg-[#3B2522]"] h3, [class*="bg-[#3B2522]"] h4,
+  [class*="bg-[#2B1810]"] h1, [class*="bg-[#2B1810]"] h2, [class*="bg-[#2B1810]"] h3, [class*="bg-[#2B1810]"] h4,
+  [class*="from-[#4A2525]"] h1, [class*="from-[#4A2525]"] h2, [class*="from-[#4A2525]"] h3, [class*="from-[#4A2525]"] h4,
+  [class*="from-[#3B2522]"] h1, [class*="from-[#3B2522]"] h2, [class*="from-[#3B2522]"] h3, [class*="from-[#3B2522]"] h4 {
+    color: #FFFFFF;
   }
 }
 
@@ -401,4 +439,135 @@ html[data-text-size="default"] .yojnasetu-navbar {
     animation: heroContentFade 300ms ease-in-out forwards !important;
     transform: none !important;
   }
+}
+
+/* =========================================================
+   Responsive Left-to-Right Hero Fade Scrim Overlay
+   Blends YojnaSetu Warm Cream (#FFFBF0) smoothly from
+   left to right, ensuring 100% text readability while
+   keeping the photograph fully visible on the right.
+   ========================================================= */
+.hero-gradient-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Desktop (1024px and wider): Clean left-aligned fade that clears the center of the image */
+@media (min-width: 1024px) {
+  .hero-gradient-scrim {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 251, 240, 0.98) 0%,
+      rgba(255, 251, 240, 0.96) 22%,
+      rgba(255, 251, 240, 0.90) 34%,
+      rgba(255, 251, 240, 0.65) 44%,
+      rgba(255, 251, 240, 0.28) 54%,
+      rgba(255, 251, 240, 0.05) 64%,
+      rgba(255, 251, 240, 0) 72%,
+      rgba(255, 251, 240, 0) 100%
+    );
+  }
+}
+
+/* Tablet (640px to 1023px): Smooth left-to-right fade supporting left-aligned text */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .hero-gradient-scrim {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 251, 240, 0.98) 0%,
+      rgba(255, 251, 240, 0.95) 28%,
+      rgba(255, 251, 240, 0.85) 45%,
+      rgba(255, 251, 240, 0.45) 60%,
+      rgba(255, 251, 240, 0.10) 74%,
+      rgba(255, 251, 240, 0) 84%
+    );
+  }
+}
+
+/* Mobile (under 640px): Smooth top-to-bottom and subtle left gradient for stacked layout */
+@media (max-width: 639px) {
+  .hero-gradient-scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 251, 240, 0.98) 0%,
+      rgba(255, 251, 240, 0.94) 50%,
+      rgba(255, 251, 240, 0.84) 75%,
+      rgba(255, 251, 240, 0.45) 100%
+    );
+  }
+}
+
+/* Financial blog pages use the same light civic palette as the main site. */
+.blog-page {
+  background: #FFFBF0 !important;
+  color: #3B2522 !important;
+}
+
+.blog-page > section {
+  background: #FFF4EC !important;
+  border-color: #E8D8D2 !important;
+  color: #3B2522 !important;
+}
+
+.blog-page > section > .absolute {
+  background: radial-gradient(circle at 85% 10%, rgba(234, 113, 123, 0.2), transparent 28%), radial-gradient(circle at 10% 90%, rgba(247, 174, 86, 0.18), transparent 30%) !important;
+}
+
+.blog-page > section h1 {
+  color: #3B2522 !important;
+}
+
+.blog-page > section p,
+.blog-page > section .text-white\/80,
+.blog-page > section .text-white\/85 {
+  color: #765E59 !important;
+}
+
+.blog-page > section .border-white\/20,
+.blog-page > section .border-white\/15 {
+  border-color: #E8D8D2 !important;
+}
+
+.blog-page > section .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.blog-page > section .text-amber-200 {
+  color: #EA717B !important;
+}
+
+.blog-page > main > div:last-child {
+  background: #FFFFFF !important;
+  border: 1px solid #E8D8D2;
+  color: #765E59 !important;
+}
+
+.blog-page > main > div:last-child .text-white\/75 {
+  color: #765E59 !important;
+}
+
+.blog-page .bg-\[\#3c1424\] {
+  background-color: #FFFFFF !important;
+}
+
+article[class*="bg-[#fef9f3]"] {
+  background-color: #FFFBF0 !important;
+  color: #3B2522 !important;
+}
+
+article[class*="bg-[#fef9f3]"] header,
+article[class*="bg-[#fef9f3]"] .border-\[\#f0dfe1\] {
+  border-color: #E8D8D2 !important;
+}
+
+article[class*="bg-[#fef9f3]"] .text-\[\#861823\] {
+  color: #EA717B !important;
+}
+
+article[class*="bg-[#fef9f3]"] .bg-\[\#f7e9e9\] {
+  background-color: #FFF4EC !important;
 }

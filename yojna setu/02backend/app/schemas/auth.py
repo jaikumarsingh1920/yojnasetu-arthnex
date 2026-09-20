@@ -67,3 +67,18 @@ class TokenResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr = Field(..., description="Registered user email address")
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(..., min_length=16, description="Cryptographic password reset token")
+    new_password: str = Field(..., min_length=8, description="New password (min 8 characters)")
+
+
+class VerifyResetTokenResponse(BaseModel):
+    valid: bool
+    email: Optional[str] = None
+    message: Optional[str] = None

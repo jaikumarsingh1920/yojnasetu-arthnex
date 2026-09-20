@@ -58,6 +58,7 @@ export const PartnerFinancialHealth: React.FC = () => {
   const [showFullDesc, setShowFullDesc] = useState(false);
 
   // Progressive Disclosure Accordion States
+  const [isWhyIndicatorMattersOpen, setIsWhyIndicatorMattersOpen] = useState<boolean>(false);
   const [isNumbersTellOpen, setIsNumbersTellOpen] = useState<boolean>(searchParams.get('open') === 'numbers');
   const [isWhyStatusOpen, setIsWhyStatusOpen] = useState<boolean>(searchParams.get('open') === 'why_status');
   const [isMethodologyOpen, setIsMethodologyOpen] = useState<boolean>(searchParams.get('open') === 'methodology');
@@ -134,13 +135,13 @@ export const PartnerFinancialHealth: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center space-y-4">
           <AlertCircle className="w-10 h-10 text-rose-600 mx-auto" />
-          <h2 className="text-lg font-black text-rose-900">Partner Financial Record Not Found</h2>
+          <h2 className="text-lg font-black text-rose-900">{t('financialHealth.partnerNotFound', 'Partner Financial Record Not Found')}</h2>
           <p className="text-xs text-rose-700 max-w-md mx-auto">{errorMsg || 'The requested channel partner financial information could not be retrieved.'}</p>
           <button
             onClick={handleBackNavigation}
             className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Financial Health
+            <ArrowLeft className="w-4 h-4" /> {t('financialHealth.backToFinancialHealth', 'Back to Financial Health')}
           </button>
         </div>
       </div>
@@ -186,75 +187,117 @@ export const PartnerFinancialHealth: React.FC = () => {
   const statusCode = data.financial_status?.code || 'LIMITED_DATA';
 
   const evidenceCount = data.financial_status?.evidence_count ?? 0;
-  const evidenceCountText =
-    evidenceCount === 3
-      ? 'Based on 3 verified financial indicators.'
-      : evidenceCount === 2
-      ? 'Based on 2 verified financial indicators.'
-      : evidenceCount === 1
-      ? 'Only limited verified financial information is available.'
-      : 'No verified financial indicators are currently available.';
+  const verifiedCount = evidenceCount;
+  const verifiedCountDesc =
+    verifiedCount >= 3
+      ? t('financialHealth.evidenceCount3', 'All core verified financial indicators are available.')
+      : verifiedCount > 0
+      ? t('financialHealth.evidenceCount1', 'Only limited verified financial information is available.')
+      : t('financialHealth.evidenceCount0', 'No verified financial indicators are currently available.');
 
   const statusDetails = {
     STRONGER: {
-      headline: 'Financial position looks stronger',
-      shortDesc: 'Reported loan problems are lower and capital is in a stronger range.',
+      headline: t('financialHealth.financial_position_stronger', 'Financial position looks stronger'),
+      shortDesc: t('financialPartner.statusStrongerShortDesc', 'Reported loan problems are lower and capital is in a stronger range.'),
       whatMeans:
-        'The available public information shows lower reported loan repayment problems and a stronger reported capital cushion.',
+        t('financialPartner.statusStrongerWhatMeans', 'The available public information shows lower reported loan repayment problems and a stronger reported capital cushion.'),
       whyStatus:
-        "This status is shown because the available verified financial indicators fall within YojnaSetu's stronger presentation ranges. The available verified information currently shows lower reported loan repayment problems and stronger reported capital.",
-      simpleSummary: 'relatively stable financial position with a strong capital base',
+        t('financialPartner.statusStrongerWhyStatus', "This status is shown because the available verified financial indicators fall within YojnaSetu's stronger presentation ranges. The available verified information currently shows lower reported loan repayment problems and stronger reported capital."),
+      simpleSummary: t('financialPartner.statusStrongerSimpleSummary', 'relatively stable financial position with a strong capital base'),
       isNeutralOrPositive: true,
     },
     MIXED: {
-      headline: 'Financial position is mixed',
-      shortDesc: 'Some reported financial numbers need attention.',
+      headline: t('financialHealth.financial_position_mixed', 'Financial position is mixed'),
+      shortDesc: t('financialPartner.statusMixedShortDesc', 'Some reported financial numbers need attention.'),
       whatMeans:
-        'Some indicators are in stronger ranges while others need attention. It helps you see different aspects of the institution’s publicly reported figures.',
+        t('financialPartner.statusMixedWhatMeans', 'Some indicators are in stronger ranges while others need attention. It helps you see different aspects of the institution’s publicly reported figures.'),
       whyStatus:
-        'This status is shown because some available verified indicators are in the middle range. Some indicators are in stronger ranges while others need attention.',
-      simpleSummary: 'mixed financial position with some indicators requiring attention',
+        t('financialPartner.statusMixedWhyStatus', 'This status is shown because some available verified indicators are in the middle range. Some indicators are in stronger ranges while others need attention.'),
+      simpleSummary: t('financialPartner.statusMixedSimpleSummary', 'mixed financial position with some indicators requiring attention'),
       isNeutralOrPositive: true,
     },
     HIGHER_STRESS: {
-      headline: 'Financial position needs attention',
-      shortDesc: 'One or more reported financial numbers need attention.',
+      headline: t('financialHealth.financial_position_needs_attention', 'Financial position needs attention'),
+      shortDesc: t('financialPartner.statusStressShortDesc', 'One or more reported financial numbers need attention.'),
       whatMeans:
-        'One or more reported financial figures show higher concern compared with standard ranges. This is based on publicly reported financial information and does not by itself mean the institution cannot provide the scheme service.',
+        t('financialPartner.statusStressWhatMeans', 'One or more reported financial figures show higher concern compared with standard ranges. This is based on publicly reported financial information and does not by itself mean the institution cannot provide the scheme service.'),
       whyStatus:
-        'This status is shown because one or more available verified indicators are in a higher range of concern. This is based on publicly reported financial figures and does not prevent participation in official schemes where authorized.',
-      simpleSummary: 'position where one or more reported figures are in an elevated stress range',
+        t('financialPartner.statusStressWhyStatus', 'This status is shown because one or more available verified indicators are in a higher range of concern. This is based on publicly reported financial figures and does not prevent participation in official schemes where authorized.'),
+      simpleSummary: t('financialPartner.statusStressSimpleSummary', 'position where one or more reported figures are in an elevated stress range'),
       isNeutralOrPositive: false,
     },
     LIMITED_DATA: {
-      headline: 'Not enough information',
-      shortDesc: 'Not enough verified financial information is available.',
+      headline: t('financialHealth.not_enough_information', 'Not enough information'),
+      shortDesc: t('financialPartner.statusLimitedShortDesc', 'Not enough verified financial information is available.'),
       whatMeans:
-        'Not enough verified financial information is available. This does not mean the institution is financially weak. It means YojnaSetu does not have enough verified public information to show a meaningful summary.',
+        t('financialPartner.statusLimitedWhatMeans', 'Not enough verified financial information is available. This does not mean the institution is financially weak. It means YojnaSetu does not have enough verified public information to show a meaningful summary.'),
       whyStatus:
-        'We do not have enough verified financial information to calculate a meaningful summary. Under YojnaSetu data governance, missing figures are never assumed to be zero or favorable.',
-      simpleSummary: 'limited public reporting profile with insufficient indicators',
+        t('financialPartner.statusLimitedWhyStatus', 'We do not have enough verified financial information to calculate a meaningful summary. Under YojnaSetu data governance, missing figures are never assumed to be zero or favorable.'),
+      simpleSummary: t('financialPartner.statusLimitedSimpleSummary', 'limited public reporting profile with insufficient indicators'),
       isNeutralOrPositive: true,
     },
   }[statusCode] || {
-    headline: 'Not enough information',
-    shortDesc: 'Not enough verified financial information is available.',
+    headline: t('financialHealth.not_enough_information', 'Not enough information'),
+    shortDesc: t('financialPartner.statusLimitedShortDesc', 'Not enough verified financial information is available.'),
     whatMeans:
-      'Not enough verified financial information is available. This does not mean the institution is financially weak.',
+      t('financialPartner.statusLimitedWhatMeans', 'Not enough verified financial information is available. This does not mean the institution is financially weak.'),
     whyStatus:
-      'We do not have enough verified financial information to calculate a meaningful summary.',
-    simpleSummary: 'limited public reporting profile',
+      t('financialPartner.statusLimitedWhyStatus', 'We do not have enough verified financial information to calculate a meaningful summary.'),
+    simpleSummary: t('financialPartner.statusLimitedSimpleSummary', 'limited public reporting profile'),
     isNeutralOrPositive: true,
   };
+
+  const statusTheme = {
+    STRONGER: {
+      cardBg: 'bg-gradient-to-br from-emerald-50/70 via-white to-[#FFFBF0]',
+      cardBorder: 'border-emerald-300/80',
+      badgeBg: 'bg-emerald-100/80 text-emerald-900 border-emerald-300',
+      iconBox: 'bg-emerald-100 text-[#2D6A4F] border border-emerald-200',
+      iconColor: 'text-[#2D6A4F]',
+      icon: CheckCircle2,
+    },
+    MIXED: {
+      cardBg: 'bg-gradient-to-br from-amber-50/70 via-white to-[#FFFBF0]',
+      cardBorder: 'border-amber-300/80',
+      badgeBg: 'bg-amber-100/80 text-amber-900 border-amber-300',
+      iconBox: 'bg-amber-100 text-[#B45309] border border-amber-200',
+      iconColor: 'text-[#B45309]',
+      icon: AlertCircle,
+    },
+    HIGHER_STRESS: {
+      cardBg: 'bg-gradient-to-br from-rose-50/70 via-white to-[#FFFBF0]',
+      cardBorder: 'border-rose-300/80',
+      badgeBg: 'bg-rose-100/80 text-rose-900 border-rose-300',
+      iconBox: 'bg-rose-100 text-[#EA717B] border border-rose-200',
+      iconColor: 'text-[#EA717B]',
+      icon: AlertCircle,
+    },
+    LIMITED_DATA: {
+      cardBg: 'bg-gradient-to-br from-slate-50/90 via-white to-[#FFFBF0]',
+      cardBorder: 'border-[#E8D8D2]',
+      badgeBg: 'bg-slate-100 text-slate-800 border-slate-300',
+      iconBox: 'bg-[#FFF4EC] text-[#765E59] border border-[#FFD0CA]',
+      iconColor: 'text-[#765E59]',
+      icon: HelpCircle,
+    },
+  }[statusCode] || {
+    cardBg: 'bg-gradient-to-br from-slate-50/90 via-white to-[#FFFBF0]',
+    cardBorder: 'border-[#E8D8D2]',
+    badgeBg: 'bg-slate-100 text-slate-800 border-slate-300',
+    iconBox: 'bg-[#FFF4EC] text-[#765E59] border border-[#FFD0CA]',
+    iconColor: 'text-[#765E59]',
+    icon: HelpCircle,
+  };
+  const StatusIcon = statusTheme.icon;
 
   return (
     <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 font-sans bg-[#FFFBF0] min-h-screen">
       {/* 1. Breadcrumb + Back Navigation Row */}
       <nav aria-label="Breadcrumb" className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#765E59] font-medium">
         <div className="flex items-center gap-2 flex-wrap">
-          <Link to="/" className="hover:text-[#EA717B] transition">Home</Link>
+          <Link to="/" className="hover:text-[#EA717B] transition">{t('nav.home', 'Home')}</Link>
           <ChevronRight className="w-3.5 h-3.5 text-[#765E59]/50 shrink-0" />
-          <Link to="/financial-health" className="hover:text-[#EA717B] transition">Financial Health</Link>
+          <Link to="/financial-health" className="hover:text-[#EA717B] transition">{t('nav.financialHealth', 'Financial Health')}</Link>
           {schemeId && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-[#765E59]/50 shrink-0" />
@@ -272,7 +315,7 @@ export const PartnerFinancialHealth: React.FC = () => {
           className="inline-flex items-center gap-1.5 text-[#765E59] hover:text-[#3B2522] font-bold text-xs transition cursor-pointer self-start sm:self-auto"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to previous page</span>
+          <span>{t('common.back', 'Back to previous page')}</span>
         </button>
       </nav>
 
@@ -280,14 +323,14 @@ export const PartnerFinancialHealth: React.FC = () => {
       <div className="bg-gradient-to-br from-[#4A2525] via-[#3B2522] to-[#4A2525] text-white rounded-3xl p-6 sm:p-8 shadow-warm-md relative overflow-hidden border border-[#E8D8D2]/20 space-y-6">
         {/* Top Badges */}
         <div className="flex flex-wrap items-center gap-2.5">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-white/10 text-[#2D6A4F] border border-white/20">
-            <Check className="w-3.5 h-3.5 text-[#2D6A4F]" />
-            <span>NSFDC Channel Partner</span>
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+            <Check className="w-3.5 h-3.5 text-emerald-300" />
+            <span>{t('financialPartner.nsfdcPartner', 'NSFDC Channel Partner')}</span>
           </span>
 
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium bg-white/10 text-[#FFFBF0] border border-white/20">
             <Info className="w-3.5 h-3.5 text-[#F7AE56]" />
-            <span>Financial information: Institution-level</span>
+            <span>{t('financialPartner.infoInstitutionLevel', 'Financial information: Institution-level')}</span>
           </span>
         </div>
 
@@ -343,8 +386,8 @@ export const PartnerFinancialHealth: React.FC = () => {
 
           {/* Right Hero Scope Card */}
           <div className="lg:col-span-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/15 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#2D6A4F]/20 text-[#2D6A4F] flex items-center justify-center shrink-0 mt-0.5">
-              <ShieldCheck className="w-5 h-5 text-[#2D6A4F]" />
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+              <ShieldCheck className="w-5 h-5 text-emerald-300" />
             </div>
             <p className="text-xs text-[#FFFBF0]/90 leading-relaxed font-medium">
               This is institution-level information. For scheme eligibility and loan approval, please refer to the specific scheme guidelines and application process.
@@ -361,7 +404,7 @@ export const PartnerFinancialHealth: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white hover:bg-[#FFF4EC] text-[#3B2522] transition shadow-warm-xs cursor-pointer"
           >
             <Bookmark className="w-3.5 h-3.5 text-[#765E59]" />
-            <span>Save Scheme</span>
+            <span>{t('schemeDetail.saveScheme', 'Save Scheme')}</span>
           </button>
 
           {/* Add to Compare */}
@@ -370,7 +413,7 @@ export const PartnerFinancialHealth: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white hover:bg-[#FFF4EC] text-[#3B2522] transition shadow-warm-xs"
           >
             <GitCompare className="w-3.5 h-3.5 text-[#765E59]" />
-            <span>Add to Compare</span>
+            <span>{t('compare.addBtn', 'Add to Compare')}</span>
           </Link>
 
           {/* Check Eligibility */}
@@ -379,7 +422,7 @@ export const PartnerFinancialHealth: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#EA717B] hover:bg-[#d65f69] text-white transition shadow-warm-xs"
           >
             <UserCheck className="w-3.5 h-3.5" />
-            <span>Check Eligibility</span>
+            <span>{t('schemeDetail.checkEligibility', 'Check Eligibility')}</span>
           </Link>
 
           {/* View Loan & Subsidy Options */}
@@ -388,7 +431,7 @@ export const PartnerFinancialHealth: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#F7AE56] hover:bg-[#e29d48] text-[#4A2525] transition shadow-warm-xs"
           >
             <Calculator className="w-3.5 h-3.5" />
-            <span>View Loan & Subsidy Options</span>
+            <span>{t('calculator.calculate', 'View Loan & Subsidy Options')}</span>
           </Link>
 
           {/* Find Nearby Partner */}
@@ -397,7 +440,7 @@ export const PartnerFinancialHealth: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white/15 hover:bg-white/25 text-white transition shadow-warm-xs border border-white/20"
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>Find Nearby Partner</span>
+            <span>{t('nav.nearbyPartners', 'Find Nearby Partner')}</span>
           </Link>
         </div>
       </div>
@@ -435,6 +478,171 @@ export const PartnerFinancialHealth: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Content Column (70% on desktop) */}
         <div className="lg:col-span-8 space-y-6">
+          {/* ========================================================= */}
+          {/* RESTORED: Citizen-Friendly Financial Position Indicator  */}
+          {/* ========================================================= */}
+          <div
+            className={`rounded-3xl p-6 sm:p-8 shadow-warm-xs transition-all space-y-5 border ${statusTheme.cardBg} ${statusTheme.cardBorder}`}
+          >
+            {/* Header: Label + Status Badge + Telemetry Tags */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 border-[#E8D8D2]/60">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-[11px] font-black uppercase tracking-widest text-[#765E59]">
+                  {t('financialPartner.financialPositionTitle', 'Financial Position')}
+                </span>
+                <FinancialStatusBadge status={data.financial_status} size="md" />
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap text-[11px] font-bold">
+                <span className="bg-white/90 text-[#3B2522] px-2.5 py-0.5 rounded-full border border-[#E8D8D2] shadow-2xs">
+                  {t('financialPartner.methodologyVersion', 'Methodology: YS-FIS-V1')}
+                </span>
+                <span className="bg-white/90 text-[#3B2522] px-2.5 py-0.5 rounded-full border border-[#E8D8D2] shadow-2xs">
+                  {t('financialPartner.scopeInstitutionLevel', 'Institution-Level')}
+                </span>
+              </div>
+            </div>
+
+            {/* Headline and Citizen Explanation */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3.5">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${statusTheme.iconBox}`}>
+                  <StatusIcon className={`w-6 h-6 ${statusTheme.iconColor}`} />
+                </div>
+                <div className="space-y-1 min-w-0">
+                  <h2 className="text-xl sm:text-2xl font-black text-[#2B1810] tracking-tight">
+                    {statusDetails.headline}
+                  </h2>
+                  <p className="text-sm font-bold text-[#3B2522] leading-relaxed">
+                    {statusDetails.shortDesc}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs sm:text-sm text-[#765E59] leading-relaxed font-normal pl-0 sm:pl-[62px]">
+                {statusDetails.whatMeans}
+              </p>
+            </div>
+
+            {/* If LIMITED_DATA: Explain missing indicators transparently */}
+            {statusCode === 'LIMITED_DATA' && (
+              <div className="p-4 bg-white/90 rounded-2xl border border-[#E8D8D2] space-y-2.5 text-xs text-[#3B2522]">
+                <div className="flex items-center gap-2 font-bold text-[#4A2525]">
+                  <AlertCircle className="w-4 h-4 text-[#F7AE56] shrink-0" />
+                  <span>{t('financialPartner.whyLimitedDataTitle', 'Why is this shown as "Not enough information"?')}</span>
+                </div>
+                <p className="text-[#765E59] leading-relaxed">
+                  {statusDetails.whyStatus} {t('financialPartner.insufficientDataNotice', 'Under YS-FIS-V1 methodology, at least 2 verified public indicators (Net NPA, Gross NPA, CRAR) are required to calculate an interpreted status. Missing figures are never assumed to be zero or favorable.')}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                  <div className="p-2.5 rounded-xl bg-[#FFFBF0] border border-[#E8D8D2]">
+                    <span className="font-bold text-[11px] block uppercase text-[#765E59]">Net NPA</span>
+                    <span className="font-mono text-xs font-extrabold text-[#3B2522]">
+                      {nnpa != null ? `${nnpa.toFixed(2)}%` : t('financialPartner.notReported', 'Not Reported')}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-[#FFFBF0] border border-[#E8D8D2]">
+                    <span className="font-bold text-[11px] block uppercase text-[#765E59]">Gross NPA</span>
+                    <span className="font-mono text-xs font-extrabold text-[#3B2522]">
+                      {gnpa != null ? `${gnpa.toFixed(2)}%` : t('financialPartner.notReported', 'Not Reported')}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-[#FFFBF0] border border-[#E8D8D2]">
+                    <span className="font-bold text-[11px] block uppercase text-[#765E59]">Capital Cushion (CRAR)</span>
+                    <span className="font-mono text-xs font-extrabold text-[#3B2522]">
+                      {crar != null ? `${crar.toFixed(2)}%` : t('financialPartner.notReported', 'Not Reported')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Interactive Explanations: "Why this matters?" + "Why is this shown as...?" */}
+            <div className="pt-2 border-t border-[#E8D8D2]/60 space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Why this matters button */}
+                <button
+                  type="button"
+                  onClick={() => setIsWhyIndicatorMattersOpen(!isWhyIndicatorMattersOpen)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-[#FFF4EC] text-[#3B2522] border border-[#E8D8D2] transition cursor-pointer shadow-2xs"
+                  aria-expanded={isWhyIndicatorMattersOpen}
+                >
+                  <Info className="w-3.5 h-3.5 text-[#EA717B]" />
+                  <span>{t('financialPartner.whyThisMatters', 'Why this matters?')}</span>
+                  <ChevronDown className={`w-3 h-3 text-[#765E59] transition-transform ${isWhyIndicatorMattersOpen ? 'rotate-180 text-[#EA717B]' : ''}`} />
+                </button>
+
+                {/* Why is this shown as... button (scrolls smoothly to Accordion 2) */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsWhyStatusOpen(true);
+                    const el = document.getElementById('why-status-accordion');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-[#FFF4EC] text-[#3B2522] border border-[#E8D8D2] transition cursor-pointer shadow-2xs"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2D6A4F]" />
+                  <span>
+                    {t('financialPartner.whyShownAsButton', {
+                      status: statusDetails.headline,
+                      defaultValue: `Why is this shown as "${statusDetails.headline}"?`
+                    })}
+                  </span>
+                  <ChevronRight className="w-3 h-3 text-[#765E59]" />
+                </button>
+              </div>
+
+              {/* Expandable "Why this matters?" explanation */}
+              {isWhyIndicatorMattersOpen && (
+                <div className="p-4 bg-white rounded-2xl border border-[#E8D8D2] text-xs text-[#3B2522] space-y-2 animate-in fade-in shadow-2xs">
+                  <p className="leading-relaxed">
+                    <strong className="text-[#2B1810]">
+                      {t('financialPartner.whyThisMattersHeading', 'Understanding Institutional Financial Position:')}
+                    </strong>{' '}
+                    {t(
+                      'financialPartner.whyThisMattersIndicatorDesc',
+                      'These indicators provide an institution-level view of publicly reported financial conditions. When an institution has a stronger financial position, its reported operations and regulatory buffers are stable. This information helps citizens understand an institution\'s public scale and stability before applying. However, it does not guarantee loan approval, credit sanction, or individual scheme eligibility.'
+                    )}
+                  </p>
+                  <p className="text-[11px] text-[#765E59] leading-relaxed pt-1.5 border-t border-[#E8D8D2]">
+                    {t('financialPartner.neutralNotice', 'Neutral Information: YojnaSetu does not provide investment advice or credit ratings. Public statutory filings are presented strictly for transparent citizen awareness.')}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Provenance & Institution-Level Disclaimer Footer */}
+            <div className="pt-3 border-t border-[#E8D8D2]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#765E59]">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-[#3B2522]">Source:</span>
+                {sourceUrl ? (
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#EA717B] hover:underline flex items-center gap-0.5 font-bold"
+                  >
+                    {authority} <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <span className="text-[#3B2522] font-bold">{authority}</span>
+                )}
+                <span>•</span>
+                <span>Last updated: <strong className="font-mono text-[#3B2522]">{reportingPeriod || '31 Mar 2025'}</strong></span>
+                <span>•</span>
+                <span className="inline-flex items-center gap-1 text-[#2D6A4F] font-bold">
+                  <ShieldCheck className="w-3 h-3" />
+                  Verified Disclosures
+                </span>
+              </div>
+
+              <div className="text-[11px] text-[#765E59] italic">
+                {verifiedCountDesc}
+              </div>
+            </div>
+          </div>
+
           {/* Key Financial Figures at a Glance Header */}
           <div className="bg-white rounded-3xl border border-[#E8D8D2] shadow-warm-xs p-6 sm:p-8 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8D8D2] pb-5">
@@ -444,7 +652,7 @@ export const PartnerFinancialHealth: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-black text-[#3B2522] tracking-tight">
-                    Key Financial Figures at a Glance
+                    {t('financialHealth.verifiedMetrics', 'Key Financial Figures at a Glance')}
                   </h2>
                   <p className="text-xs text-[#765E59] mt-0.5">
                     These are the latest publicly reported figures for {institutionName} (institution-level).
@@ -474,19 +682,35 @@ export const PartnerFinancialHealth: React.FC = () => {
               </div>
             </div>
 
-            {/* 3 KPI Cards Side-by-Side (Exact match to Reference) */}
+            {/* 3 KPI Cards Side-by-Side */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Card 1: Net NPA */}
               <MetricKpiCard
                 id="nnpa"
                 label="Net NPA"
-                value={nnpa != null ? `${nnpa.toFixed(2)}%` : '0.40%'}
-                statusBadgeText="Lower is better"
-                statusBadgeType="positive"
+                value={nnpa != null ? `${nnpa.toFixed(2)}%` : t('financialPartner.notReported', 'Not Reported')}
+                statusBadgeText={
+                  nnpa != null
+                    ? nnpa <= 1.0
+                      ? t('financialPartner.strongRange', 'Strong range')
+                      : nnpa <= 3.0
+                      ? t('financialPartner.moderateLevel', 'Moderate level')
+                      : t('financialPartner.needsAttention', 'Needs attention')
+                    : t('financialPartner.noPublicData', 'No public data')
+                }
+                statusBadgeType={
+                  nnpa != null
+                    ? nnpa <= 1.0
+                      ? 'positive'
+                      : nnpa <= 3.0
+                      ? 'moderate'
+                      : 'caution'
+                    : 'neutral'
+                }
                 interpretation={
                   nnpa != null
                     ? `Only ₹${nnpa.toFixed(2)} out of every ₹100 of loans is currently classified as non-performing after provisions.`
-                    : 'Only ₹0.40 out of every ₹100 of loans is currently classified as non-performing after provisions.'
+                    : t('financialPartner.nnpaNotReported', 'Net NPA figure is not reported in public statutory disclosures for this partner.')
                 }
                 icon={Coins}
                 iconBg="bg-[#FFF4EC]"
@@ -498,13 +722,29 @@ export const PartnerFinancialHealth: React.FC = () => {
               <MetricKpiCard
                 id="gnpa"
                 label="Gross NPA"
-                value={gnpa != null ? `${gnpa.toFixed(2)}%` : '3.95%'}
-                statusBadgeText="Moderate level"
-                statusBadgeType="moderate"
+                value={gnpa != null ? `${gnpa.toFixed(2)}%` : t('financialPartner.notReported', 'Not Reported')}
+                statusBadgeText={
+                  gnpa != null
+                    ? gnpa <= 3.0
+                      ? t('financialPartner.strongRange', 'Strong range')
+                      : gnpa <= 7.0
+                      ? t('financialPartner.moderateLevel', 'Moderate level')
+                      : t('financialPartner.needsAttention', 'Needs attention')
+                    : t('financialPartner.noPublicData', 'No public data')
+                }
+                statusBadgeType={
+                  gnpa != null
+                    ? gnpa <= 3.0
+                      ? 'positive'
+                      : gnpa <= 7.0
+                      ? 'moderate'
+                      : 'caution'
+                    : 'neutral'
+                }
                 interpretation={
                   gnpa != null
                     ? `About ₹${gnpa.toFixed(2)} out of every ₹100 of loans is classified as non-performing.`
-                    : 'About ₹3.95 out of every ₹100 of loans is classified as non-performing.'
+                    : t('financialPartner.gnpaNotReported', 'Gross NPA figure is not reported in public statutory disclosures for this partner.')
                 }
                 icon={BarChart3}
                 iconBg="bg-[#FFF4EC]"
@@ -516,13 +756,29 @@ export const PartnerFinancialHealth: React.FC = () => {
               <MetricKpiCard
                 id="crar"
                 label="Capital Cushion (CRAR)"
-                value={crar != null ? `${crar.toFixed(2)}%` : '15.97%'}
-                statusBadgeText="Well above regulatory requirement"
-                statusBadgeType="positive"
+                value={crar != null ? `${crar.toFixed(2)}%` : t('financialPartner.notReported', 'Not Reported')}
+                statusBadgeText={
+                  crar != null
+                    ? crar >= 12.0
+                      ? t('financialPartner.strongCushion', 'Strong cushion')
+                      : crar >= 9.0
+                      ? t('financialPartner.meetsMinimum', 'Meets minimum norm')
+                      : t('financialPartner.belowNorm', 'Below standard norm')
+                    : t('financialPartner.noPublicData', 'No public data')
+                }
+                statusBadgeType={
+                  crar != null
+                    ? crar >= 12.0
+                      ? 'positive'
+                      : crar >= 9.0
+                      ? 'moderate'
+                      : 'caution'
+                    : 'neutral'
+                }
                 interpretation={
                   crar != null
                     ? `The bank maintains ₹${crar.toFixed(2)} of capital for every ₹100 of risk-weighted assets, indicating a strong financial cushion.`
-                    : 'The bank maintains ₹15.97 of capital for every ₹100 of risk-weighted assets, indicating a strong financial cushion.'
+                    : t('financialPartner.crarNotReported', 'Capital Cushion (CRAR) is not reported in public statutory disclosures for this partner.')
                 }
                 icon={Shield}
                 iconBg="bg-[#FFF4EC]"
@@ -547,10 +803,10 @@ export const PartnerFinancialHealth: React.FC = () => {
                 {activeMetricModal === 'NNPA' && (
                   <>
                     <p className="leading-relaxed">
-                      <strong>Simple meaning:</strong> Loans where repayment problems are still reported after applicable provisions and deductions.
+                      <strong>{t('financialPartner.simpleMeaning', 'Simple meaning:')}</strong> {t('financialHealth.net_npa_simple', 'Loans where repayment problems are still reported after applicable provisions and deductions.')}
                     </p>
                     <p className="leading-relaxed">
-                      <strong>Why does a lower number generally matter?</strong> A lower Net NPA generally means a smaller share of the institution's reported net loans has repayment problems.
+                      <strong>{t('financialPartner.whyLowerMatters', 'Why does a lower number generally matter?')}</strong> A lower Net NPA generally means a smaller share of the institution's reported net loans has repayment problems.
                     </p>
                     <p className="text-[11px] font-bold text-[#EA717B] pt-1">
                       Important: It does not mean your own loan will be approved.
@@ -560,20 +816,20 @@ export const PartnerFinancialHealth: React.FC = () => {
                 {activeMetricModal === 'GNPA' && (
                   <>
                     <p className="leading-relaxed">
-                      <strong>Simple meaning:</strong> Shows the broader share of loans reported as non-performing.
+                      <strong>{t('financialPartner.simpleMeaning', 'Simple meaning:')}</strong> {t('financialHealth.gross_npa_simple', 'Shows the broader share of loans reported as non-performing.')}
                     </p>
                     <p className="leading-relaxed">
-                      <strong>Why does a lower number generally matter?</strong> A lower Gross NPA generally means fewer of the institution's reported loans are classified as non-performing.
+                      <strong>{t('financialPartner.whyLowerMatters', 'Why does a lower number generally matter?')}</strong> A lower Gross NPA generally means fewer of the institution's reported loans are classified as non-performing.
                     </p>
                   </>
                 )}
                 {activeMetricModal === 'CRAR' && (
                   <>
                     <p className="leading-relaxed">
-                      <strong>Simple meaning:</strong> Shows the capital an institution maintains against the risks in its assets.
+                      <strong>{t('financialPartner.simpleMeaning', 'Simple meaning:')}</strong> {t('financialHealth.crar_simple', 'Shows the capital an institution maintains against the risks in its assets.')}
                     </p>
                     <p className="leading-relaxed">
-                      <strong>Why does a higher number generally matter?</strong> A higher CRAR generally means more capital cushion under the applicable capital framework.
+                      <strong>{t('financialPartner.whyHigherMatters', 'Why does a higher number generally matter?')}</strong> A higher CRAR generally means more capital cushion under the applicable capital framework.
                     </p>
                   </>
                 )}
@@ -586,7 +842,12 @@ export const PartnerFinancialHealth: React.FC = () => {
                 <Lightbulb className="w-5 h-5 text-[#EA717B]" />
               </div>
               <p className="text-xs sm:text-sm text-[#3B2522] leading-relaxed">
-                <strong className="font-extrabold text-[#4A2525]">In simple terms:</strong> These numbers indicate that <strong>{institutionName}</strong> is in a <strong>{statusDetails.simpleSummary}</strong>. However, these are overall bank-level figures. Your loan application will still be evaluated based on the specific scheme rules and branch/partner process.
+                <strong className="font-extrabold text-[#4A2525]">{t('financialPartner.inSimpleTermsLabel', 'In simple terms:')}</strong>{' '}
+                {t('financialPartner.inSimpleTermsDesc', {
+                  name: institutionName,
+                  summary: statusDetails.simpleSummary,
+                  defaultValue: `These numbers indicate that ${institutionName} is in a ${statusDetails.simpleSummary}. However, these are overall bank-level figures. Your loan application will still be evaluated based on the specific scheme rules and branch/partner process.`
+                })}
               </p>
             </div>
           </div>
@@ -607,10 +868,10 @@ export const PartnerFinancialHealth: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-extrabold text-[#3B2522]">
-                      What do these numbers tell us?
+                      {t('financialPartner.accordion1Title', 'What do these numbers tell us?')}
                     </h3>
                     <p className="text-xs text-[#765E59]">
-                      A simple citizen overview of Net NPA, Gross NPA, and Capital Cushion
+                      {t('financialPartner.accordion1Sub', 'A simple citizen overview of Net NPA, Gross NPA, and Capital Cushion')}
                     </p>
                   </div>
                 </div>
@@ -621,27 +882,27 @@ export const PartnerFinancialHealth: React.FC = () => {
                 <div className="p-5 pt-0 border-t border-[#E8D8D2] space-y-3 text-xs text-[#765E59] bg-[#FFF4EC]/30">
                   <div className="divide-y divide-[#E8D8D2]">
                     <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <span className="font-bold text-[#3B2522] w-36 uppercase">NET NPA</span>
-                      <span className="text-[#765E59] flex-1">Reported repayment problems that remain after applicable provisions and deductions.</span>
+                      <span className="font-bold text-[#3B2522] w-36 uppercase">{t('financialHealth.netNpa', 'Net NPA')}</span>
+                      <span className="text-[#765E59] flex-1">{t('financialPartner.netNpaExplainer', 'Reported repayment problems that remain after applicable provisions and deductions.')}</span>
                     </div>
                     <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <span className="font-bold text-[#3B2522] w-36 uppercase">GROSS NPA</span>
-                      <span className="text-[#765E59] flex-1">Broader reported level of non-performing loans across all loan books.</span>
+                      <span className="font-bold text-[#3B2522] w-36 uppercase">{t('financialHealth.grossNpa', 'Gross NPA')}</span>
+                      <span className="text-[#765E59] flex-1">{t('financialPartner.grossNpaExplainer', 'Broader reported level of non-performing loans across all loan books.')}</span>
                     </div>
                     <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                      <span className="font-bold text-[#3B2522] w-36 uppercase">CRAR</span>
-                      <span className="text-[#765E59] flex-1">Reported capital cushion against measured financial risks under RBI Basel norms.</span>
+                      <span className="font-bold text-[#3B2522] w-36 uppercase">{t('financialHealth.crar', 'CRAR')}</span>
+                      <span className="text-[#765E59] flex-1">{t('financialPartner.crarExplainer', 'Reported capital cushion against measured financial risks under RBI Basel norms.')}</span>
                     </div>
                   </div>
                   <p className="text-[#765E59] bg-white p-3 rounded-xl border border-[#E8D8D2] font-medium">
-                    Together, these indicators give a broader picture than any single number alone.
+                    {t('financialPartner.togetherIndicators', 'Together, these indicators give a broader picture than any single number alone.')}
                   </p>
                 </div>
               )}
             </div>
 
             {/* Accordion 2: Why is this shown as status? */}
-            <div className="bg-white border border-[#E8D8D2] rounded-2xl shadow-warm-xs overflow-hidden">
+            <div id="why-status-accordion" className="bg-white border border-[#E8D8D2] rounded-2xl shadow-warm-xs overflow-hidden">
               <button
                 type="button"
                 onClick={() => setIsWhyStatusOpen(!isWhyStatusOpen)}
@@ -649,15 +910,15 @@ export const PartnerFinancialHealth: React.FC = () => {
                 aria-expanded={isWhyStatusOpen}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-4 h-4 text-[#2D6A4F]" />
+                  <div className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 ${statusTheme.iconBox}`}>
+                    <StatusIcon className={`w-4 h-4 ${statusTheme.iconColor}`} />
                   </div>
                   <div>
                     <h3 className="text-sm font-extrabold text-[#3B2522]">
-                      Why is this shown as &quot;{statusDetails.headline}&quot;?
+                      {t('financialPartner.accordion2Title', { status: statusDetails.headline, defaultValue: `Why is this shown as "${statusDetails.headline}"?` })}
                     </h3>
                     <p className="text-xs text-[#765E59]">
-                      How verified figures map to this summary
+                      {t('financialPartner.accordion2Sub', 'How verified figures map to this summary')}
                     </p>
                   </div>
                 </div>
@@ -669,29 +930,53 @@ export const PartnerFinancialHealth: React.FC = () => {
                   <p className="leading-relaxed font-medium text-[#3B2522]">
                     {statusDetails.whyStatus}
                   </p>
-                  <div className="bg-white p-3.5 rounded-xl border border-[#E8D8D2] space-y-1.5">
-                    <span className="font-bold text-[#3B2522] block">Available verified information:</span>
-                    <ul className="space-y-1">
-                      {nnpa != null && (
-                        <li className="flex items-center gap-2 text-[#3B2522]">
-                          <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
-                          <span>Net NPA — <strong className="font-mono">{nnpa.toFixed(2)}%</strong></span>
-                        </li>
-                      )}
-                      {gnpa != null && (
-                        <li className="flex items-center gap-2 text-[#3B2522]">
-                          <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
-                          <span>Gross NPA — <strong className="font-mono">{gnpa.toFixed(2)}%</strong></span>
-                        </li>
-                      )}
-                      {crar != null && (
-                        <li className="flex items-center gap-2 text-[#3B2522]">
-                          <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
-                          <span>Capital cushion (CRAR) — <strong className="font-mono">{crar.toFixed(2)}%</strong></span>
-                        </li>
-                      )}
-                    </ul>
+                  <div className="bg-white p-3.5 rounded-xl border border-[#E8D8D2] space-y-2">
+                    <span className="font-bold text-[#3B2522] block">{t('financialHealth.verifiedMetrics', 'Available verified information:')}</span>
+                    {evidenceCount > 0 ? (
+                      <ul className="space-y-1.5">
+                        {nnpa != null && (
+                          <li className="flex items-center justify-between text-[#3B2522] border-b border-[#E8D8D2]/50 pb-1">
+                            <span className="flex items-center gap-2">
+                              <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+                              <span>Net NPA: <strong className="font-mono">{nnpa.toFixed(2)}%</strong></span>
+                            </span>
+                            <span className="text-[11px] font-mono text-[#765E59]">
+                              {nnpa <= 1.0 ? 'Stronger (≤ 1.0%)' : nnpa <= 3.0 ? 'Mixed (1.0% - 3.0%)' : 'Stress (> 3.0%)'}
+                            </span>
+                          </li>
+                        )}
+                        {gnpa != null && (
+                          <li className="flex items-center justify-between text-[#3B2522] border-b border-[#E8D8D2]/50 pb-1">
+                            <span className="flex items-center gap-2">
+                              <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+                              <span>Gross NPA: <strong className="font-mono">{gnpa.toFixed(2)}%</strong></span>
+                            </span>
+                            <span className="text-[11px] font-mono text-[#765E59]">
+                              {gnpa <= 3.0 ? 'Stronger (≤ 3.0%)' : gnpa <= 7.0 ? 'Mixed (3.0% - 7.0%)' : 'Stress (> 7.0%)'}
+                            </span>
+                          </li>
+                        )}
+                        {crar != null && (
+                          <li className="flex items-center justify-between text-[#3B2522]">
+                            <span className="flex items-center gap-2">
+                              <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+                              <span>Capital cushion (CRAR): <strong className="font-mono">{crar.toFixed(2)}%</strong></span>
+                            </span>
+                            <span className="text-[11px] font-mono text-[#765E59]">
+                              {crar >= 12.0 ? 'Stronger (≥ 12.0%)' : crar >= 9.0 ? 'Mixed (9.0% - 12.0%)' : 'Stress (< 9.0%)'}
+                            </span>
+                          </li>
+                        )}
+                      </ul>
+                    ) : (
+                      <p className="text-[#765E59] italic">
+                        {t('financialPartner.noMetricsAvailableForEvaluation', 'No verified financial indicators were found in public disclosures for this entity. YojnaSetu strictly requires at least 2 verified indicators before calculating a position.')}
+                      </p>
+                    )}
                   </div>
+                  <p className="text-[11px] text-[#765E59]">
+                    {t('financialPartner.institutionLevelNote', 'Figures represent corporate institution disclosures under RBI guidelines and not specific branch results.')}
+                  </p>
                 </div>
               )}
             </div>
@@ -710,10 +995,10 @@ export const PartnerFinancialHealth: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-extrabold text-[#3B2522]">
-                      How did YojnaSetu calculate this?
+                      {t('financialPartner.accordion3Title', 'How did YojnaSetu calculate this?')}
                     </h3>
                     <p className="text-xs text-[#765E59]">
-                      Methodology, presentation bands, and thresholds (YS-FIS-V1)
+                      {t('financialPartner.accordion3Sub', 'Methodology, presentation bands, and thresholds (YS-FIS-V1)')}
                     </p>
                   </div>
                 </div>
@@ -727,15 +1012,15 @@ export const PartnerFinancialHealth: React.FC = () => {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="p-3 bg-white rounded-xl border border-[#E8D8D2]">
-                      <span className="font-bold text-[#2D6A4F] block">STRONGER</span>
+                      <span className="font-bold text-[#2D6A4F] block">{t('financialHealth.statusStronger', 'STRONGER')}</span>
                       <p className="font-mono text-[11px] text-[#765E59] mt-1">NNPA &le; 1.0%, GNPA &le; 3.0%, CRAR &ge; 12.0%</p>
                     </div>
                     <div className="p-3 bg-white rounded-xl border border-[#E8D8D2]">
-                      <span className="font-bold text-[#F7AE56] block">MIXED</span>
+                      <span className="font-bold text-[#F7AE56] block">{t('financialHealth.statusMixed', 'MIXED')}</span>
                       <p className="font-mono text-[11px] text-[#765E59] mt-1">1.0% &lt; NNPA &le; 3.0% or 3.0% &lt; GNPA &le; 7.0%</p>
                     </div>
                     <div className="p-3 bg-white rounded-xl border border-[#E8D8D2]">
-                      <span className="font-bold text-[#EA717B] block">HIGHER STRESS</span>
+                      <span className="font-bold text-[#EA717B] block">{t('financialHealth.statusAttention', 'HIGHER STRESS')}</span>
                       <p className="font-mono text-[11px] text-[#765E59] mt-1">NNPA &gt; 3.0% or GNPA &gt; 7.0% or CRAR &lt; 9.0%</p>
                     </div>
                   </div>
@@ -761,10 +1046,10 @@ export const PartnerFinancialHealth: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-extrabold text-[#3B2522]">
-                      Technical verification & audit details
+                      {t('financialPartner.accordion4Title', 'Technical verification & audit details')}
                     </h3>
                     <p className="text-xs text-[#765E59]">
-                      Entity resolution telemetry, statutory prudential checks, provenance, and audit logs
+                      {t('financialPartner.accordion4Sub', 'Entity resolution telemetry, statutory prudential checks, provenance, and audit logs')}
                     </p>
                   </div>
                 </div>
@@ -904,10 +1189,10 @@ export const PartnerFinancialHealth: React.FC = () => {
           <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-2xl p-4 text-xs text-[#4A2525] space-y-2">
             <div className="flex items-center gap-1.5 font-bold text-[#4A2525]">
               <Info className="w-4 h-4 text-[#EA717B] shrink-0" />
-              <span>Citizen Information Notice</span>
+              <span>{t('financialPartner.citizenNoticeTitle', 'Citizen Information Notice')}</span>
             </div>
             <p className="leading-relaxed text-[#765E59]">
-              This financial information helps you evaluate institution performance before applying. Scheme eligibility and financial assistance sanctions remain governed exclusively by official scheme rules.
+              {t('financialPartner.citizenNoticeDesc', 'This financial information helps you evaluate institution performance before applying. Scheme eligibility and financial assistance sanctions remain governed exclusively by official scheme rules.')}
             </p>
           </div>
         </div>

@@ -357,11 +357,11 @@ export const SchemeDocumentsSection: React.FC<SchemeDocumentsSectionProps> = ({ 
           >
             {areAllExpanded ? (
               <>
-                <ChevronUp className="w-4 h-4" /> Collapse All Groups
+                <ChevronUp className="w-4 h-4" /> {t('schemeDetail.documents.collapseAllGroups', 'Collapse All Groups')}
               </>
             ) : (
               <>
-                <ChevronDown className="w-4 h-4" /> Expand All Groups
+                <ChevronDown className="w-4 h-4" /> {t('schemeDetail.documents.expandAllGroups', 'Expand All Groups')}
               </>
             )}
           </button>
@@ -372,14 +372,14 @@ export const SchemeDocumentsSection: React.FC<SchemeDocumentsSectionProps> = ({ 
       {allDocs.length === 0 ? (
         <div className="bg-[#FFF4EC] border border-[#F7AE56]/30 p-6 rounded-2xl text-center space-y-2">
           <Info className="w-8 h-8 text-[#F7AE56] mx-auto" />
-          <p className="text-sm font-bold text-[#3B2522]">Document Guidelines Under Gazette Review</p>
+          <p className="text-sm font-bold text-[#3B2522]">{t('schemeDetail.documents.underReview', 'Document Guidelines Under Gazette Review')}</p>
           <p className="text-xs text-[#765E59] max-w-lg mx-auto">
             Official document requirements are being synchronized with the latest ministry gazette. Please keep standard identity (Aadhaar), residence, and bank records ready.
           </p>
         </div>
       ) : populatedGroups.length === 0 ? (
         <div className="bg-white p-6 rounded-2xl border border-[#E8D8D2] text-center space-y-2">
-          <p className="text-xs text-[#765E59]">No documents found matching "{searchTerm}".</p>
+          <p className="text-xs text-[#765E59]">{t('schemeDetail.documents.noDocsMatch', { term: searchTerm, defaultValue: `No documents found matching "${searchTerm}".` })}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -414,7 +414,7 @@ export const SchemeDocumentsSection: React.FC<SchemeDocumentsSectionProps> = ({ 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="text-sm font-bold text-[#3B2522] truncate">
-                          {meta.title}
+                          {t(`schemeDetail.documents.cat${meta.key}Title`, meta.title)}
                         </h3>
                         <span className="text-[11px] font-extrabold bg-[#FFF4EC] text-[#765E59] px-2 py-0.5 rounded-full shrink-0 border border-[#E8D8D2]">
                           {docsToDisplay.length}
@@ -428,7 +428,7 @@ export const SchemeDocumentsSection: React.FC<SchemeDocumentsSectionProps> = ({ 
 
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-xs font-semibold text-[#765E59] hidden sm:inline">
-                      {isExpanded ? 'Hide' : 'Show'}
+                      {isExpanded ? t('common.hide', 'Hide') : t('common.show', 'Show')}
                     </span>
                     <div className="w-7 h-7 rounded-lg bg-[#FFF4EC] text-[#4A2525] flex items-center justify-center">
                       {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -488,7 +488,7 @@ export const SchemeDocumentsSection: React.FC<SchemeDocumentsSectionProps> = ({ 
       <div className="bg-[#FFF4EC] rounded-2xl p-4 border border-[#E8D8D2] text-xs text-[#765E59] flex items-start gap-3">
         <ShieldCheck className="w-4 h-4 text-[#EA717B] shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="font-bold text-[#3B2522] text-[11px]">Zero Document Storage Security</p>
+          <p className="font-bold text-[#3B2522] text-[11px]">{t('schemeDetail.documents.zeroStorage', 'Zero Document Storage Security')}</p>
           <p className="text-[11px] text-[#765E59] leading-relaxed">
             YojnaSetu never asks you to upload, transmit, or store sensitive documents. Please carry your original papers or present them via authorized DigiLocker channels during in-person verification with authorized channel partners or bank officers.
           </p>

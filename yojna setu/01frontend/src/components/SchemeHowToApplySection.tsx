@@ -67,10 +67,10 @@ export const SchemeHowToApplySection: React.FC<SchemeHowToApplySectionProps> = (
   const customSteps = parseRawSteps(scheme.application_steps);
 
   const routeTitle = isDirectPortal
-    ? 'Direct Official Portal Route'
+    ? t('schemeDetail.howToApply.directPortalRoute', 'Direct Official Portal Route')
     : isPartnerRouted
-    ? 'Authorized Channel Partner Route'
-    : 'District Departmental Route';
+    ? t('schemeDetail.howToApply.channelPartnerRoute', 'Authorized Channel Partner Route')
+    : t('schemeDetail.howToApply.departmentalRoute', 'District Departmental Route');
 
   const routeBadgeColor = isDirectPortal
     ? 'bg-sky-50 text-sky-700 border-sky-200'
@@ -85,10 +85,10 @@ export const SchemeHowToApplySection: React.FC<SchemeHowToApplySectionProps> = (
         <div>
           <h2 className="text-lg sm:text-xl font-extrabold text-[#3B2522] tracking-tight flex items-center gap-2">
             <Building2 className="w-5 h-5 text-[#EA717B]" />
-            How to Apply
+            {t('schemeDetail.howToApplyTitle', 'How to Apply')}
           </h2>
           <p className="text-xs text-[#765E59] mt-0.5">
-            Follow this verified 4-step process to submit your application through the official channel.
+            {t('schemeDetail.howToApply.howToApplyDesc', 'Follow this verified 4-step process to submit your application through the official channel.')}
           </p>
         </div>
 
@@ -250,7 +250,7 @@ export const SchemeHowToApplySection: React.FC<SchemeHowToApplySectionProps> = (
           <div className="space-y-3 pt-2 border-t border-[#E8D8D2]/60">
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#765E59] flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-[#EA717B]" />
-              Documented Departmental Steps
+              {t('schemeDetail.howToApply.documentedSteps', 'Documented Departmental Steps')}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               {customSteps.map((step, idx) => (
@@ -274,10 +274,10 @@ export const SchemeHowToApplySection: React.FC<SchemeHowToApplySectionProps> = (
             <div className="space-y-0.5">
               <span className="font-bold text-[#4A2525] flex items-center gap-1.5">
                 <TrendingUp className="w-4 h-4 text-[#EA717B]" />
-                Channel Partner Financial Health Directory
+                {t('schemeDetail.howToApply.channelPartnerCallout', 'Channel Partner Financial Health Directory')}
               </span>
               <p className="text-[#765E59] text-[11px]">
-                Review financial health indicators and institutional stability of authorized channel partners for this scheme.
+                {t('schemeDetail.howToApply.channelPartnerCalloutDesc', 'Review financial health indicators and institutional stability of authorized channel partners for this scheme.')}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -285,7 +285,7 @@ export const SchemeHowToApplySection: React.FC<SchemeHowToApplySectionProps> = (
                 to={`/financial-health/scheme/${scheme.scheme_id}`}
                 className="text-xs font-bold text-[#4A2525] hover:text-[#EA717B] flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-[#E8D8D2] shadow-warm-xs hover:bg-[#FFF4EC] transition"
               >
-                View Partner Financial Health
+                {t('schemeDetail.howToApply.viewPartnerFinancialHealth', 'View Partner Financial Health')}
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -296,9 +296,9 @@ export const SchemeHowToApplySection: React.FC<SchemeHowToApplySectionProps> = (
         <div className="bg-[#FFF4EC]/50 rounded-xl p-3.5 text-xs text-[#765E59] border border-[#E8D8D2] flex items-start gap-2.5">
           <Info className="w-4 h-4 text-[#EA717B] shrink-0 mt-0.5" />
           <div className="space-y-0.5">
-            <p className="font-bold text-[#3B2522] text-[11px]">Official Notice</p>
+            <p className="font-bold text-[#3B2522] text-[11px]">{t('schemeDetail.howToApply.officialNotice', 'Official Notice')}</p>
             <p className="text-[11px] text-[#765E59] leading-relaxed">
-              Final eligibility, document verification, and approval are decided by the concerned authority. YojnaSetu provides procedural guidance based on verified government documentation.
+              {t('schemeDetail.howToApply.officialNoticeDesc', 'Final eligibility, document verification, and approval are decided by the concerned authority. YojnaSetu provides procedural guidance based on verified government documentation.')}
             </p>
           </div>
         </div>

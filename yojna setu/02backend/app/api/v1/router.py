@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, profile, schemes, recommendations, applications, partner, calculator, ai, admin, notifications, saved_schemes, health, ingestion, financial_health
+from app.api.v1.endpoints import auth, profile, schemes, recommendations, applications, partner, calculator, ai, admin, notifications, saved_schemes, health, ingestion, financial_health, blogs
 
 api_router = APIRouter()
 
@@ -18,4 +18,6 @@ api_router.include_router(financial_health.router, prefix="/financial-health", t
 api_router.include_router(ai.router, prefix="/ai", tags=["AI & NLP Intelligence Layer"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications & Alerts"])
 api_router.include_router(ingestion.router, prefix="/ingestion", tags=["Dynamic Scheme Data Ingestion Pipeline"])
+api_router.include_router(blogs.router, prefix="/blogs", tags=["Financial Blogs"])
+api_router.include_router(blogs.admin_router, prefix="/admin/blogs", tags=["System Admin & Management"])
 

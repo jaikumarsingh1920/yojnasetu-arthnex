@@ -71,7 +71,7 @@ export const AICopilot: React.FC = () => {
             <span className="absolute -top-0.5 -right-0.5 bg-[#EA717B] w-2 h-2 rounded-full ring-2 ring-[#4A2525] animate-pulse" />
           </div>
           <span className="hidden sm:inline text-xs font-bold tracking-tight text-[#FFFBF0]">
-            Ask YojnaSetu
+            {t('copilot.askButton', 'Ask YojnaSetu')}
           </span>
         </button>
       )}

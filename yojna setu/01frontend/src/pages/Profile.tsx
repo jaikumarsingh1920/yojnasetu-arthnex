@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api/profileApi';
@@ -79,6 +79,9 @@ const SECTORS = [
 export const Profile: React.FC = () => {
   const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
 
   const [profileData, setProfileData] = useState<BeneficiaryProfileInput>({
     age: 28,
@@ -193,8 +196,16 @@ export const Profile: React.FC = () => {
 
       setFeedback({
         type: 'success',
-        message: t('profile.saveSuccess', 'Citizen profile updated and verified successfully! Smart matching is ready.'),
+        message: redirectUrl
+          ? t('profile.saveSuccessRedirect', 'Citizen profile updated successfully! Returning to Smart Matching...')
+          : t('profile.saveSuccess', 'Citizen profile updated and verified successfully! Smart matching is ready.'),
       });
+
+      if (redirectUrl) {
+        setTimeout(() => {
+          navigate(redirectUrl);
+        }, 1200);
+      }
     } catch (err: any) {
       setFeedback({
         type: 'error',
@@ -225,6 +236,14 @@ export const Profile: React.FC = () => {
           </p>
         </div>
 
+        {redirectUrl && (
+          <Link
+            to={redirectUrl}
+            className="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FFF4EC] hover:bg-white text-[#4A2525] font-bold text-xs shadow-warm-xs transition"
+          >
+            <span>← Return to Smart Matching</span>
+          </Link>
+        )}
       </div>
 
       {feedback && (

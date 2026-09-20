@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Scheme, SchemeRule } from '../types';
 import {
   ShieldCheck,
@@ -37,6 +38,7 @@ interface HumanizedRule {
 }
 
 export const SchemeEligibilitySection: React.FC<SchemeEligibilitySectionProps> = ({ scheme }) => {
+  const { t } = useTranslation();
   const [activeCategory, setActiveCategory] = useState<EligibilityCategory | 'ALL'>('ALL');
   const [showTechnicalDetails, setShowTechnicalDetails] = useState<boolean>(false);
 
@@ -324,31 +326,31 @@ export const SchemeEligibilitySection: React.FC<SchemeEligibilitySectionProps> =
     { title: string; icon: React.FC<{ className?: string }>; count: number; desc: string }
   > = {
     APPLICANT: {
-      title: 'Applicant Eligibility',
+      title: t('schemeDetail.eligibility.catApplicant', 'Applicant & Personal Requirements'),
       icon: UserCheck,
       count: humanizedRules.filter((r) => r.category === 'APPLICANT').length,
       desc: 'Age limits, gender, citizenship, and educational prerequisites',
     },
     INCOME_FINANCIAL: {
-      title: 'Income & Financial Conditions',
+      title: t('schemeDetail.eligibility.catIncome', 'Income & Financial Criteria'),
       icon: Wallet,
       count: humanizedRules.filter((r) => r.category === 'INCOME_FINANCIAL').length,
       desc: 'Family income ceilings, loan quantums, interest rates, and tenures',
     },
     CATEGORY_COMMUNITY: {
-      title: 'Category & Community Conditions',
+      title: t('schemeDetail.eligibility.catCommunity', 'Category & Community Guidelines'),
       icon: Users,
       count: humanizedRules.filter((r) => r.category === 'CATEGORY_COMMUNITY').length,
       desc: 'Affirmative action, social category, and reserved community criteria',
     },
     PROJECT_BUSINESS: {
-      title: 'Project & Business Conditions',
+      title: t('schemeDetail.eligibility.catProject', 'Project & Business Rules'),
       icon: Briefcase,
       count: humanizedRules.filter((r) => r.category === 'PROJECT_BUSINESS').length,
       desc: 'Permissible project costs, business stage, and eligible trades',
     },
     OTHER: {
-      title: 'Application Route & Other Conditions',
+      title: t('schemeDetail.eligibility.catOther', 'Application Route & Other Conditions'),
       icon: HelpCircle,
       count: humanizedRules.filter((r) => r.category === 'OTHER').length,
       desc: 'Authorized application channels and territorial coverage',
@@ -371,23 +373,23 @@ export const SchemeEligibilitySection: React.FC<SchemeEligibilitySectionProps> =
         <div>
           <h2 className="text-lg sm:text-xl font-extrabold text-[#3B2522] tracking-tight flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-[#EA717B]" />
-            Who Can Apply?
+            {t('schemeDetail.eligibility.whoCanApply', 'Who Can Apply?')}
           </h2>
           <p className="text-xs text-[#765E59] mt-0.5">
-            Verified official eligibility rules and program conditions extracted from scheme gazette.
+            {t('schemeDetail.eligibility.whoCanApplyDesc', 'Verified official eligibility rules and program conditions extracted from scheme gazette.')}
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <span className="text-[11px] font-bold bg-[#FFF4EC] text-[#4A2525] px-3 py-1 rounded-full border border-[#E8D8D2]">
-            {rules.length} {rules.length === 1 ? 'Official Rule' : 'Official Rules'}
+            {rules.length} {rules.length === 1 ? t('schemeDetail.eligibility.officialRulesCount', 'Official Rule') : t('schemeDetail.eligibility.officialRulesCount_other', 'Official Rules')}
           </span>
           <button
             onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
             className="text-[11px] font-semibold text-[#765E59] hover:text-[#3B2522] flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-[#E8D8D2] shadow-warm-xs transition cursor-pointer"
           >
             <Code2 className="w-3.5 h-3.5 text-[#765E59]" />
-            {showTechnicalDetails ? 'Hide Audit Fields' : 'Show Audit Fields'}
+            {showTechnicalDetails ? t('schemeDetail.eligibility.hideAuditFields', 'Hide Audit Fields') : t('schemeDetail.eligibility.showAuditFields', 'Show Audit Fields')}
           </button>
         </div>
       </div>
@@ -396,9 +398,9 @@ export const SchemeEligibilitySection: React.FC<SchemeEligibilitySectionProps> =
       <div className="bg-[#FFF4EC] border border-[#FFD0CA] rounded-2xl p-4 text-xs text-[#4A2525] flex items-start gap-3 shadow-warm-xs">
         <Info className="w-4 h-4 text-[#EA717B] shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="font-bold text-[#4A2525]">Citizen Guidance Guarantee</p>
+          <p className="font-bold text-[#4A2525]">{t('schemeDetail.eligibility.citizenGuidanceGuarantee', 'Citizen Guidance Guarantee')}</p>
           <p className="text-[#765E59] leading-relaxed text-[11px]">
-            YojnaSetu presents documented criteria exactly as verified in official government notifications. YojnaSetu never approves, rejects, or decides applications. Final eligibility and approvals are made exclusively by the concerned department or designated lending partner.
+            {t('schemeDetail.eligibility.citizenGuidanceGuaranteeDesc', 'YojnaSetu presents documented criteria exactly as verified in official government notifications. YojnaSetu never approves, rejects, or decides applications. Final eligibility and approvals are made exclusively by the concerned department or designated lending partner.')}
           </p>
         </div>
       </div>
@@ -414,7 +416,7 @@ export const SchemeEligibilitySection: React.FC<SchemeEligibilitySectionProps> =
                 : 'bg-white text-[#765E59] border-[#E8D8D2] hover:bg-[#FFF4EC]'
             }`}
           >
-            All Conditions ({rules.length})
+            {t('schemeDetail.eligibility.allConditions', { count: rules.length, defaultValue: `All Conditions (${rules.length})` })}
           </button>
 
           {activeCategories.map((catKey) => {
@@ -450,9 +452,9 @@ export const SchemeEligibilitySection: React.FC<SchemeEligibilitySectionProps> =
       {rules.length === 0 ? (
         <div className="bg-white p-6 rounded-2xl border border-[#E8D8D2] text-center space-y-2">
           <Info className="w-8 h-8 text-[#765E59] mx-auto" />
-          <p className="text-sm font-bold text-[#3B2522]">Standard Government Scheme Guidelines</p>
+          <p className="text-sm font-bold text-[#3B2522]">{t('schemeDetail.eligibility.standardGuidelines', 'Standard Government Scheme Guidelines')}</p>
           <p className="text-xs text-[#765E59] max-w-md mx-auto">
-            Specific parametric rules are verified under general ministry directives. General Indian citizenship and sector-specific operational criteria apply.
+            {t('schemeDetail.eligibility.standardGuidelinesDesc', 'Specific parametric rules are verified under general ministry directives. General Indian citizenship and sector-specific operational criteria apply.')}
           </p>
         </div>
       ) : (

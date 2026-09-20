@@ -106,6 +106,8 @@ class SchemeListItemResponse(BaseModel):
     verification_status: Optional[str] = "VERIFIED"
     last_verified_date: Optional[str] = None
     created_at: datetime
+    language: Optional[str] = "en"
+    canonical_scheme_name: Optional[str] = None
 
     @field_validator("scheme_type", mode="before")
     @classmethod
@@ -285,6 +287,11 @@ class SchemeDetailResponse(BaseModel):
     searchable_tags: Optional[str] = None
     verification_status: Optional[str] = "VERIFIED"
     created_at: datetime
+    language: Optional[str] = "en"
+    translation_available: Optional[bool] = None
+    translation_provider: Optional[str] = None
+    translation_cached: Optional[bool] = None
+    canonical_scheme_name: Optional[str] = None
 
     # Related Entities
     verifications: List[SchemeVerificationResponse] = []
@@ -307,6 +314,18 @@ class SchemeDetailResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SchemeTranslationsResponse(BaseModel):
+    scheme_id: str
+    language: str
+    is_supported: bool
+    translation_available: bool
+    translation_cached: bool
+    provider: Optional[str] = None
+    canonical_scheme_name: str
+    fields: Dict[str, str]
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class FilterOptionItem(BaseModel):

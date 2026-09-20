@@ -9,12 +9,17 @@ export const apiClient = axios.create({
   },
 });
 
-// Attach JWT access token automatically
+// Attach JWT access token and active language automatically
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('yojnasetu_access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    const currentLang = localStorage.getItem('i18nextLng') || 'en';
+    config.headers['Accept-Language'] = currentLang;
+    if (config.method === 'get' || !config.method) {
+      config.params = { language: currentLang, ...config.params };
     }
     return config;
   },

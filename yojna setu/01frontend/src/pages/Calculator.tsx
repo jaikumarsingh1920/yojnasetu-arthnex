@@ -1067,7 +1067,7 @@ export const CalculatorPage: React.FC = () => {
                       to={`/schemes/${selectedScheme.scheme_id}`}
                       className="text-xs text-[#FFD0CA] hover:text-white font-bold flex items-center gap-1 transition"
                     >
-                      <span>View Scheme Rules</span> <ArrowRight className="w-3.5 h-3.5" />
+                      <span>{t('calculator.viewSchemeRules', 'View Scheme Rules')}</span> <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   )}
                 </div>
@@ -1075,7 +1075,7 @@ export const CalculatorPage: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
                   {backendResult.subsidy_amount !== undefined && backendResult.subsidy_amount !== null && (
                     <div className="bg-black/20 p-3 rounded-xl border border-white/10">
-                      <span className="text-[#FFD0CA]/80 text-[10px] uppercase font-bold block">Estimated Govt Subsidy</span>
+                      <span className="text-[#FFD0CA]/80 text-[10px] uppercase font-bold block">{t('calculator.estimatedGovtSubsidy', 'Estimated Govt Subsidy')}</span>
                       <span className="text-lg font-black text-[#F7AE56] font-mono mt-0.5 block">
                         {formatCurrency(backendResult.subsidy_amount)}
                       </span>
@@ -1083,7 +1083,7 @@ export const CalculatorPage: React.FC = () => {
                   )}
                   {backendResult.beneficiary_contribution_amount !== undefined && backendResult.beneficiary_contribution_amount !== null && (
                     <div className="bg-black/20 p-3 rounded-xl border border-white/10">
-                      <span className="text-[#FFD0CA]/80 text-[10px] uppercase font-bold block">Applicant Contribution</span>
+                      <span className="text-[#FFD0CA]/80 text-[10px] uppercase font-bold block">{t('calculator.applicantContribution', 'Applicant Contribution')}</span>
                       <span className="text-lg font-black text-white font-mono mt-0.5 block">
                         {formatCurrency(backendResult.beneficiary_contribution_amount)}
                       </span>
@@ -1099,7 +1099,7 @@ export const CalculatorPage: React.FC = () => {
                 <div>
                   <h3 className="text-base font-extrabold text-[#3B2522] flex items-center gap-2">
                     <Table className="w-4 h-4 text-[#EA717B]" />
-                    <span>Loan Amortization Schedule</span>
+                    <span>{t('calculator.loanAmortizationSchedule', 'Loan Amortization Schedule')}</span>
                   </h3>
                   <p className="text-xs text-[#765E59] mt-0.5">
                     Complete breakdown of principal reduction and interest deduction over tenure.
@@ -1176,9 +1176,9 @@ export const CalculatorPage: React.FC = () => {
                     className="text-xs font-bold text-[#EA717B] hover:text-[#d95d67] inline-flex items-center gap-1.5 transition cursor-pointer"
                   >
                     {showFullSchedule ? (
-                      <>Show First 12 Months Only <ChevronUp className="w-4 h-4" /></>
+                      <>{t('calculator.showFirst12Months', 'Show First 12 Months Only')} <ChevronUp className="w-4 h-4" /></>
                     ) : (
-                      <>Show Full {totalMonths}-Month Amortization Schedule <ChevronDown className="w-4 h-4" /></>
+                      <>{t('calculator.showAllTenureMonths', 'Show Full {{months}}-Month Amortization Schedule', { months: totalMonths })} <ChevronDown className="w-4 h-4" /></>
                     )}
                   </button>
                 </div>

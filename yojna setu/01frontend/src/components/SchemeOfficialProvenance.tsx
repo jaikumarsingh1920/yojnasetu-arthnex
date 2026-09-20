@@ -103,20 +103,20 @@ export const SchemeOfficialProvenance: React.FC<SchemeOfficialProvenanceProps> =
           {/* 3. Last Verified Date */}
           <div className="bg-[#FFFBF0] p-4 rounded-xl border border-[#E8D8D2] space-y-1">
             <span className="text-[10px] font-bold text-[#765E59] uppercase tracking-wider block">
-              Last Verified Date
+              {t('schemeDetail.lastVerifiedDate', 'Last Verified Date')}
             </span>
             <p className="font-bold text-[#3B2522] font-mono text-xs">
               {formattedDate}
             </p>
             <span className="text-[11px] text-[#765E59] block">
-              Official audit timestamp
+              {t('schemeDetail.officialAuditTimestamp', 'Official audit timestamp')}
             </span>
           </div>
 
           {/* 4. Official Gazette / Portal Link */}
           <div className="bg-[#FFFBF0] p-4 rounded-xl border border-[#E8D8D2] space-y-1 flex flex-col justify-between">
             <span className="text-[10px] font-bold text-[#765E59] uppercase tracking-wider block">
-              Authoritative Portal
+              {t('schemeDetail.authoritativePortal', 'Authoritative Portal')}
             </span>
             {officialUrl ? (
               onOpenPortalModal ? (
@@ -124,7 +124,7 @@ export const SchemeOfficialProvenance: React.FC<SchemeOfficialProvenanceProps> =
                   onClick={onOpenPortalModal}
                   className="text-xs font-bold text-[#EA717B] hover:text-[#d95d67] flex items-center gap-1.5 cursor-pointer truncate"
                 >
-                  <span className="truncate">Visit Official Portal</span>
+                  <span className="truncate">{t('schemeDetail.visitOfficialPortal', 'Visit Official Portal')}</span>
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                 </button>
               ) : (
@@ -134,13 +134,13 @@ export const SchemeOfficialProvenance: React.FC<SchemeOfficialProvenanceProps> =
                   rel="noopener noreferrer"
                   className="text-xs font-bold text-[#EA717B] hover:text-[#d95d67] flex items-center gap-1.5 truncate"
                 >
-                  <span className="truncate">Visit Official Portal</span>
+                  <span className="truncate">{t('schemeDetail.visitOfficialPortal', 'Visit Official Portal')}</span>
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                 </a>
               )
             ) : (
               <span className="text-[#765E59]/60 italic text-[11px]">
-                Not specified in available official data
+                {t('schemeDetail.notSpecifiedOfficial', 'Not specified in available official data')}
               </span>
             )}
             <span className="text-[10px] text-[#765E59]/70 block truncate font-mono">

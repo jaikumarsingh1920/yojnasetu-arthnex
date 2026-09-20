@@ -414,7 +414,7 @@ def test_14_ai_prompt_injection_neutralization(client):
 
 def test_15_ai_output_scrubbing():
     """Output scrubber must redact sensitive keys and database URLs."""
-    dummy_key = "".join(["AIza", "Sy", "D3x9L9aK8mN1oP2qR3sT4uV5wX6yZ7a8b"])
+    dummy_key = "AIza" + "0" * 35  # Scanner-safe zero-entropy test fixture
     leaked_sample = f"Here is the key: {dummy_key} and postgresql://user:pass@localhost:5432/yojnasetu_db"
     scrubbed = AISecurityGuard.scrub_output(leaked_sample)
     assert dummy_key not in scrubbed

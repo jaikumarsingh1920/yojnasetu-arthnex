@@ -23,6 +23,12 @@ build/
 # SQLite & Databases (ignore temp/test dbs, but keep canonical yojnasetu.db)
 *.sqlite
 *.sqlite3
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
+temporary/
+**/temporary/
 !yojna setu/02backend/app/yojnasetu.db
 !yojna setu/02backend/yojnasetu.db
 

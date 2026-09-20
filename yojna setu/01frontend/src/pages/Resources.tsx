@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   BookOpen,
@@ -18,35 +19,34 @@ import {
 } from 'lucide-react';
 
 const Resources: React.FC = () => {
+  const { t } = useTranslation();
+
   const resources = [
     {
       icon: ShieldCheck,
       iconBg: 'bg-[#FFD0CA]',
       iconColor: 'text-[#4A2525]',
-      title: 'National Gazette Verification Standard',
-      description:
-        'All 90 welfare schemes indexed on YojnaSetu are validated against official Gazette of India notifications, statutory ministry guidelines, and RBI/NABARD master circulars.',
-      tag: 'Scheme Verification',
+      title: t('resources.gazetteTitle'),
+      description: t('resources.gazetteDesc'),
+      tag: t('resources.schemeVerificationTag'),
       tagClass: 'bg-[#FFF4EC] text-[#4A2525] border-[#FFD0CA]',
     },
     {
       icon: Calculator,
       iconBg: 'bg-[#FFD0CA]',
       iconColor: 'text-[#4A2525]',
-      title: 'Financial Calculator Methodology',
-      description:
-        'Calculators use standardized reducing balance EMI calculations and accurate category-specific margin money / back-ended capital subsidy formulas.',
-      tag: 'Financial Tools',
+      title: t('resources.calcMethodologyTitle'),
+      description: t('resources.calcMethodologyDesc'),
+      tag: t('resources.financialToolsTag'),
       tagClass: 'bg-[#FFF4EC] text-[#4A2525] border-[#FFD0CA]',
     },
     {
       icon: Phone,
       iconBg: 'bg-[#FFD0CA]',
       iconColor: 'text-[#4A2525]',
-      title: 'Grievance Redressal & Helpdesk',
-      description:
-        'Toll-Free National Helpline: 1800–11–2026 (9:00 AM – 6:00 PM IST, Monday to Saturday).',
-      tag: 'Citizen Support',
+      title: t('resources.grievanceTitle'),
+      description: t('resources.grievanceDesc'),
+      tag: t('resources.citizenSupportTag'),
       tagClass: 'bg-[#FFF4EC] text-[#4A2525] border-[#FFD0CA]',
     },
   ];
@@ -54,7 +54,7 @@ const Resources: React.FC = () => {
   const literacyArticles = [
     {
       icon: IndianRupee,
-      category: 'LOANS & EMI',
+      category: t('blog.catLoansSubsidies'),
       title: 'Understanding EMI Before Taking a Loan',
       description:
         'Learn how principal, interest rate, tenure and monthly EMI work together before choosing a credit scheme.',
@@ -66,7 +66,7 @@ const Resources: React.FC = () => {
     },
     {
       icon: PiggyBank,
-      category: 'SAVINGS',
+      category: t('blog.catFinancialLiteracy'),
       title: 'Build a Strong Financial Safety Net',
       description:
         'Simple principles for managing income, savings and emergency funds while planning for long-term goals.',
@@ -78,7 +78,7 @@ const Resources: React.FC = () => {
     },
     {
       icon: CreditCard,
-      category: 'CREDIT',
+      category: t('blog.catFinancialLiteracy'),
       title: 'Know Your Credit Before Borrowing',
       description:
         'Understand responsible borrowing, repayment discipline and the basics of maintaining a healthy credit profile.',
@@ -90,7 +90,7 @@ const Resources: React.FC = () => {
     },
     {
       icon: Wallet,
-      category: 'GOVERNMENT SCHEMES',
+      category: t('blog.catLoansSubsidies'),
       title: 'How Subsidy & Concessional Loans Work',
       description:
         'Understand the difference between a subsidy, a concessional loan, margin money support and regular credit.',
@@ -102,7 +102,7 @@ const Resources: React.FC = () => {
     },
     {
       icon: Lightbulb,
-      category: 'FINANCIAL BASICS',
+      category: t('blog.catFinancialLiteracy'),
       title: 'Read the Important Numbers First',
       description:
         'Before applying for financial assistance, know which numbers and conditions deserve your attention.',
@@ -114,7 +114,7 @@ const Resources: React.FC = () => {
     },
     {
       icon: FileCheck2,
-      category: 'APPLICATION GUIDANCE',
+      category: t('blog.catDocuments'),
       title: 'Prepare Before You Apply',
       description:
         'A simple checklist to help citizens understand scheme requirements and avoid unnecessary application delays.',
@@ -139,18 +139,15 @@ const Resources: React.FC = () => {
 
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-bold tracking-wide mb-5">
               <BookOpen className="w-4 h-4 text-[#F7AE56]" />
-              <span className="text-[#FFFBF0]">CITIZEN RESOURCES</span>
+              <span className="text-[#FFFBF0]">{t('resources.heroBadge')}</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-              Resources &{' '}
-              <span className="text-[#F7AE56]">Guidelines</span>
+              {t('resources.heroTitle')}
             </h1>
 
             <p className="mt-5 max-w-3xl text-sm sm:text-base lg:text-lg text-[#FFFBF0]/80 leading-relaxed">
-              Trusted guidance, financial tools and practical resources to help
-              you understand government welfare schemes and make informed
-              financial decisions.
+              {t('resources.heroDesc')}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -158,7 +155,7 @@ const Resources: React.FC = () => {
                 href="#official-resources"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#EA717B] text-white text-sm font-extrabold hover:bg-[#d65f69] transition shadow-warm-xs"
               >
-                Explore Resources
+                {t('resources.exploreResources')}
                 <ArrowRight className="w-4 h-4" />
               </a>
 
@@ -166,7 +163,7 @@ const Resources: React.FC = () => {
                 href="#financial-literacy"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-[#FFFBF0] text-sm font-bold hover:bg-white/15 transition"
               >
-                Financial Literacy
+                {t('resources.financialLiteracy')}
               </a>
             </div>
 
@@ -185,10 +182,10 @@ const Resources: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm font-extrabold text-[#3B2522]">
-                  Verified Information
+                  {t('resources.verifiedInformation')}
                 </p>
                 <p className="text-xs text-[#765E59]">
-                  Government guidelines & sources
+                  {t('resources.verifiedInformationDesc')}
                 </p>
               </div>
             </div>
@@ -199,10 +196,10 @@ const Resources: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm font-extrabold text-[#3B2522]">
-                  Practical Financial Tools
+                  {t('resources.practicalTools')}
                 </p>
                 <p className="text-xs text-[#765E59]">
-                  Understand your numbers
+                  {t('resources.practicalToolsDesc')}
                 </p>
               </div>
             </div>
@@ -213,10 +210,10 @@ const Resources: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm font-extrabold text-[#3B2522]">
-                  Citizen First
+                  {t('resources.citizenFirst')}
                 </p>
                 <p className="text-xs text-[#765E59]">
-                  Simple and accessible guidance
+                  {t('resources.citizenFirstDesc')}
                 </p>
               </div>
             </div>
@@ -232,16 +229,15 @@ const Resources: React.FC = () => {
       >
         <div className="max-w-3xl mb-9">
           <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#EA717B]">
-            Official Guidance
+            {t('resources.officialGuidance')}
           </p>
 
           <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-[#3B2522]">
-            Citizen Welfare Resources
+            {t('resources.citizenWelfareResources')}
           </h2>
 
           <p className="mt-3 text-sm sm:text-base text-[#765E59] leading-relaxed">
-            Key standards, methodologies and support information used to make
-            YojnaSetu more transparent and useful for citizens.
+            {t('resources.officialResourcesDesc')}
           </p>
         </div>
 
@@ -277,7 +273,7 @@ const Resources: React.FC = () => {
 
                 <div className="mt-6 pt-4 border-t border-[#E8D8D2]/60 flex items-center gap-2 text-xs font-bold text-[#EA717B]">
                   <CheckCircleIcon />
-                  YojnaSetu Resource
+                  {t('resources.yojnasetuResource')}
                 </div>
               </article>
             );
@@ -296,16 +292,15 @@ const Resources: React.FC = () => {
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-9">
             <div className="max-w-3xl">
               <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#EA717B]">
-                Learn Before You Borrow
+                {t('resources.learnBeforeBorrow')}
               </p>
 
               <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-[#3B2522]">
-                Financial Literacy
+                {t('resources.financialLiteracy')}
               </h2>
 
               <p className="mt-3 text-sm sm:text-base text-[#765E59] leading-relaxed">
-                Simple guides to help citizens understand loans, EMIs,
-                subsidies, savings and responsible financial planning.
+                {t('resources.literacySubtitle')}
               </p>
             </div>
 
@@ -313,7 +308,7 @@ const Resources: React.FC = () => {
               to="/calculator"
               className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#EA717B] text-white text-sm font-bold hover:bg-[#d65f69] transition shadow-warm-xs shrink-0"
             >
-              Try Financial Calculator
+              {t('resources.tryCalculator')}
               <Calculator className="w-4 h-4" />
             </Link>
           </div>
@@ -362,7 +357,7 @@ const Resources: React.FC = () => {
                     type="button"
                     className="mt-5 inline-flex items-center gap-2 text-xs font-extrabold text-[#EA717B] hover:gap-3 transition-all"
                   >
-                    Read Guide
+                    {t('resources.readGuide')}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </article>
@@ -383,17 +378,15 @@ const Resources: React.FC = () => {
             <div>
               <div className="inline-flex items-center gap-2 text-[#F7AE56] text-xs font-extrabold uppercase tracking-wider">
                 <BookOpen className="w-4 h-4" />
-                Make Better Decisions
+                {t('resources.makeBetterDecisions')}
               </div>
 
               <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold">
-                Use the right resource at the right stage.
+                {t('resources.rightResourceHeadline')}
               </h2>
 
               <p className="mt-4 text-sm sm:text-base text-[#FFFBF0]/80 leading-relaxed max-w-xl">
-                Start by discovering suitable schemes, understand your
-                eligibility, use the financial calculator, and then review the
-                application guidance before proceeding.
+                {t('resources.rightResourceDesc')}
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
@@ -401,7 +394,7 @@ const Resources: React.FC = () => {
                   to="/schemes"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#EA717B] text-white text-sm font-extrabold hover:bg-[#d65f69] transition shadow-warm-xs"
                 >
-                  Explore Schemes
+                  {t('resources.exploreSchemes')}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
@@ -409,7 +402,7 @@ const Resources: React.FC = () => {
                   to="/recommendations"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/20 bg-white/10 text-[#FFFBF0] text-sm font-bold hover:bg-white/15 transition"
                 >
-                  Find Matching Schemes
+                  {t('resources.findMatchingSchemes')}
                   <ExternalLink className="w-4 h-4" />
                 </Link>
               </div>
@@ -419,26 +412,26 @@ const Resources: React.FC = () => {
 
               <JourneyCard
                 number="01"
-                title="Discover"
-                description="Find schemes relevant to your needs."
+                title={t('resources.stepDiscover')}
+                description={t('resources.stepDiscoverDesc')}
               />
 
               <JourneyCard
                 number="02"
-                title="Understand"
-                description="Check eligibility and scheme conditions."
+                title={t('resources.stepUnderstand')}
+                description={t('resources.stepUnderstandDesc')}
               />
 
               <JourneyCard
                 number="03"
-                title="Calculate"
-                description="Estimate EMI, subsidy and repayment."
+                title={t('resources.stepCalculate')}
+                description={t('resources.stepCalculateDesc')}
               />
 
               <JourneyCard
                 number="04"
-                title="Apply"
-                description="Follow the correct application route."
+                title={t('resources.stepApply')}
+                description={t('resources.stepApplyDesc')}
               />
 
             </div>
@@ -452,8 +445,7 @@ const Resources: React.FC = () => {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 text-xs text-[#765E59]">
             <ShieldCheck className="w-4 h-4 text-[#2D6A4F]" />
-            Always verify scheme-specific terms with the concerned official
-            authority before applying.
+            {t('resources.footerDisclaimer')}
           </div>
         </div>
       </section>

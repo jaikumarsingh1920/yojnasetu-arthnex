@@ -340,3 +340,180 @@ class EmailService:
                 "message": "Unable to send email at this moment. Please check the recipient address or try again.",
                 "recipient_email": clean_recipient
             }
+
+    @classmethod
+    def send_password_reset_email(
+        cls,
+        recipient_email: str,
+        reset_token: str,
+        user_name: Optional[str] = None,
+        yojnasetu_base_url: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Sends a secure password reset link to recipient_email.
+        In production with SMTP configured: sends a branded transactional email.
+        In local development / unconfigured SMTP: logs the reset URL to the server console only.
+        """
+        if not recipient_email or "@" not in recipient_email or "." not in recipient_email:
+            return {"sent": False, "message": "Invalid recipient email address."}
+
+        clean_recipient = recipient_email.strip()
+        base_url = (yojnasetu_base_url or settings.YOJNASETU_BASE_URL or "http://localhost:3000").rstrip("/")
+        reset_url = f"{base_url}/reset-password?token={reset_token}"
+        display_name = user_name or "Citizen"
+
+        # Provider determination: if real SMTP_HOST configured, use smtp
+        provider = (settings.EMAIL_PROVIDER or "none").lower()
+        has_real_smtp = bool(
+            settings.SMTP_HOST
+            and settings.SMTP_HOST.strip()
+            and "example.com" not in settings.SMTP_HOST.lower()
+        )
+        if provider == "none" and has_real_smtp:
+            provider = "smtp"
+        elif provider == "smtp" and not has_real_smtp:
+            provider = "none"
+
+        # Local development / simulated fallback
+        if provider == "none" or (provider == "smtp" and not has_real_smtp):
+            dev_msg = f"[DEV ONLY] Password reset URL for {clean_recipient}: {reset_url}"
+            logger.info(dev_msg)
+            print(f"\n==================================================")
+            print(dev_msg)
+            print(f"==================================================\n")
+            return {
+                "sent": True,
+                "message": f"Password reset instructions sent to {clean_recipient}.",
+                "recipient_email": clean_recipient,
+                "reset_url": reset_url if settings.DEBUG else None,
+            }
+
+        plain_text_body = f"""YOJNASETU — PASSWORD RESET REQUEST
+==================================================
+Hello {display_name},
+
+We received a request to reset the password for your YojnaSetu account.
+
+To create a new password, click or paste the following link into your browser:
+{reset_url}
+
+IMPORTANT SECURITY NOTICE:
+• This link will expire in 15 minutes.
+• This link can only be used once.
+• If you did not request a password reset, please ignore this email. Your account remains secure.
+
+National Welfare & Credit Guidance Portal
+Government of India / YojnaSetu
+"""
+
+        html_body = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reset your YojnaSetu password</title>
+</head>
+<body style="margin: 0; padding: 24px; background-color: #FFFBF0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #3B2522;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 580px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E8D8D2; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(59, 37, 34, 0.05);">
+    <tr>
+      <td style="padding: 28px 32px; background-color: #FFF4EC; border-bottom: 1px solid #E8D8D2;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+          <tr>
+            <td>
+              <span style="display: inline-block; background-color: #EA717B; color: #FFFFFF; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 9999px;">Gov of India</span>
+              <h1 style="margin: 12px 0 4px 0; font-size: 22px; font-weight: 900; color: #2B1810;">YojnaSetu</h1>
+              <p style="margin: 0; font-size: 12px; color: #765E59;">National Welfare & Credit Guidance Portal</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 32px;">
+        <h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 800; color: #2B1810;">Reset your password</h2>
+        <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #4A2525;">
+          Hello <strong>{display_name}</strong>,
+        </p>
+        <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.6; color: #765E59;">
+          We received a request to reset the password for your YojnaSetu account. Click the button below to choose a new password:
+        </p>
+        <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 28px 0;">
+          <tr>
+            <td style="border-radius: 12px; background-color: #EA717B;">
+              <a href="{reset_url}" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-decoration: none; border-radius: 12px;">Reset Password</a>
+            </td>
+          </tr>
+        </table>
+        <p style="margin: 24px 0 12px 0; font-size: 12px; line-height: 1.6; color: #9B817A;">
+          If the button above does not work, copy and paste this URL into your browser:
+        </p>
+        <p style="margin: 0 0 24px 0; font-size: 11px; word-break: break-all; color: #EA717B;">
+          <a href="{reset_url}" style="color: #EA717B; text-decoration: underline;">{reset_url}</a>
+        </p>
+        <div style="padding: 14px 16px; background-color: #FFF4EC; border: 1px solid #FFD0CA; border-radius: 12px; margin-top: 24px;">
+          <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #4A2525;">
+            <strong>Security Notice:</strong> This link is valid for <strong>15 minutes</strong> and can only be used once. If you did not make this request, you can safely ignore this email.
+          </p>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 20px 32px; background-color: #FFFBF0; border-top: 1px solid #E8D8D2; text-align: center;">
+        <p style="margin: 0; font-size: 11px; color: #9B817A;">
+          © YojnaSetu — Ministry of Social Justice and Empowerment, Government of India.
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+        sender = settings.get_sender_email()
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = "Reset your YojnaSetu password"
+            msg["From"] = f"YojnaSetu <{sender}>"
+            msg["To"] = clean_recipient
+
+            text_part = MIMEText(plain_text_body, "plain", "utf-8")
+            html_part = MIMEText(html_body, "html", "utf-8")
+            msg.attach(text_part)
+            msg.attach(html_part)
+
+            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
+                    clean_user = settings.SMTP_USERNAME.strip()
+                    clean_pwd = settings.SMTP_PASSWORD.replace(" ", "").strip()
+                    server.login(clean_user, clean_pwd)
+                server.sendmail(sender, [clean_recipient], msg.as_string())
+
+            logger.info(f"Password reset email sent to {clean_recipient}")
+            return {
+                "sent": True,
+                "message": "Password reset instructions sent to your email.",
+                "recipient_email": clean_recipient
+            }
+        except smtplib.SMTPAuthenticationError:
+            logger.error("SMTP authentication failed. Verify SMTP_USERNAME and SMTP_PASSWORD.")
+            return {
+                "sent": False,
+                "message": "Email delivery failed due to a mail authentication error. Please try again later.",
+                "recipient_email": clean_recipient
+            }
+        except (smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected, TimeoutError, socket.gaierror, OSError) as exc:
+            logger.error(f"SMTP connection error: {exc.__class__.__name__}")
+            return {
+                "sent": False,
+                "message": "Email delivery failed due to a mail server connection error. Please try again later.",
+                "recipient_email": clean_recipient
+            }
+        except Exception as exc:
+            logger.error(f"SMTP delivery error: {exc.__class__.__name__}")
+            return {
+                "sent": False,
+                "message": "Unable to send reset email at this moment. Please check the recipient address or try again.",
+                "recipient_email": clean_recipient
+            }

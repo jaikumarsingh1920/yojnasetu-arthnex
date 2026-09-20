@@ -1,5 +1,6 @@
 import React from 'react';
-import { Info, ExternalLink, CheckCircle2, FileText, ShieldCheck } from 'lucide-react';
+import { Info, ExternalLink, CheckCircle2, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AboutInformationCardProps {
   sourceName?: string;
@@ -20,6 +21,8 @@ export const AboutInformationCard: React.FC<AboutInformationCardProps> = ({
   dataEngine = 'YS-FIS-V1 (Deterministic)',
   sourceDocumentUrl,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 space-y-4">
       <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
@@ -27,14 +30,14 @@ export const AboutInformationCard: React.FC<AboutInformationCardProps> = ({
           <Info className="w-4 h-4 text-sky-600" />
         </div>
         <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
-          About This Information
+          {t('shared.aboutInfoTitle')}
         </h3>
       </div>
 
       <div className="space-y-3 text-xs">
         {/* Source */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-slate-500 font-medium">Information Source</span>
+          <span className="text-slate-500 font-medium">{t('shared.infoSource')}</span>
           {sourceUrl ? (
             <a
               href={sourceUrl}
@@ -52,19 +55,19 @@ export const AboutInformationCard: React.FC<AboutInformationCardProps> = ({
 
         {/* Latest Updated */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-slate-500 font-medium">Latest Updated</span>
+          <span className="text-slate-500 font-medium">{t('shared.latestUpdated')}</span>
           <span className="font-bold text-slate-800">{latestUpdated}</span>
         </div>
 
         {/* Data Level */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-slate-500 font-medium">Financial Data Level</span>
+          <span className="text-slate-500 font-medium">{t('shared.financialDataLevel')}</span>
           <span className="font-bold text-slate-800">{dataLevel}</span>
         </div>
 
         {/* Verification Status */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-slate-500 font-medium">Verification Status</span>
+          <span className="text-slate-500 font-medium">{t('shared.verificationStatus')}</span>
           <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px]">
             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
             {verificationStatus}
@@ -73,7 +76,7 @@ export const AboutInformationCard: React.FC<AboutInformationCardProps> = ({
 
         {/* Data Engine */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-slate-500 font-medium">Data Engine</span>
+          <span className="text-slate-500 font-medium">{t('shared.dataEngine')}</span>
           <span className="font-mono text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
             {dataEngine}
           </span>
@@ -90,7 +93,7 @@ export const AboutInformationCard: React.FC<AboutInformationCardProps> = ({
             className="w-full py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900 font-bold text-xs flex items-center justify-center gap-2 transition"
           >
             <FileText className="w-3.5 h-3.5 text-slate-500" />
-            <span>View Source Document</span>
+            <span>{t('shared.viewSourceDocument')}</span>
             <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
         </div>

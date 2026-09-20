@@ -3,7 +3,7 @@ import math
 import re
 from decimal import Decimal
 from typing import Optional, List, Dict, Any, Set
-from fastapi import APIRouter, Depends, HTTPException, Query, Body, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Body, Path, status, Request
 from sqlalchemy import or_, and_, asc, desc, func
 from sqlalchemy.orm import Session, selectinload
 
@@ -16,6 +16,7 @@ from app.schemas.profile import BeneficiaryProfileInput
 from app.engine.eligibility import DeterministicEligibilityEngine
 from app.core.config import settings
 from app.services.email_service import EmailService
+from app.services.dynamic_scheme_translation import DynamicSchemeTranslationService
 from app.schemas.scheme import (
     SchemeListItemResponse,
     PaginatedSchemeListResponse,
@@ -28,6 +29,7 @@ from app.schemas.scheme import (
     EmailSchemeRequest,
     EmailSchemeResponse,
     SchemeSelectorItem,
+    SchemeTranslationsResponse,
 )
 
 router = APIRouter()
@@ -345,6 +347,7 @@ def list_schemes(
     application_route: Optional[str] = Query(default=None, description="Filter by application route: DIRECT_PORTAL, PARTNER_ASSISTED"),
     scheme_status: Optional[str] = Query(default=None, description="Filter by scheme status (e.g. ACTIVE)"),
     verification_status: Optional[str] = Query(default=None, description="Filter by verification status (e.g. VERIFIED)"),
+    language: Optional[str] = Query(default=None, description="Optional target Indian language code for scheme listing (e.g. hi, bn, ta)"),
     page: int = Query(default=1, ge=1, description="Page number (1-indexed)"),
     page_size: int = Query(default=20, ge=1, le=100, description="Items per page (max 100)"),
     sort_by: str = Query(default="scheme_id", description="Sort field: relevance, scheme_name, created_at, ministry, max_loan_amount, interest_rate_min"),
@@ -760,6 +763,26 @@ def list_schemes(
     offset = (page_num - 1) * page_sz
     paged_items = filtered_items[offset : offset + page_sz]
 
+    # 18. Apply lightweight cached translation if non-English language requested
+    norm_lang = DynamicSchemeTranslationService.normalize_language_code(language)
+    if norm_lang != "en" and paged_items:
+        translated_map = DynamicSchemeTranslationService.get_translated_list_fields(
+            schemes=paged_items,
+            target_lang=norm_lang,
+            db=db
+        )
+        if translated_map:
+            transformed_items = []
+            for item in paged_items:
+                item_dict = SchemeListItemResponse.model_validate(item).model_dump()
+                if item.scheme_id in translated_map:
+                    for fname, trans_val in translated_map[item.scheme_id].items():
+                        item_dict[fname] = trans_val
+                    item_dict["language"] = norm_lang
+                    item_dict["canonical_scheme_name"] = item.scheme_name
+                transformed_items.append(SchemeListItemResponse(**item_dict))
+            paged_items = transformed_items
+
     return PaginatedSchemeListResponse(
         items=paged_items,
         total=total,
@@ -898,16 +921,20 @@ def compare_schemes(
 @router.get(
     "/{scheme_id}",
     response_model=SchemeDetailResponse,
-    summary="Get complete scheme detail by scheme_id",
-    description="Returns full detailed representation of a scheme including applicable rules, documents, and verification metadata."
+    summary="Get complete scheme detail by scheme_id with optional dynamic translation",
+    description="Returns full detailed representation of a scheme including applicable rules, documents, and verification metadata. Supports optional dynamic translation into 12 Indian languages via ?language=hi or Accept-Language header."
 )
 def get_scheme_detail(
     scheme_id: str,
+    language: Optional[str] = Query(default=None, description="Optional target Indian language code (en, hi, bn, mr, ta, te, gu, kn, ml, pa, or, as)"),
+    request: Request = None,
     db: Session = Depends(get_db)
 ):
     """
     Returns complete scheme details for a valid scheme_id.
     Eagerly loads related rules, documents, and verifications to prevent N+1 queries.
+    Applies dynamic localized translations to whitelisted government content fields
+    when a non-English language is specified.
     Raises HTTP 404 if the scheme_id does not exist.
     """
     scheme = db.query(Scheme).options(
@@ -925,7 +952,91 @@ def get_scheme_detail(
             detail=f"Scheme with ID '{scheme_id}' was not found or is currently inactive.",
         )
 
-    return scheme
+    # Determine requested language from query param or Accept-Language header
+    req_lang = language
+    if not req_lang and request and "accept-language" in request.headers:
+        raw_accept = request.headers.get("accept-language", "")
+        parts = [p.strip().split(";")[0] for p in raw_accept.split(",") if p.strip()]
+        if parts:
+            req_lang = parts[0]
+
+    norm_lang = DynamicSchemeTranslationService.normalize_language_code(req_lang)
+    detail_dict = SchemeDetailResponse.model_validate(scheme).model_dump()
+
+    if norm_lang != "en":
+        trans_data = DynamicSchemeTranslationService.get_translated_scheme_detail(
+            scheme=scheme,
+            target_lang=norm_lang,
+            db=db
+        )
+        for fname, fval in trans_data.get("fields", {}).items():
+            if fval:
+                detail_dict[fname] = fval
+
+        detail_dict["language"] = trans_data.get("language", norm_lang)
+        detail_dict["translation_available"] = trans_data.get("translation_available", True)
+        detail_dict["translation_provider"] = trans_data.get("translation_provider")
+        detail_dict["translation_cached"] = trans_data.get("translation_cached")
+        detail_dict["canonical_scheme_name"] = scheme.scheme_name
+    else:
+        detail_dict["language"] = "en"
+        detail_dict["translation_available"] = True
+        detail_dict["translation_provider"] = "canonical_english"
+        detail_dict["translation_cached"] = True
+        detail_dict["canonical_scheme_name"] = scheme.scheme_name
+
+    return SchemeDetailResponse(**detail_dict)
+
+
+@router.get(
+    "/{scheme_id}/translations",
+    response_model=SchemeTranslationsResponse,
+    summary="Get dynamic translation and provenance metadata for a scheme",
+    description="Fetches localized scheme content with provenance metadata, source hash verification, and caching status across 12 Indian languages."
+)
+def get_scheme_translations(
+    scheme_id: str,
+    language: str = Query(default="hi", description="Target language code: hi, bn, mr, ta, te, gu, kn, ml, pa, or, as"),
+    db: Session = Depends(get_db)
+):
+    """
+    Dedicated endpoint for querying localized dynamic scheme content and provenance.
+    Returns translated fields, canonical source hashes, cache status, and provider name.
+    """
+    scheme = db.query(Scheme).filter(Scheme.scheme_id == scheme_id).first()
+    if not scheme or scheme.scheme_status == "INACTIVE":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scheme with ID '{scheme_id}' was not found or is currently inactive.",
+        )
+
+    is_supp = DynamicSchemeTranslationService.is_supported(language)
+    norm_lang = DynamicSchemeTranslationService.normalize_language_code(language)
+
+    trans_data = DynamicSchemeTranslationService.get_translated_scheme_detail(
+        scheme=scheme,
+        target_lang=norm_lang,
+        db=db
+    )
+
+    return SchemeTranslationsResponse(
+        scheme_id=scheme.scheme_id,
+        language=norm_lang,
+        is_supported=is_supp,
+        translation_available=trans_data.get("translation_available", False),
+        translation_cached=trans_data.get("translation_cached", False),
+        provider=trans_data.get("translation_provider"),
+        canonical_scheme_name=scheme.scheme_name,
+        fields=trans_data.get("fields", {}),
+        metadata={
+            "source_hashes": {
+                fname: DynamicSchemeTranslationService.compute_source_hash(getattr(scheme, fname, None))
+                for fname in DynamicSchemeTranslationService.TRANSLATABLE_FIELDS
+                if getattr(scheme, fname, None)
+            },
+            "supported_languages": sorted(list(DynamicSchemeTranslationService.SUPPORTED_LANGUAGES)),
+        }
+    )
 
 
 @router.post(

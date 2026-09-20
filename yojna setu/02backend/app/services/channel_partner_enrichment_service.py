@@ -1472,7 +1472,8 @@ class ChannelPartnerEnrichmentService:
         search: Optional[str] = None,
         ministry: Optional[str] = None,
         has_partners_only: bool = False,
-        availability: Optional[str] = None
+        availability: Optional[str] = None,
+        language: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Returns list of schemes with real database-calculated channel partner financial health coverage.
@@ -1532,6 +1533,21 @@ class ChannelPartnerEnrichmentService:
 
         schemes = scheme_stmt.all()
 
+        norm_lang = None
+        translated_map = {}
+        if language:
+            try:
+                from app.services.dynamic_scheme_translation import DynamicSchemeTranslationService
+                norm_lang = DynamicSchemeTranslationService.normalize_language_code(language)
+                if norm_lang != "en" and schemes:
+                    translated_map = DynamicSchemeTranslationService.get_translated_list_fields(
+                        schemes=schemes,
+                        target_lang=norm_lang,
+                        db=db
+                    ) or {}
+            except Exception:
+                translated_map = {}
+
         # 4. For each scheme, compute verified and limited counts truthfully
         results = []
         for s in schemes:
@@ -1578,6 +1594,13 @@ class ChannelPartnerEnrichmentService:
             clean_desc = clean_gov_description(s.short_description or s.purpose or "")
             clean_min = clean_gov_title(s.ministry)
             clean_sec = clean_gov_title(s.sector)
+
+            if norm_lang and norm_lang != "en" and s.scheme_id in translated_map:
+                trans_fields = translated_map[s.scheme_id]
+                if "scheme_name" in trans_fields:
+                    clean_name = trans_fields["scheme_name"]
+                if "short_description" in trans_fields:
+                    clean_desc = trans_fields["short_description"]
 
             results.append({
                 "scheme_id": s.scheme_id,

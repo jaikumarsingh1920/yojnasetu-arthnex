@@ -45,4 +45,24 @@ export const authApi = {
     const response = await apiClient.put<CitizenProfileResponse>('/auth/profile', profile);
     return response.data;
   },
+
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  verifyResetToken: async (token: string): Promise<{ valid: boolean; email?: string; message?: string }> => {
+    const response = await apiClient.get<{ valid: boolean; email?: string; message?: string }>(
+      `/auth/verify-reset-token?token=${encodeURIComponent(token)}`
+    );
+    return response.data;
+  },
+
+  resetPassword: async (token: string, new_password: string): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>('/auth/reset-password', {
+      token,
+      new_password,
+    });
+    return response.data;
+  },
 };

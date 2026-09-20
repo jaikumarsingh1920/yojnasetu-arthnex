@@ -250,12 +250,12 @@ export const SchemeDetail: React.FC = () => {
                 >
                   {isFullOverviewOpen ? (
                     <>
-                      <span>Show less overview</span>
+                      <span>{t('schemeDetail.showLessOverview', 'Show less overview')}</span>
                       <ChevronUp className="w-3.5 h-3.5" />
                     </>
                   ) : (
                     <>
-                      <span>Read full scheme details</span>
+                      <span>{t('schemeDetail.readFullOverview', 'Read full scheme details')}</span>
                       <ChevronDown className="w-3.5 h-3.5" />
                     </>
                   )}
@@ -275,7 +275,7 @@ export const SchemeDetail: React.FC = () => {
               }
             />
             <span className="text-[11px] text-[#FFFBF0]/70">
-              Deterministic Official Source
+              {t('schemeDetail.deterministicOfficialSource', 'Deterministic Official Source')}
             </span>
           </div>
         </div>
@@ -287,7 +287,7 @@ export const SchemeDetail: React.FC = () => {
             to="/recommendations"
             className="bg-[#EA717B] hover:bg-[#D65D67] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-warm-xs hover:shadow-warm-sm transition flex items-center justify-center gap-2 min-h-[42px]"
           >
-            <span>Check Eligibility</span>
+            <span>{t('schemeDetail.checkEligibility', 'Check Eligibility')}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
 
@@ -297,7 +297,7 @@ export const SchemeDetail: React.FC = () => {
             className="bg-[#3B2522] hover:bg-[#2F1D1B] text-[#FFFBF0] text-xs font-bold px-4 py-2.5 rounded-xl border border-[#E8D8D2]/30 transition flex items-center justify-center gap-1.5 min-h-[42px] cursor-pointer"
           >
             <CalcIcon className="w-4 h-4 text-[#F7AE56]" />
-            <span>Calculate EMI</span>
+            <span>{t('schemeDetail.calculateEmi', 'Calculate EMI')}</span>
           </button>
 
           {/* Save Scheme */}
@@ -316,7 +316,7 @@ export const SchemeDetail: React.FC = () => {
             className="bg-[#3B2522] hover:bg-[#2F1D1B] text-[#FFFBF0] text-xs font-bold px-4 py-2.5 rounded-xl border border-[#E8D8D2]/30 transition flex items-center justify-center gap-1.5 min-h-[42px]"
           >
             <MapPin className="w-4 h-4 text-emerald-400" />
-            <span>Find Partner</span>
+            <span>{t('schemeDetail.findPartner', 'Find Partner')}</span>
           </Link>
 
           {/* Official Portal Apply Button if available */}
@@ -325,7 +325,7 @@ export const SchemeDetail: React.FC = () => {
               onClick={() => setIsModalOpen(true)}
               className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-white/20 transition flex items-center justify-center gap-1.5 min-h-[42px] cursor-pointer"
             >
-              <span>Official Portal</span>
+              <span>{t('schemeDetail.officialPortal', 'Official Portal')}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </button>
           )}
@@ -364,7 +364,7 @@ export const SchemeDetail: React.FC = () => {
             <div className="bg-white rounded-3xl border border-[#E8D8D2] shadow-warm-xs p-6 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-[#EA717B] uppercase tracking-wider">
                 <Compass className="w-4 h-4 text-[#EA717B]" />
-                <span>Scheme Purpose & Objective</span>
+                <span>{t('schemeDetail.schemePurposeObjective', 'Scheme Purpose & Objective')}</span>
               </div>
               <p className="text-sm text-[#3B2522] leading-relaxed">
                 {isFullOverviewOpen ? cleanOverview : truncatedOverview}
@@ -375,7 +375,7 @@ export const SchemeDetail: React.FC = () => {
                   onClick={() => setIsFullOverviewOpen(!isFullOverviewOpen)}
                   className="text-xs font-bold text-[#EA717B] hover:text-[#D65D67] flex items-center gap-1 cursor-pointer"
                 >
-                  <span>{isFullOverviewOpen ? 'Show less' : 'Read more'}</span>
+                  <span>{isFullOverviewOpen ? t('schemeDetail.showLess', 'Show less') : t('schemeDetail.readMore', 'Read more')}</span>
                   {isFullOverviewOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 </button>
               )}
@@ -386,38 +386,38 @@ export const SchemeDetail: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-extrabold text-[#3B2522] uppercase tracking-wider flex items-center gap-2">
                   <Coins className="w-4 h-4 text-[#F7AE56]" />
-                  <span>Quick Facts</span>
+                  <span>{t('schemeDetail.quickFacts', 'Quick Facts')}</span>
                 </h3>
                 <span className="text-[10px] bg-[#FFF4EC] text-emerald-800 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Verified Parameters
+                  {t('schemeDetail.verifiedParameters', 'Verified Parameters')}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                 <div className="bg-[#FFF4EC]/40 p-3 rounded-2xl border border-[#E8D8D2]">
-                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">Max Project / Loan</span>
+                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">{t('schemeDetail.maxProjectLoan', 'Max Project / Loan')}</span>
                   <span className="text-sm font-black text-[#3B2522] mt-0.5 block truncate">
                     {scheme.max_loan_amount
                       ? formatCurrency(Number(scheme.max_loan_amount))
                       : scheme.max_project_cost
                       ? formatCurrency(Number(scheme.max_project_cost))
-                      : 'As per appraisal'}
+                      : t('schemeDetail.asPerAppraisal', 'As per appraisal')}
                   </span>
                 </div>
 
                 <div className="bg-[#FFF4EC]/40 p-3 rounded-2xl border border-[#E8D8D2]">
-                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">Subsidy / Margin</span>
+                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">{t('schemeDetail.subsidyMargin', 'Subsidy / Margin')}</span>
                   <span className="text-sm font-black text-[#3B2522] mt-0.5 block truncate">
                     {scheme.subsidy_percentage
                       ? `${scheme.subsidy_percentage}% (varies)`
                       : scheme.max_subsidy_amount
                       ? formatCurrency(Number(scheme.max_subsidy_amount))
-                      : 'Guidelines Apply'}
+                      : t('schemeDetail.guidelinesApply', 'Guidelines Apply')}
                   </span>
                 </div>
 
                 <div className="bg-[#FFF4EC]/40 p-3 rounded-2xl border border-[#E8D8D2]">
-                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">Interest Rate</span>
+                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">{t('schemeDetail.interestRate', 'Interest Rate')}</span>
                   <span className="text-sm font-black text-[#3B2522] mt-0.5 block truncate">
                     {scheme.interest_rate !== null && scheme.interest_rate !== undefined
                       ? scheme.interest_rate === 0
@@ -425,12 +425,12 @@ export const SchemeDetail: React.FC = () => {
                         : `${scheme.interest_rate}% p.a.`
                       : scheme.interest_rate_max !== null && scheme.interest_rate_max !== undefined
                       ? `${scheme.interest_rate_max}% max`
-                      : 'As per bank'}
+                      : t('schemeDetail.asPerBank', 'As per bank')}
                   </span>
                 </div>
 
                 <div className="bg-[#FFF4EC]/40 p-3 rounded-2xl border border-[#E8D8D2]">
-                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">Repayment Period</span>
+                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">{t('schemeDetail.repaymentPeriod', 'Repayment Period')}</span>
                   <span className="text-sm font-black text-[#3B2522] mt-0.5 block truncate">
                     {scheme.repayment_period_months
                       ? `${Math.round(scheme.repayment_period_months / 12)} years (${scheme.repayment_period_months}m)`
@@ -439,13 +439,13 @@ export const SchemeDetail: React.FC = () => {
                 </div>
 
                 <div className="bg-[#FFF4EC]/40 p-3 rounded-2xl border border-[#E8D8D2] sm:col-span-2">
-                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">Application Mode</span>
+                  <span className="text-[10px] uppercase font-bold text-[#765E59] block">{t('schemeDetail.applicationMode', 'Application Mode')}</span>
                   <span className="text-sm font-black text-[#3B2522] mt-0.5 block truncate">
                     {scheme.application_route === 'DIRECT_PORTAL'
-                      ? 'Official Ministry Portal'
+                      ? t('schemeDetail.officialMinistryPortal', 'Official Ministry Portal')
                       : isPartnerRouted
-                      ? 'Through Authorized Banks & Agencies'
-                      : 'Assisted Civic Center'}
+                      ? t('schemeDetail.authorizedBanksAgencies', 'Through Authorized Banks & Agencies')
+                      : t('schemeDetail.assistedCivicCenter', 'Assisted Civic Center')}
                   </span>
                 </div>
               </div>
@@ -459,7 +459,7 @@ export const SchemeDetail: React.FC = () => {
               <div className="flex items-center justify-between border-b border-[#E8D8D2]/60 pb-3">
                 <h3 className="text-sm font-extrabold text-[#3B2522] uppercase tracking-wider flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#EA717B]" />
-                  <span>Who Can Apply?</span>
+                  <span>{t('schemeDetail.eligibility.whoCanApply', 'Who Can Apply?')}</span>
                 </h3>
               </div>
 
@@ -484,7 +484,7 @@ export const SchemeDetail: React.FC = () => {
                 href="#eligibility"
                 className="text-xs font-bold text-[#EA717B] hover:text-[#D65D67] flex items-center gap-1 pt-1"
               >
-                <span>View Detailed Eligibility</span>
+                <span>{t('schemeDetail.viewDetailedEligibility', 'View Detailed Eligibility')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>
@@ -494,7 +494,7 @@ export const SchemeDetail: React.FC = () => {
               <div className="flex items-center justify-between border-b border-[#E8D8D2]/60 pb-3">
                 <h3 className="text-sm font-extrabold text-[#3B2522] uppercase tracking-wider flex items-center gap-2">
                   <FileText className="w-4 h-4 text-[#F7AE56]" />
-                  <span>Important Documents</span>
+                  <span>{t('schemeDetail.importantDocuments', 'Important Documents')}</span>
                 </h3>
               </div>
 
@@ -519,7 +519,7 @@ export const SchemeDetail: React.FC = () => {
                           : 'bg-[#FFF4EC] text-[#765E59]'
                       }`}
                     >
-                      {doc.is_mandatory ? 'Required' : 'Conditional'}
+                      {doc.is_mandatory ? t('common.required', 'Required') : t('common.optional', 'Conditional')}
                     </span>
                   </div>
                 ))}
@@ -529,7 +529,7 @@ export const SchemeDetail: React.FC = () => {
                 href="#documents"
                 className="text-xs font-bold text-[#EA717B] hover:text-[#D65D67] flex items-center gap-1 pt-1"
               >
-                <span>View All Documents</span>
+                <span>{t('schemeDetail.viewAllDocuments', 'View All Documents')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </div>

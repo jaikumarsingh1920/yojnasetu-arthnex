@@ -2,16 +2,32 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const ROUTE_TITLES: Record<string, string> = {
-  '/': 'YojnaSetu — National Welfare & Credit Guidance Portal',
-  '/recommendations': 'Smart Scheme Matching — YojnaSetu',
+  '/': 'YojnaSetu — National Welfare & Citizen Support',
+  '/home': 'YojnaSetu — National Welfare & Citizen Support',
+  '/about': 'About YojnaSetu — National Welfare & Citizen Support',
+  '/blogs': 'Blog — YojnaSetu',
+  '/blog': 'Blog — YojnaSetu',
+  '/recommendations': 'Smart Matching — YojnaSetu',
   '/schemes': 'Explore Welfare Schemes — YojnaSetu',
+  '/explore': 'Explore Welfare Schemes — YojnaSetu',
+  '/explore-schemes': 'Explore Welfare Schemes — YojnaSetu',
   '/compare': 'Compare Schemes — YojnaSetu',
-  '/calculator': 'Financial & Subsidy Calculator — YojnaSetu',
-  '/channel-partners': 'Channel Partner Centers & Helpdesks — YojnaSetu',
-  '/login': 'Citizen Login — YojnaSetu',
-  '/auth/login': 'Citizen Login — YojnaSetu',
-  '/register': 'Citizen Registration — YojnaSetu',
-  '/auth/register': 'Citizen Registration — YojnaSetu',
+  '/calculator': 'Financial Calculator — YojnaSetu',
+  '/financial-health': 'Financial Health — YojnaSetu',
+  '/channel-partners': 'Channel Partners & Helpdesks — YojnaSetu',
+  '/nearby-partners': 'Nearby Partners — YojnaSetu',
+  '/resources': 'Resources & Guidelines — YojnaSetu',
+  '/faq': 'Frequently Asked Questions — YojnaSetu',
+  '/login': 'Login — YojnaSetu',
+  '/auth/login': 'Login — YojnaSetu',
+  '/signup': 'Signup — YojnaSetu',
+  '/register': 'Signup — YojnaSetu',
+  '/auth/register': 'Signup — YojnaSetu',
+  '/auth/signup': 'Signup — YojnaSetu',
+  '/forgot-password': 'Forgot Password — YojnaSetu',
+  '/auth/forgot-password': 'Forgot Password — YojnaSetu',
+  '/reset-password': 'Reset Password — YojnaSetu',
+  '/auth/reset-password': 'Reset Password — YojnaSetu',
   '/profile': 'Citizen Profile — YojnaSetu',
   '/dashboard': 'Beneficiary Dashboard — YojnaSetu',
   '/applications': 'Application Guidance & Checklists — YojnaSetu',
@@ -19,6 +35,8 @@ const ROUTE_TITLES: Record<string, string> = {
   '/notifications': 'Citizen Notifications — YojnaSetu',
   '/partner': 'Partner Review Queue — YojnaSetu',
   '/admin': 'System Admin Dashboard — YojnaSetu',
+  '/demo-admin': 'Demo Admin — YojnaSetu',
+  '/admin-demo': 'Demo Admin — YojnaSetu',
   '/unauthorized': 'Access Restricted — YojnaSetu',
 };
 
@@ -34,6 +52,12 @@ export const PageTitleManager: React.FC = () => {
       document.title = ROUTE_TITLES[pathname];
     } else if (pathname.startsWith('/schemes/')) {
       document.title = 'Scheme Details — YojnaSetu';
+    } else if (pathname.startsWith('/blogs/') || pathname.startsWith('/blog/')) {
+      document.title = 'Blog Article — YojnaSetu';
+    } else if (pathname.startsWith('/channel-partners/') && pathname.includes('/financial-health')) {
+      document.title = 'Channel Partner Financial Health — YojnaSetu';
+    } else if (pathname.startsWith('/channel-partners/')) {
+      document.title = 'Channel Partner Details — YojnaSetu';
     } else if (pathname.startsWith('/applications/')) {
       document.title = 'Application Guidance Details — YojnaSetu';
     } else if (pathname.startsWith('/partner/applications/')) {

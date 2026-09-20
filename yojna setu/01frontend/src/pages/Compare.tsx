@@ -715,10 +715,10 @@ export const Compare: React.FC = () => {
                         <Link
                           to={`/recommendations?scheme=${scheme.scheme_id}`}
                           className="text-xs font-bold text-[#3B2522] hover:text-[#EA717B] bg-white hover:bg-[#FFF4EC] px-3 py-2 rounded-xl border border-[#E8D8D2] flex items-center justify-center gap-1.5 transition shadow-warm-xs text-center"
-                          title="Evaluate citizen profile eligibility against this scheme"
+                          title={t('common.checkEligibility', 'Check Eligibility')}
                         >
                           <ShieldCheck className="w-3.5 h-3.5 text-[#EA717B] shrink-0" />
-                          <span>Check Eligibility</span>
+                          <span>{t('common.checkEligibility', 'Check Eligibility')}</span>
                         </Link>
 
                         <div className="grid grid-cols-2 gap-1.5">
@@ -1608,7 +1608,7 @@ export const Compare: React.FC = () => {
                     );
                   }
                   return (
-                    <span className="text-slate-500 text-xs">Official Ministry Guidelines</span>
+                    <span className="text-slate-500 text-xs">{t('schemes.officialGuidelines', 'Official Ministry Guidelines')}</span>
                   );
                 }}
               />

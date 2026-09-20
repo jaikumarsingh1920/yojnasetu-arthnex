@@ -303,7 +303,7 @@ class GPTCopilotAgent:
                     facts["liquid_savings"] = float(pc_match.group(1)) * 100000.0
 
         # Activity / Trade
-        if any(term in msg_lower for term in ["dairy", "milk", "doodh", "pashupalan"]):
+        if any(term in msg_lower for term in ["dairy", "milk", "doodh", "pashupalan", "डेयरी", "दूध", "पशुपालन"]):
             facts["sector"] = "DAIRY"
             facts["activity_type"] = "DAIRY_FARMING"
             facts["business_description"] = "dairy farming"

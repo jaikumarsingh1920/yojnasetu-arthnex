@@ -167,6 +167,7 @@ class Scheme(Base):
     partner_mappings = relationship("PartnerSchemeMapping", back_populates="scheme", cascade="all, delete-orphan")
     faqs = relationship("SchemeFAQ", back_populates="scheme", cascade="all, delete-orphan")
     knowledge_profile = relationship("SchemeKnowledgeProfile", back_populates="scheme", uselist=False, cascade="all, delete-orphan")
+    translations = relationship("SchemeTranslation", back_populates="scheme", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_schemes_state_restriction", "state_restriction"),

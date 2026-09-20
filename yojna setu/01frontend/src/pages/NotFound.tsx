@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Home, Compass } from 'lucide-react';
 
 export const NotFound: React.FC = () => {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    document.title = '404 Page Not Found — YojnaSetu';
+  }, []);
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-12 bg-[#FFFBF0]">
       <div className="max-w-md w-full bg-white rounded-3xl border border-[#E8D8D2] shadow-warm-md p-6 sm:p-8 text-center space-y-5">

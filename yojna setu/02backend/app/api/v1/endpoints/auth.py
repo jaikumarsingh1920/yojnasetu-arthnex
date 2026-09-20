@@ -1,4 +1,7 @@
 import json
+import hashlib
+import secrets
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -6,6 +9,7 @@ from app.api.deps import get_db, get_current_user, require_roles
 from app.core.config import settings
 from app.core.security import hash_password, verify_password, create_access_token
 from app.models.user import User, UserRole
+from app.models.password_reset import PasswordResetToken
 from app.schemas.auth import (
     UserRegisterRequest,
     UserLoginRequest,
@@ -13,12 +17,16 @@ from app.schemas.auth import (
     UserResponse,
     TokenResponse,
     MessageResponse,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+    VerifyResetTokenResponse,
 )
 from app.schemas.profile import (
     BeneficiaryProfileInput,
     CitizenProfileResponse,
     calculate_profile_completion,
 )
+from app.services.email_service import EmailService
 from app.services.google_auth_service import verify_google_id_token
 
 router = APIRouter()
@@ -230,6 +238,187 @@ def logout(
     Logs out the current user session.
     """
     return MessageResponse(message="Successfully logged out.")
+
+
+@router.post(
+    "/forgot-password",
+    response_model=MessageResponse,
+    summary="Request a password reset link"
+)
+def forgot_password(
+    req: ForgotPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Sends password reset instructions to the provided email if an account exists.
+    Strictly protects against account enumeration by always returning the same response.
+    Applies rate limiting to prevent repeated rapid requests.
+    """
+    clean_email = str(req.email).strip().lower()
+    generic_response = MessageResponse(
+        message="If an account exists for this email, you'll receive password reset instructions shortly."
+    )
+
+    user = db.query(User).filter(User.email.ilike(clean_email)).first()
+    if not user:
+        return generic_response
+
+    # Rate limiting: check if a reset was requested in the last 60 seconds
+    now = datetime.now(timezone.utc)
+    recent_token = (
+        db.query(PasswordResetToken)
+        .filter(
+            PasswordResetToken.user_id == user.user_id,
+            PasswordResetToken.created_at >= now - timedelta(seconds=60)
+        )
+        .first()
+    )
+    if recent_token:
+        # Rate limited: safely return the generic response without creating duplicates
+        return generic_response
+
+    # Invalidate any previous unused tokens for this user
+    db.query(PasswordResetToken).filter(
+        PasswordResetToken.user_id == user.user_id,
+        PasswordResetToken.is_used == False
+    ).update({"is_used": True})
+
+    # Generate high-entropy cryptographic token
+    raw_token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+    expires_at = now + timedelta(minutes=15)
+
+    reset_record = PasswordResetToken(
+        user_id=user.user_id,
+        token_hash=token_hash,
+        expires_at=expires_at,
+        is_used=False,
+        created_at=now,
+    )
+    db.add(reset_record)
+    db.commit()
+
+    # Dispatch email (or log dev URL)
+    EmailService.send_password_reset_email(
+        recipient_email=user.email,
+        reset_token=raw_token,
+        user_name=user.full_name or user.email.split("@")[0]
+    )
+
+    return generic_response
+
+
+@router.get(
+    "/verify-reset-token",
+    response_model=VerifyResetTokenResponse,
+    summary="Validate password reset token status"
+)
+def verify_reset_token(
+    token: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Validates if a password reset token is active, unexpired, and unused.
+    """
+    if not token or len(token.strip()) < 16:
+        return VerifyResetTokenResponse(valid=False, message="Invalid or malformed reset token.")
+
+    token_hash = hashlib.sha256(token.strip().encode("utf-8")).hexdigest()
+    now = datetime.now(timezone.utc)
+
+    reset_record = (
+        db.query(PasswordResetToken)
+        .filter(PasswordResetToken.token_hash == token_hash)
+        .first()
+    )
+
+    if not reset_record:
+        return VerifyResetTokenResponse(valid=False, message="Reset link is invalid.")
+
+    if reset_record.is_used:
+        return VerifyResetTokenResponse(valid=False, message="This reset link has already been used.")
+
+    expires_at = reset_record.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if expires_at < now:
+        return VerifyResetTokenResponse(valid=False, message="Reset link has expired.")
+
+    user = db.query(User).filter(User.user_id == reset_record.user_id).first()
+    email_masked = None
+    if user and user.email:
+        parts = user.email.split("@")
+        if len(parts[0]) > 2:
+            email_masked = f"{parts[0][0]}***{parts[0][-1]}@{parts[1]}"
+        else:
+            email_masked = user.email
+
+    return VerifyResetTokenResponse(valid=True, email=email_masked, message="Token is valid.")
+
+
+@router.post(
+    "/reset-password",
+    response_model=MessageResponse,
+    summary="Reset password using a valid reset token"
+)
+def reset_password(
+    req: ResetPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Consumes a valid password reset token and updates the user's password.
+    Hashes the new password with bcrypt and immediately invalidates the token.
+    """
+    token_str = req.token.strip()
+    if len(token_str) < 16:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or malformed reset token."
+        )
+
+    token_hash = hashlib.sha256(token_str.encode("utf-8")).hexdigest()
+    now = datetime.now(timezone.utc)
+
+    reset_record = (
+        db.query(PasswordResetToken)
+        .filter(PasswordResetToken.token_hash == token_hash)
+        .first()
+    )
+
+    if not reset_record or reset_record.is_used:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Reset link is invalid or has already been used."
+        )
+
+    expires_at = reset_record.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if expires_at < now:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Reset link has expired. Please request a new one."
+        )
+
+    user = db.query(User).filter(User.user_id == reset_record.user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Associated user account not found."
+        )
+
+    # Update password securely with bcrypt
+    user.hashed_password = hash_password(req.new_password)
+    user.updated_at = now
+
+    # Mark token used immediately (one-time use)
+    reset_record.is_used = True
+
+    db.commit()
+
+    return MessageResponse(message="Password reset successfully. You can now sign in with your new password.")
 
 
 @router.get(

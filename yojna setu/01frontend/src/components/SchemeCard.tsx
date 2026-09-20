@@ -24,7 +24,8 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({ scheme }) => {
           {(() => {
             const rawType = scheme.scheme_type || scheme.support_type || scheme.financial_category;
             if (!rawType || rawType === 'UNKNOWN') return null;
-            const cleanType = rawType.replace(/_/g, ' ').replace(/;/g, ' •');
+            const key = `schemeTypes.${rawType}`;
+            const cleanType = t(key, rawType.replace(/_/g, ' ').replace(/;/g, ' •'));
             return (
               <span className="text-[10px] bg-[#EAF4EE] text-[#1B5E20] border border-[#A5D6A7]/60 font-bold px-2 py-0.5 rounded-lg uppercase tracking-wider shrink-0">
                 {cleanType}
@@ -56,19 +57,19 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({ scheme }) => {
               <Banknote className="w-4 h-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] text-[#9B817A] block font-medium">Financial Support:</span>
+              <span className="text-[11px] text-[#9B817A] block font-medium">{t('schemeCard.financialSupportLabel', 'Financial Support:')}</span>
               <span className="text-xs font-bold text-[#3B2522] truncate block">
                 {scheme.max_loan_amount
                   ? scheme.max_loan_amount >= 10000000
-                    ? `Up to ₹${(scheme.max_loan_amount / 10000000).toFixed(1)} Cr`
+                    ? `${t('schemeCard.upTo', 'Up to')} ₹${(scheme.max_loan_amount / 10000000).toFixed(1)} ${t('schemeCard.cr', 'Cr')}`
                     : scheme.max_loan_amount >= 100000
-                    ? `Up to ₹${(scheme.max_loan_amount / 100000).toFixed(1)} Lakh`
-                    : `Up to ₹${Number(scheme.max_loan_amount).toLocaleString('en-IN')}`
+                    ? `${t('schemeCard.upTo', 'Up to')} ₹${(scheme.max_loan_amount / 100000).toFixed(1)} ${t('schemeCard.lakh', 'Lakh')}`
+                    : `${t('schemeCard.upTo', 'Up to')} ₹${Number(scheme.max_loan_amount).toLocaleString('en-IN')}`
                   : scheme.subsidy_percentage
-                  ? `${scheme.subsidy_percentage}% Capital Subsidy`
+                  ? `${scheme.subsidy_percentage}% ${t('schemeCard.capitalSubsidy', 'Capital Subsidy')}`
                   : scheme.financial_category === 'GRANT_SUBSIDY'
-                  ? 'Capital Subsidy / Grant'
-                  : 'Official Financial Assistance'}
+                  ? t('schemeCard.capitalSubsidyGrant', 'Capital Subsidy / Grant')
+                  : t('schemeCard.officialAssistance', 'Official Financial Assistance')}
               </span>
             </div>
           </div>
@@ -79,15 +80,25 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({ scheme }) => {
               <Users className="w-4 h-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] text-[#9B817A] block font-medium">Eligible:</span>
+              <span className="text-[11px] text-[#9B817A] block font-medium">{t('schemeCard.eligibleLabel', 'Eligible:')}</span>
               <span className="text-xs font-bold text-[#3B2522] truncate block">
                 {(() => {
                   const target = scheme.target_groups || scheme.marginalized_group || scheme.target_beneficiary;
-                  if (target && target !== 'UNKNOWN') return target.replace(/_/g, ' ');
-                  if (scheme.min_age || scheme.max_age) {
-                    return `${scheme.min_age || 18}+ years`;
+                  if (target && target !== 'UNKNOWN') {
+                    if (target.toUpperCase().includes('ALL') && target.toUpperCase().includes('ELIGIBLE')) {
+                      return t('schemeCard.allEligible', 'All Eligible Citizens');
+                    }
+                    if (target.toUpperCase().includes('SC') || target.toUpperCase().includes('ST') || target.toUpperCase().includes('WOMEN')) {
+                      return t('schemeCard.scStWomen', 'SC, ST, Women');
+                    }
+                    const normTarget = target.toUpperCase().replace(/\s+/g, '_');
+                    const targetKey = `targetGroups.${normTarget}`;
+                    return t(targetKey, target.replace(/_/g, ' '));
                   }
-                  return 'Citizens meeting scheme criteria';
+                  if (scheme.min_age || scheme.max_age) {
+                    return `${scheme.min_age || 18}+ ${t('schemeCard.years', 'years')}`;
+                  }
+                  return t('schemeCard.generalCitizen', 'Citizens meeting scheme criteria');
                 })()}
               </span>
             </div>
@@ -99,11 +110,11 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({ scheme }) => {
               <Building2 className="w-4 h-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] text-[#9B817A] block font-medium">Partners:</span>
+              <span className="text-[11px] text-[#9B817A] block font-medium">{t('schemeCard.partnersLabel', 'Partners:')}</span>
               <span className="text-xs font-bold text-[#3B2522] truncate block">
                 {scheme.application_route === 'OFFICIAL_PORTAL'
-                  ? 'Official Ministry Portal'
-                  : 'Authorized Banks & Facilitation Centers'}
+                  ? t('schemeCard.officialPortal', 'Official Ministry Portal')
+                  : t('schemeCard.authorizedPartners', 'Authorized Banks & Facilitation Centers')}
               </span>
             </div>
           </div>
@@ -116,7 +127,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({ scheme }) => {
           to={`/schemes/${scheme.scheme_id}`}
           className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#EA717B] hover:bg-[#D65D67] text-white font-bold text-xs py-2 px-3.5 rounded-xl transition duration-200 shadow-warm-sm group-hover:shadow-warm-md"
         >
-          <span>{t('schemeCard.viewDetails', 'View Details')}</span>
+          <span>{t('schemeCard.guidelines', 'Guidelines')}</span>
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
         </Link>
 
@@ -125,7 +136,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({ scheme }) => {
           <Link
             to={`/channel-partners?scheme_id=${scheme.scheme_id}`}
             className="p-2 rounded-xl text-[#765E59] hover:text-[#3B2522] hover:bg-white border border-transparent hover:border-[#E8D8D2] transition"
-            title="Locate Authorized Channel Partners"
+            title={t('schemeCard.locatePartnersTooltip', 'Locate Authorized Channel Partners')}
           >
             <MapPin className="w-3.5 h-3.5" />
           </Link>
@@ -134,7 +145,7 @@ export const SchemeCard: React.FC<SchemeCardProps> = ({ scheme }) => {
               <Link
                 to={`/calculator?scheme=${scheme.scheme_id}`}
                 className="p-2 rounded-xl text-[#765E59] hover:text-[#3B2522] hover:bg-white border border-transparent hover:border-[#E8D8D2] transition"
-                title="Calculate EMI & Subsidy"
+                title={t('schemeCard.calculateEmiTooltip', 'Calculate EMI & Subsidy')}
               >
                 <Calculator className="w-3.5 h-3.5" />
               </Link>

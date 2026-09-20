@@ -36,10 +36,14 @@ from app.models.financial_intelligence import (
     PartnerFinancialObservation,
     PrudentialRule,
 )
+from app.models.translation import SchemeTranslation
+from app.models.blog import FinancialBlog
+from app.models.password_reset import PasswordResetToken
 
 __all__ = [
     "Base",
     "Scheme",
+    "SchemeTranslation",
     "SchemeVerification",
     "SchemeRule",
     "SchemeDocument",
@@ -70,6 +74,8 @@ __all__ = [
     "InstitutionAlias",
     "PartnerFinancialObservation",
     "PrudentialRule",
+    "FinancialBlog",
+    "PasswordResetToken",
 ]
 
 
