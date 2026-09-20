@@ -20,6 +20,8 @@ class Settings(BaseSettings):
 
     # CORS configuration
     BACKEND_CORS_ORIGINS: List[str] = [
+        "https://yojnasetu-arthnex.vercel.app",
+        "https://01frontend-nine.vercel.app",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:5173",

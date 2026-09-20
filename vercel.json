@@ -3,6 +3,14 @@
   "outputDirectory": "yojna setu/01frontend/dist",
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://yojnasetu-backend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://yojnasetu-backend.onrender.com/health"
+    },
+    {
       "source": "/((?!api/|assets/|.*\\.[^/]+$).*)",
       "destination": "/index.html"
     }

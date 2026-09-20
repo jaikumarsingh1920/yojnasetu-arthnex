@@ -54,8 +54,8 @@ app.add_exception_handler(Exception, unhandled_exception_handler)
 app.add_middleware(RateLimitMiddleware)
 app.add_middleware(RequestIDMiddleware)
 
-# CORS middleware: Strict origin whitelisting in production; dev regex permitted in non-production
-cors_regex = None if is_prod else r"https://.*\.vercel\.app|https://.*\.ngrok-free\.app|https://.*\.ngrok\.io|http://localhost:\d+|http://127\.0\.0\.1:\d+"
+# CORS middleware: Vercel domains whitelisted in all environments; dev regex permitted in non-production
+cors_regex = r"https://.*\.vercel\.app" if is_prod else r"https://.*\.vercel\.app|https://.*\.ngrok-free\.app|https://.*\.ngrok\.io|http://localhost:\d+|http://127\.0\.0\.1:\d+"
 
 app.add_middleware(
     CORSMiddleware,
