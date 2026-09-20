@@ -31,6 +31,8 @@ temporary/
 **/temporary/
 !yojna setu/02backend/app/yojnasetu.db
 !yojna setu/02backend/yojnasetu.db
+*.db-shm
+*.db-wal
 
 
 # Uploads & User Files

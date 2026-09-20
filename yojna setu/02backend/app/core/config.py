@@ -1,5 +1,6 @@
 import os
 from typing import List, Optional
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -75,6 +76,14 @@ class Settings(BaseSettings):
     SMTP_FROM_EMAIL: Optional[str] = None
     EMAIL_FROM: str = "noreply@yojnasetu.gov.in"
     YOJNASETU_BASE_URL: str = "http://localhost:3000"
+
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def normalize_debug_value(cls, value):
+        """Accept legacy deployment labels such as DEBUG=release."""
+        if isinstance(value, str) and value.strip().lower() in {"release", "production", "prod"}:
+            return False
+        return value
 
     def is_production(self) -> bool:
         return self.ENV.lower() == "production"
